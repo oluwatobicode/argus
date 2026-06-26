@@ -1,0 +1,8 @@
+{
+  "name": "argus",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel --filter './app/**' dev",
+    "build": "pnpm --recursive build"
+  }
+}

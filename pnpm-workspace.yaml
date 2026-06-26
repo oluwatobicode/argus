@@ -1,0 +1,8 @@
+packages:
+  - "app/backend/*"
+  - "app/frontend"
+  - "packages/*"
+allowBuilds:
+  '@prisma/engines': false
+  msgpackr-extract: false
+  prisma: false
