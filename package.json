@@ -3,6 +3,18 @@
   "private": true,
   "scripts": {
     "dev": "pnpm --parallel --filter './app/**' dev",
-    "build": "pnpm --recursive build"
+    "dev:api": "pnpm --filter @argus/api dev",
+    "dev:worker": "pnpm --filter @argus/worker dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "build": "pnpm --recursive build",
+    "build:api": "pnpm --filter @argus/api build",
+    "typecheck": "pnpm --filter @argus/api exec tsc --noEmit",
+    "db:generate": "pnpm --filter @argus/api exec prisma generate",
+    "db:migrate": "pnpm --filter @argus/api exec prisma migrate dev",
+    "db:studio": "pnpm --filter @argus/api exec prisma studio",
+    "db:reset": "pnpm --filter @argus/api exec prisma migrate reset"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1"
   }
 }

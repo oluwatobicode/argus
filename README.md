@@ -111,7 +111,7 @@ argus/
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/yourusername/argus.git
+git clone https://github.com/oluwatobicode/argus
 cd argus
 pnpm install
 
@@ -130,8 +130,8 @@ cd backend/api && pnpm prisma migrate dev --name init && cd ../..
 psql $DATABASE_URL -f infra/migrations/001_timescale_init.sql
 psql $DATABASE_URL -f infra/migrations/002_indexes.sql
 
-# 6. Set up Stripe webhook (in development)
-stripe listen --forward-to localhost:3001/billing/webhook
+# 6. Set up polar webhook (in development) using ngrok
+polar listen --forward-to localhost:3001/billing/webhook
 
 # 7. Start everything
 pnpm dev
