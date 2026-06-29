@@ -1,9 +1,6 @@
 import session from "express-session";
-import { createClient } from "redis";
 import { RedisStore } from "connect-redis";
-
-const redisClient = createClient({ url: process.env.REDIS_URL || "redis://localhost:6379" });
-redisClient.connect().catch(console.error);
+import { redisClient } from "./redis.config";
 
 const store = new RedisStore({ client: redisClient });
 
