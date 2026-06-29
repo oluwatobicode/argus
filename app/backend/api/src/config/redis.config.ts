@@ -1,11 +1,19 @@
-import { createClient } from "redis";
+import { Redis } from "ioredis";
 
-const redisClient = createClient({
-  url: process.env.REDIS_URL || "redis://localhost:6379",
+if (!process.env.REDIS_URL) {
+  throw new Error("REDIS_URL environment variable is missing!");
+}
+
+const redis = new Redis(process.env.REDIS_URL, {
+  maxRetriesPerRequest: 4,
 });
 
-redisClient.on("error", (err) => console.error("Redis client error:", err));
+redis.on("connect", () => {
+  console.log("🚀 Redis connection initialized successfully.");
+});
 
-redisClient.connect().catch(console.error);
+redis.on("error", (error) => {
+  console.error("❌ Redis Connection Error:", error);
+});
 
-export { redisClient };
+export default redis;

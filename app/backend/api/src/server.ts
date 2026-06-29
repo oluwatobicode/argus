@@ -1,12 +1,18 @@
 import app from "./app";
 import { prisma } from "./config/db.config";
+import redis from "./config/redis.config";
 
 const PORT = Number(process.env.PORT) || 3000;
 
 async function startServer(): Promise<void> {
   try {
+    /* postgresql */
     await prisma.$connect();
     console.log("Database connected 🤩");
+
+    /* redis */
+    await redis.ping();
+    console.log("Redis cache connected 🚀");
 
     app.listen(PORT, () => {
       console.log(`app is alive ${PORT}`);

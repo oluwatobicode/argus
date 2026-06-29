@@ -9,7 +9,6 @@ import {
 } from "../../config/constants.config";
 import { comparePassword, hashPassword } from "../../utils/password.util";
 
-
 export const register = async (
   req: Request,
   res: Response,
@@ -22,7 +21,7 @@ export const register = async (
       return sendError(res, HTTP_STATUS.BAD_REQUEST, "All fields are required");
     }
 
-    const normalizedEmail = (email as string).trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
 
     // Check if this email is already taken
     const existingUser = await prisma.user.findUnique({
@@ -30,11 +29,14 @@ export const register = async (
     });
 
     if (existingUser) {
-      return sendError(res, HTTP_STATUS.CONFLICT, ERROR_MESSAGES.DUPLICATE_ENTRY);
+      return sendError(
+        res,
+        HTTP_STATUS.CONFLICT,
+        ERROR_MESSAGES.DUPLICATE_ENTRY,
+      );
     }
 
     const passwordHash = await hashPassword(password as string);
-
 
     const newUser = await prisma.user.create({
       data: {
@@ -51,21 +53,14 @@ export const register = async (
       },
     });
 
-    
-    req.login(newUser, (err) => {
-      if (err) return next(err);
-      return sendSuccess(res, HTTP_STATUS.CREATED, SUCCESS_MESSAGES.SIGNUP_SUCCESS, {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name,
-      });
+    return sendSuccess(res, HTTP_STATUS.OK, SUCCESS_MESSAGES.SIGNUP_SUCCESS, {
+      email: newUser.email,
     });
   } catch (error) {
     console.error(error);
     next(error);
   }
 };
-
 
 export const login = async (
   req: Request,
@@ -129,36 +124,45 @@ export const login = async (
   }
 };
 
-//  Logout 
+//  Logout
 
-export const logout = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+export const logout = (req: Request, res: Response, next: NextFunction) => {
   req.logout((err) => {
     if (err) return next(err);
     return sendSuccess(res, HTTP_STATUS.OK, SUCCESS_MESSAGES.LOGOUT_SUCCESS);
   });
 };
 
-//  Me 
+//  Me
 
 export const me = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
-      return sendError(res, HTTP_STATUS.UNAUTHORIZED, ERROR_MESSAGES.NOT_LOGGED_IN);
+      return sendError(
+        res,
+        HTTP_STATUS.UNAUTHORIZED,
+        ERROR_MESSAGES.NOT_LOGGED_IN,
+      );
     }
-    return sendSuccess(res, HTTP_STATUS.OK, SUCCESS_MESSAGES.FETCH_SUCCESS, req.user);
+    return sendSuccess(
+      res,
+      HTTP_STATUS.OK,
+      SUCCESS_MESSAGES.FETCH_SUCCESS,
+      req.user,
+    );
   } catch (error) {
     next(error);
   }
 };
 
-//  Google OAuth 
+//  Google OAuth
 
 export const googleAuth = (req: Request, res: Response, next: NextFunction) => {
-  passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
+  passport.authenticate("google", { scope: ["profile", "email"] })(
+    req,
+    res,
+    next,
+  );
 };
 
 export const googleCallback = (
