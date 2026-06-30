@@ -490,3 +490,59 @@ cd backend/api && pnpm prisma migrate reset
 - The Polar webhook route must be registered **before** `express.json()` middleware because Polar requires the raw request body to verify the signature.
 - FREE plan users are blocked from creating a second project at the controller level (`POST /projects`), not at the middleware level.
 - `billingCycleStart` on the User model is used to know when to reset `monthlyEventCount`. For FREE users this resets on the 1st of each month. For PRO users it resets on their Polar subscription renewal date.
+
+---
+
+## Build Phases
+
+### Phase 1 — Auth ✅
+- [x] PostgreSQL + Prisma setup
+- [x] User model + Account model
+- [x] Register with email/password
+- [x] OTP generation & verification
+- [x] Login with session auth
+- [x] Logout / Me endpoint
+- [x] Google OAuth strategy
+- [x] GitHub OAuth strategy
+- [x] Redis session store
+- [x] Session config
+
+### Phase 2 — Core Error Pipeline 🔴 Building
+- [ ] Ingest endpoint (`POST /ingest/:projectId/envelope`)
+- [ ] DSN auth middleware
+- [ ] Fingerprinting util (SHA-256 of top 5 frames)
+- [ ] Issue upsert (create or increment)
+- [ ] Event storage
+- [ ] BullMQ queue service (producer)
+- [ ] Worker error event processor
+- [ ] Projects REST API
+- [ ] Issues REST API
+- [ ] Events REST API
+
+### Phase 3 — Rate Limiting & Quotas
+- [ ] Rate limiter middleware (Redis sliding window)
+- [ ] Quota middleware (monthly limit check)
+- [ ] Redis counter for fast increments
+- [ ] Async counter sync to Postgres
+- [ ] Usage REST API
+
+### Phase 4 — Alerting
+- [ ] AlertRule model + CRUD routes
+- [ ] AlertLog model
+- [ ] Alert engine in worker
+- [ ] Email notifications via Resend
+- [ ] Alerts REST API
+
+### Phase 5 — Billing
+- [ ] Polar checkout session creation
+- [ ] Polar webhook handler
+- [ ] Plan enforcement (project limit, quota limit)
+- [ ] Subscription model
+- [ ] Billing REST API
+
+### Phase 6 — Performance Monitoring
+- [ ] Transaction/span ingest
+- [ ] Transaction + Span models
+- [ ] TimescaleDB hypertable setup
+- [ ] Web vitals aggregation
+- [ ] Performance REST API

@@ -226,3 +226,48 @@ pnpm --filter dashboard preview
 ```
 
 Runs on `http://localhost:5173`.
+
+---
+
+## Build Phases
+
+### Phase 1 — Auth UI 🔴 Building
+- [ ] Login page
+- [ ] Register page
+- [ ] Verify email page
+- [ ] Auth store (Zustand)
+- [ ] API client with silent refresh
+
+### Phase 2 — Issues Dashboard
+- [ ] Projects list page
+- [ ] Create project modal
+- [ ] Issues list (paginated, filtered by status/level)
+- [ ] Issue detail page (stack trace, breadcrumbs, events)
+- [ ] IssueRow, IssueFilters, StackTrace components
+- [ ] Layout: Sidebar, Header, PageWrapper
+
+### Phase 3 — Project Settings
+- [ ] Settings page (rename, DSN key, danger zone)
+- [ ] Usage meter component
+- [ ] Plan badge in sidebar
+
+### Phase 4 — Alerting UI
+- [ ] Alerts management page
+- [ ] Create/edit alert rule form
+- [ ] Alert log display
+
+### Phase 5 — Billing UI
+- [ ] Billing page (plan comparison, upgrade CTA)
+- [ ] Upgrade banner (80% usage warning)
+- [ ] Manage subscription flow
+
+### Phase 6 — Performance Dashboard
+- [ ] Performance page (transactions table)
+- [ ] Web vitals cards (LCP, CLS, TTFB, FCP)
+- [ ] VitalsCard, TransactionRow components
+
+### Phase 7 — Polish
+- [ ] Empty states for all lists
+- [ ] Loading spinners throughout
+- [ ] Error boundaries
+- [ ] Responsive layout

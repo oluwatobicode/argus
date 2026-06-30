@@ -3,6 +3,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github2";
 import { prisma } from "./db.config";
 
+/* manual email and password */
 passport.serializeUser((user: any, done) => {
   done(null, user.id);
 });
@@ -16,13 +17,13 @@ passport.deserializeUser(async (id: string, done) => {
   }
 });
 
-//  Google Strategy 
+//  Google Strategy
 
 passport.use(
   new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      clientID: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       callbackURL: "/api/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
@@ -94,16 +95,21 @@ passport.use(
   ),
 );
 
-//  GitHub Strategy 
+//  GitHub Strategy
 
 passport.use(
   new GitHubStrategy(
     {
-      clientID: process.env.GITHUB_CLIENT_ID || "",
-      clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
+      clientID: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
       callbackURL: "/api/auth/github/callback",
     },
-    async (accessToken: string, refreshToken: string, profile: any, done: (err: any, user?: any) => void) => {
+    async (
+      accessToken: string,
+      refreshToken: string,
+      profile: any,
+      done: (err: any, user?: any) => void,
+    ) => {
       try {
         const email = profile.emails?.[0]?.value;
 

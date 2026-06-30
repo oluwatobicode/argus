@@ -3,11 +3,15 @@ import passport from "passport";
 import { prisma } from "../../config/db.config";
 import { sendError, sendSuccess } from "../../interface/ApiResponse";
 import {
+  AUTH_MESSAGES,
   ERROR_MESSAGES,
   HTTP_STATUS,
   SUCCESS_MESSAGES,
 } from "../../config/constants.config";
 import { comparePassword, hashPassword } from "../../utils/password.util";
+import { generateAlphaNumeric } from "../../utils/otp.utils";
+import redis from "../../config/redis.config";
+import crypto from "crypto";
 
 export const register = async (
   req: Request,
@@ -53,11 +57,110 @@ export const register = async (
       },
     });
 
+    const otp = generateAlphaNumeric(6);
+    const hashedOtp = crypto.createHash("sha512").update(otp).digest("hex");
+    await redis.set(`otp:${normalizedEmail}`, hashedOtp, "EX", 600);
+    /* will change to render later */
+    console.log(otp);
+
     return sendSuccess(res, HTTP_STATUS.OK, SUCCESS_MESSAGES.SIGNUP_SUCCESS, {
       email: newUser.email,
     });
   } catch (error) {
     console.error(error);
+    next(error);
+  }
+};
+
+export const verifyOtp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return sendError(
+        res,
+        HTTP_STATUS.BAD_REQUEST,
+        ERROR_MESSAGES.REQUIRED_FIELD("Email and OTP"),
+      );
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const storedHashedOtp = await redis.get(`otp:${normalizedEmail}`);
+
+    if (!storedHashedOtp) {
+      return sendError(res, HTTP_STATUS.BAD_REQUEST, AUTH_MESSAGES.OTP_EXPIRED);
+    }
+
+    const hashedOtp = crypto.createHash("sha512").update(otp).digest("hex");
+
+    if (hashedOtp !== storedHashedOtp) {
+      return sendError(res, HTTP_STATUS.BAD_REQUEST, AUTH_MESSAGES.INVALID_OTP);
+    }
+
+    await prisma.user.update({
+      where: { email: normalizedEmail },
+      data: {
+        emailVerified: true,
+      },
+    });
+
+    await redis.del(`otp:${normalizedEmail}`);
+
+    return sendSuccess(res, HTTP_STATUS.OK, SUCCESS_MESSAGES.OTP_VERIFIED);
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+export const sendOtp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return sendError(
+        res,
+        HTTP_STATUS.BAD_REQUEST,
+        ERROR_MESSAGES.REQUIRED_FIELD("Email"),
+      );
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+
+    if (!user) {
+      return sendError(res, HTTP_STATUS.NOT_FOUND, ERROR_MESSAGES.NOT_FOUND);
+    }
+
+    if (user.emailVerified) {
+      return sendError(
+        res,
+        HTTP_STATUS.BAD_REQUEST,
+        AUTH_MESSAGES.EMAIL_ALREADY_VERIFIED,
+      );
+    }
+
+    const otp = generateAlphaNumeric(6);
+    const hashedOtp = crypto.createHash("sha512").update(otp).digest("hex");
+    await redis.set(`otp:${normalizedEmail}`, hashedOtp, "EX", 600);
+    /* will change to render later */
+    console.log(otp);
+
+    return sendSuccess(res, HTTP_STATUS.OK, SUCCESS_MESSAGES.OTP_RESENT);
+  } catch (error) {
+    console.log(error);
     next(error);
   }
 };

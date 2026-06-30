@@ -31,6 +31,18 @@ export const ERROR_MESSAGES = {
   SESSION_EXPIRED: "Session expired, please login again",
   INVALID_TOKEN: "Invalid token",
   PASSWORD_MIN_LENGTH: "New password must be at least 6 characters",
+  PROJECT_LIMIT: "Free plan limited to 1 project",
+  QUOTA_EXCEEDED: "Monthly event limit exceeded",
+  INVALID_DSN_KEY: "Invalid DSN key",
+  RATE_LIMITED: "Too many requests, please slow down",
+  PLAN_RESTRICTED: "Upgrade your plan to access this feature",
+  SUBSCRIPTION_REQUIRED: "Active subscription required",
+  PROJECT_NOT_FOUND: "Project not found",
+  ISSUE_NOT_FOUND: "Issue not found",
+  EVENT_NOT_FOUND: "Event not found",
+  ALERT_NOT_FOUND: "Alert rule not found",
+  SLUG_TAKEN: "This slug is already in use",
+  FORBIDDEN: "You do not have permission to perform this action",
 };
 
 export const SUCCESS_MESSAGES = {
@@ -47,6 +59,24 @@ export const SUCCESS_MESSAGES = {
   PASSWORD_CHANGED: "Password changed successfully",
   PASSWORD_RESET_SUCCESS: "Password reset successful",
   TOKEN_REFRESHED: "Token refreshed successfully",
+  PROJECT_CREATED: "Project created successfully",
+  PROJECT_UPDATED: "Project updated successfully",
+  PROJECT_DELETED: "Project deleted successfully",
+  PROJECTS_FETCHED: "Projects fetched successfully",
+  ISSUES_FETCHED: "Issues fetched successfully",
+  ISSUE_FETCHED: "Issue fetched successfully",
+  ISSUE_STATUS_UPDATED: "Issue status updated",
+  EVENTS_FETCHED: "Events fetched successfully",
+  TRANSACTIONS_FETCHED: "Transactions fetched successfully",
+  VITALS_FETCHED: "Web vitals fetched successfully",
+  ALERT_CREATED: "Alert rule created",
+  ALERT_UPDATED: "Alert rule updated",
+  ALERT_DELETED: "Alert rule deleted",
+  ALERTS_FETCHED: "Alert rules fetched",
+  CHECKOUT_CREATED: "Checkout session created",
+  PORTAL_CREATED: "Billing portal session created",
+  USAGE_FETCHED: "Usage data fetched successfully",
+  EVENT_RECEIVED: "Event received successfully",
 };
 
 export const AUTH_MESSAGES = {

@@ -165,3 +165,12 @@ To test against your local Argus instance set the DSN host to localhost:
 ```
 https://YOUR_PUBLIC_KEY@localhost:3001/YOUR_PROJECT_ID
 ```
+
+---
+
+## Build Phases
+
+- [ ] `@argus/sdk-core` — DSN parsing, envelope builder, transport with retry
+- [ ] `@argus/sdk-browser` — window.onerror, unhandledrejection, breadcrumbs, web vitals
+- [ ] `@argus/sdk-node` — uncaughtException, unhandledRejection, Express error middleware
+- [ ] `@argus/sdk-react-native` — RN crash capture, stack trace formatting

@@ -1,4 +1,4 @@
-import { redisClient } from "../config/redis.config";
+import redisClient from "../config/redis.config";
 import { generateAlphaNumeric } from "../utils/otp.utils";
 import { TIME } from "../config/constants.config";
 
@@ -14,7 +14,7 @@ export async function createOtp(email: string): Promise<string> {
   const key = `${OTP_PREFIX}${email}`;
 
   // SET with EX — auto-expires after OTP_TTL seconds
-  await redisClient.set(key, otp, { EX: OTP_TTL });
+  await redisClient.set(key, otp, "EX", OTP_TTL);
 
   return otp;
 }
