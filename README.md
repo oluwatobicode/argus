@@ -144,12 +144,17 @@ pnpm dev
 ### Phase 1 — Core Error Pipeline (MVP)
 The bare minimum for the app to actually track errors.
 
-- [ ] Ingest endpoint — `POST /ingest/:projectId/envelope`
-- [ ] Fingerprinting — SHA-256 of top 5 stack frames
-- [ ] Issue upsert — create new or increment eventCount
-- [ ] Event storage — save each raw occurrence
-- [ ] Dashboard: Issues list page + Issue detail page
-- [ ] API routes: `GET /projects/:pid/issues`, `GET /issues/:id/events`
+- [x] Ingest endpoint — `POST /ingest/:projectId/envelope`
+- [x] DSN auth middleware — validate public key on ingest
+- [x] Rate limiter middleware (Redis sliding window)
+- [x] Quota middleware (monthly event limit check)
+- [x] BullMQ queue service (producer)
+- [ ] Fingerprinting — SHA-256 of top 5 stack frames — worker, pending
+- [ ] Issue upsert — create new or increment eventCount — worker, pending
+- [ ] Event storage — save each raw occurrence — worker, pending
+- [ ] BullMQ worker (move processing off the API server) — pending
+- [ ] Dashboard: Issues list page + Issue detail page — pending
+- [ ] API routes: `GET /projects/:pid/issues`, `GET /issues/:id/events` — done
 
 ### Phase 2 — SDKs
 The other half of the pipeline — actually capturing errors from user apps.
@@ -157,23 +162,15 @@ The other half of the pipeline — actually capturing errors from user apps.
 - [ ] `@argus/sdk-core` — shared types, envelope builder
 - [ ] `@argus/sdk-browser` — window.onerror, unhandledrejection, console.error wrapping
 - [ ] `@argus/sdk-node` — process.on('uncaughtException'), express error middleware
-- [ ] DSN auth middleware — validate public key on ingest
+- [ ] `@argus/sdk-react-native`
 
 ### Phase 3 — Team & Projects
 Multi-user, multi-project support.
 
-- [ ] Organization CRUD
+- [x] Organization auto-creation on signup
+- [x] Project CRUD + project limit (1 for FREE)
 - [ ] Organization member management (invite, roles)
-- [ ] Project CRUD + project limit (1 for FREE)
 - [ ] Dashboard: project settings, team page
-
-### Phase 4 — Production Readiness
-Make it survive real traffic.
-
-- [ ] Rate limiter middleware (Redis sliding window)
-- [ ] Quota middleware (monthly event limit check)
-- [ ] BullMQ worker (move processing off the API server)
-- [ ] Redis counter + async sync to Postgres
 
 ### Phase 5 — Alerting
 Tell users when something breaks.

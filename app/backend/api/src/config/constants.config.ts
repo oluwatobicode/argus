@@ -17,6 +17,7 @@ export const HTTP_STATUS = {
   NOT_FOUND: 404,
   CONFLICT: 409,
   INTERNAL_SERVER_ERROR: 500,
+  T00_MANY_REQUEST: 429,
 };
 
 export const ERROR_MESSAGES = {
@@ -34,7 +35,7 @@ export const ERROR_MESSAGES = {
   PROJECT_LIMIT: "Free plan limited to 1 project",
   QUOTA_EXCEEDED: "Monthly event limit exceeded",
   INVALID_DSN_KEY: "Invalid DSN key",
-  RATE_LIMITED: "Too many requests, please slow down",
+  RATE_LIMITED: "Too many requests",
   PLAN_RESTRICTED: "Upgrade your plan to access this feature",
   SUBSCRIPTION_REQUIRED: "Active subscription required",
   PROJECT_NOT_FOUND: "Project not found",
@@ -77,6 +78,12 @@ export const SUCCESS_MESSAGES = {
   PORTAL_CREATED: "Billing portal session created",
   USAGE_FETCHED: "Usage data fetched successfully",
   EVENT_RECEIVED: "Event received successfully",
+};
+
+export const ORGANIZATION_MESSAGES = {
+  NO_PROJECTS: "No projects are in these organization",
+  ALL_PROJECTS: "Found your projects",
+  ONE_PROJECT: "You can only create one project in the free plan",
 };
 
 export const AUTH_MESSAGES = {

@@ -1,8 +1,17 @@
-import type { User as PrismaUser } from "../generated/prisma/client";
+import type {
+  Project as PrismaProject,
+  ProjectKey as PrismaProjectKey,
+  User as PrismaUser,
+} from "../generated/prisma/client";
 
 declare global {
   namespace Express {
     interface User extends PrismaUser {}
+
+    interface Request {
+      project?: PrismaProject;
+      projectKey?: PrismaProjectKey;
+    }
   }
 }
 

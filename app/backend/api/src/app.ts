@@ -23,6 +23,7 @@ import {
   ingestRoutes,
 } from "./routes";
 
+const API_PREFIX = "/api/v1";
 const app: Application = express();
 
 app.use(helmet());
@@ -43,14 +44,14 @@ app.get("/", (_req: Request, res: Response) => {
   res.json({ status: "success", message: "Welcome to argus API" });
 });
 
-app.use("/api/auth", authRoutes);
-app.use("/api/projects", projectsRoutes);
-app.use("/api/projects/:projectId/issues", issuesRoutes);
-app.use("/api/projects/:projectId/issues/:issueId/events", eventsRoutes);
-app.use("/api/projects/:projectId/performance", performanceRoutes);
-app.use("/api/projects/:projectId/alerts", alertsRoutes);
-app.use("/api/billing", billingRoutes);
-app.use("/api/usage", usageRoutes);
-app.use("/api/ingest", ingestRoutes);
+app.use(`${API_PREFIX}/auth`, authRoutes);
+app.use(`${API_PREFIX}/projects`, projectsRoutes);
+app.use(`${API_PREFIX}/projects/:projectId/issues`, issuesRoutes);
+app.use(`${API_PREFIX}/projects/:projectId/issues/:issueId/events`, eventsRoutes);
+app.use(`${API_PREFIX}/projects/:projectId/performance`, performanceRoutes);
+app.use(`${API_PREFIX}/projects/:projectId/alerts`, alertsRoutes);
+app.use(`${API_PREFIX}/billing`, billingRoutes);
+app.use(`${API_PREFIX}/usage`, usageRoutes);
+app.use(`${API_PREFIX}/ingest`, ingestRoutes);
 
 export default app;

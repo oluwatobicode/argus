@@ -507,24 +507,21 @@ cd backend/api && pnpm prisma migrate reset
 - [x] Redis session store
 - [x] Session config
 
-### Phase 2 — Core Error Pipeline 🔴 Building
-- [ ] Ingest endpoint (`POST /ingest/:projectId/envelope`)
-- [ ] DSN auth middleware
-- [ ] Fingerprinting util (SHA-256 of top 5 frames)
-- [ ] Issue upsert (create or increment)
-- [ ] Event storage
-- [ ] BullMQ queue service (producer)
-- [ ] Worker error event processor
-- [ ] Projects REST API
-- [ ] Issues REST API
-- [ ] Events REST API
-
-### Phase 3 — Rate Limiting & Quotas
-- [ ] Rate limiter middleware (Redis sliding window)
-- [ ] Quota middleware (monthly limit check)
-- [ ] Redis counter for fast increments
-- [ ] Async counter sync to Postgres
-- [ ] Usage REST API
+### Phase 2 — Core Error Pipeline ✅
+- [x] Ingest endpoint (`POST /ingest/:projectId/envelope`)
+- [x] DSN auth middleware
+- [ ] Fingerprinting util (SHA-256 of top 5 frames) — worker, pending
+- [ ] Issue upsert (create or increment) — worker, pending
+- [ ] Event storage — worker, pending
+- [x] BullMQ queue service (producer)
+- [ ] Worker error event processor — pending
+- [x] Projects REST API
+- [x] Issues REST API
+- [x] Events REST API
+- [x] Rate limiter middleware
+- [x] Quota middleware (monthly check)
+- [ ] Redis counter + async sync to Postgres — deferred
+- [ ] Usage REST API — pending
 
 ### Phase 4 — Alerting
 - [ ] AlertRule model + CRUD routes

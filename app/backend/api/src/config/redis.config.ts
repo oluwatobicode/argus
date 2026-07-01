@@ -1,10 +1,11 @@
 import { Redis } from "ioredis";
+import "dotenv/config";
 
-if (!process.env.REDIS_URL) {
+if (!process.env.REDIS_URL!) {
   throw new Error("REDIS_URL environment variable is missing!");
 }
 
-const redis = new Redis(process.env.REDIS_URL, {
+const redis = new Redis(process.env.REDIS_URL!, {
   maxRetriesPerRequest: 4,
 });
 

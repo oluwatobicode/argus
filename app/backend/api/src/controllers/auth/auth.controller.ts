@@ -54,6 +54,17 @@ export const register = async (
             passwordHash,
           },
         },
+        memberships: {
+          create: {
+            role: "OWNER",
+            org: {
+              create: {
+                name: `${name?.split(" ")[0] ?? "Personal"}'s Organization`,
+                slug: `${normalizedEmail.split("@")[0]}-org`,
+              },
+            },
+          },
+        },
       },
     });
 
