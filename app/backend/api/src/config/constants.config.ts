@@ -94,6 +94,16 @@ export const AUTH_MESSAGES = {
   INVALID_RESET_TOKEN: "Invalid or expired reset token",
 };
 
+export const PLAN_EVENT_LIMITS = {
+  FREE: 10_000,
+  PRO: 500_000,
+};
+
+export const RATE_LIMIT = {
+  MAX_EVENTS_PER_WINDOW: 100,
+  WINDOW_MS: 60_000,
+};
+
 export const TIME = {
   ONE_HOUR: 60 * 60,
   ONE_DAY: 60 * 60 * 24,

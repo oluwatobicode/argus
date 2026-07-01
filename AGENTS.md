@@ -18,7 +18,7 @@ Root README and sub-READMEs are aspirational planning docs. **Trust the source c
 
 - **Auth**: Passport session-based (serialize/deserialize User). Routes mounted under `/api/` prefix. Register → OTP sent via Redis (600s TTL) → verify OTP → login → session cookie. Google + GitHub OAuth strategies.
 - **Prisma**: Client generated to `app/backend/api/src/generated/prisma/`. Uses `@prisma/adapter-pg` (not the default driver). Schema: User → Account (multi-provider), Organization → OrganizationMember, Project → ProjectKey, Issue → Event, Transaction → Span, Subscription, EventQuota.
-- **Worker**: `src/index.ts` is empty — processors exist but nothing registers them yet.
+- **Worker**: BullMQ Worker consuming from `argus-events` queue. Error pipeline: parse envelope → SHA-256 fingerprint → upsert Issue → write Event.
 - **Frontend**: Vite default template. No dashboard code yet.
 
 ## Commands (run from repo root)
@@ -40,7 +40,7 @@ Root README and sub-READMEs are aspirational planning docs. **Trust the source c
 - **Prisma client import**: `from "../generated/prisma/client"` — not from `@prisma/client`. Run `pnpm db:generate` before importing.
 - **pnpm-workspace.yaml** has `allowBuilds` for prisma set to `false` — may need adjustment when running prisma generate in CI.
 - **`.env.example` files are empty** — you must create `.env` files with the required vars (see `app/backend/api/src/config/` and `app/backend/worker/src/config/` for what is accessed).
-- **Worker is non-functional**: `src/index.ts` is empty. Any work on the event pipeline must start there.
+- **Worker has own Prisma schema + generated client** at `app/backend/worker/prisma/` and `src/generated/`. Run `pnpm db:generate` to sync both.
 - **Frontend is scaffold-only**: `src/App.tsx` is the default Vite boilerplate. No TanStack Query, Zustand, or dashboard code exists yet.
 - **No tests, no CI, no docker-compose, no linter** (except `oxlint` in frontend/package.json).
 - **Express 5** — note breaking changes from Express 4 (e.g., async error handling, route param syntax).

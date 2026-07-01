@@ -9,7 +9,7 @@
     "build": "pnpm --recursive build",
     "build:api": "pnpm --filter @argus/api build",
     "typecheck": "pnpm --filter @argus/api exec tsc --noEmit",
-    "db:generate": "pnpm --filter @argus/api exec prisma generate",
+    "db:generate": "pnpm --filter @argus/api exec prisma generate && pnpm --filter @argus/worker exec prisma generate",
     "db:migrate": "pnpm --filter @argus/api exec prisma migrate dev",
     "db:studio": "pnpm --filter @argus/api exec prisma studio",
     "db:reset": "pnpm --filter @argus/api exec prisma migrate reset"

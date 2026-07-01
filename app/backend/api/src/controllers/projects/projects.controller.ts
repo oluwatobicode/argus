@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import crypto from "crypto";
 import { prisma } from "../../config/db.config";
+import { generateAlphaNumeric } from "../../utils/otp.utils";
 import { sendError, sendSuccess } from "../../interface/ApiResponse";
 import {
   ERROR_MESSAGES,
@@ -78,25 +79,32 @@ export const createProject = async (
       }
     }
 
-    const slug = name.toLowerCase().replace(/\s+/g, "-");
+    let slug = name.toLowerCase().trim().replace(/\s+/g, "-");
+
+    /* slug is unique per org — suffix on collision instead of a 500 */
+    const slugTaken = await prisma.project.findFirst({
+      where: { orgId: org.id, slug },
+    });
+    if (slugTaken) {
+      slug = `${slug}-${generateAlphaNumeric(4).toLowerCase()}`;
+    }
 
     const host = process.env.DSN_HOST || "localhost:3000";
     const publicKey = crypto.randomUUID();
-    const dsn = `https://${publicKey}@${host}/${slug}`;
 
-    const project = await prisma.project.create({
-      data: {
-        name,
-        slug,
-        orgId: org.id,
-        keys: {
-          create: {
-            publicKey,
-            dsn,
-          },
+    /* DSN embeds project.id — the ingest route is /:projectId/envelope */
+    const project = await prisma.$transaction(async (tx) => {
+      const created = await tx.project.create({
+        data: { name, slug, orgId: org.id },
+      });
+      const key = await tx.projectKey.create({
+        data: {
+          projectId: created.id,
+          publicKey,
+          dsn: `https://${publicKey}@${host}/${created.id}`,
         },
-      },
-      include: { keys: true },
+      });
+      return { ...created, keys: [key] };
     });
 
     return sendSuccess(

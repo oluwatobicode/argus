@@ -1,7 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
 import redis from "../config/redis.config";
 import { sendError } from "../interface/ApiResponse";
-import { ERROR_MESSAGES } from "../config/constants.config";
+import {
+  ERROR_MESSAGES,
+  HTTP_STATUS,
+  RATE_LIMIT,
+} from "../config/constants.config";
 
 export const rateLimiter = async (
   req: Request,
@@ -11,20 +15,28 @@ export const rateLimiter = async (
   try {
     const key = `rateLimit:${req.project!.id}`;
     const now = Date.now();
-    const windowMs = 60_000;
 
-    await redis.zremrangebyscore(key, 0, now - windowMs);
-    const count = await redis.zcard(key);
+    /* one atomic round-trip: trim window → record request → count */
+    const results = await redis
+      .multi()
+      .zremrangebyscore(key, 0, now - RATE_LIMIT.WINDOW_MS)
+      .zadd(key, now, `${now}:${crypto.randomUUID()}`)
+      .zcard(key)
+      .expire(key, Math.ceil(RATE_LIMIT.WINDOW_MS / 1000))
+      .exec();
 
-    if (count >= 100) {
-      return sendError(res, 429, ERROR_MESSAGES.RATE_LIMITED);
+    const count = (results?.[2]?.[1] as number) ?? 0;
+
+    if (count > RATE_LIMIT.MAX_EVENTS_PER_WINDOW) {
+      return sendError(
+        res,
+        HTTP_STATUS.T00_MANY_REQUEST,
+        ERROR_MESSAGES.RATE_LIMITED,
+      );
     }
 
-    await redis.zadd(key, now, `${now}:${crypto.randomUUID()}`);
-    await redis.expire(key, 60);
     next();
   } catch (error) {
-    console.error(error);
     next(error);
   }
 };

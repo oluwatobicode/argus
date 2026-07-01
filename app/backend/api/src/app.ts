@@ -10,6 +10,7 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import passport from "passport";
 import { sessionMiddleware } from "./config/session.config";
+import { errorHandler } from "./middlewares/error.middleware";
 import "./config/passport.config";
 import {
   authRoutes,
@@ -25,6 +26,11 @@ import {
 
 const API_PREFIX = "/api/v1";
 const app: Application = express();
+
+/* secure cookies need this when running behind a reverse proxy in prod */
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
 
 app.use(helmet());
 app.use(express.json());
@@ -53,5 +59,7 @@ app.use(`${API_PREFIX}/projects/:projectId/alerts`, alertsRoutes);
 app.use(`${API_PREFIX}/billing`, billingRoutes);
 app.use(`${API_PREFIX}/usage`, usageRoutes);
 app.use(`${API_PREFIX}/ingest`, ingestRoutes);
+
+app.use(errorHandler);
 
 export default app;

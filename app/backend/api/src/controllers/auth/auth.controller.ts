@@ -60,7 +60,8 @@ export const register = async (
             org: {
               create: {
                 name: `${name?.split(" ")[0] ?? "Personal"}'s Organization`,
-                slug: `${normalizedEmail.split("@")[0]}-org`,
+                /* random suffix — org slug is globally unique, email prefixes are not */
+                slug: `${normalizedEmail.split("@")[0]}-${generateAlphaNumeric(6).toLowerCase()}`,
               },
             },
           },

@@ -1,0 +1,227 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum AuthProvider {
+  GOOGLE
+  GITHUB
+  EMAIL
+}
+
+enum IssueStatus {
+  UNRESOLVED
+  RESOLVED
+  IGNORED
+}
+
+enum EventLevel {
+  FATAL
+  ERROR
+  WARNING
+  INFO
+  DEBUG
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String?   @unique
+  name          String?
+  avatarUrl     String?
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts    Account[]
+  memberships OrganizationMember[]
+}
+
+model Account {
+  id                String       @id @default(cuid())
+  userId            String
+  provider          AuthProvider
+  providerAccountId String
+  accessToken       String?
+  refreshToken      String?
+  passwordHash      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Organization {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  plan            Plan     @default(FREE)
+  polarCustomerId String?  @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  members      OrganizationMember[]
+  projects     Project[]
+  subscription Subscription?
+  quotas       EventQuota[]
+}
+
+model OrganizationMember {
+  id        String     @id @default(cuid())
+  userId    String
+  orgId     String
+  role      MemberRole @default(MEMBER)
+  createdAt DateTime   @default(now())
+
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, orgId])
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  orgId     String
+  name      String
+  slug      String
+  platform  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  org          Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  keys         ProjectKey[]
+  issues       Issue[]
+  events       Event[]
+  transactions Transaction[]
+
+  @@unique([orgId, slug])
+}
+
+model ProjectKey {
+  id        String   @id @default(cuid())
+  projectId String
+  label     String   @default("Default")
+  publicKey String   @unique @default(cuid())
+  dsn       String   @unique
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Issue {
+  id          String      @id @default(cuid())
+  projectId   String
+  fingerprint String
+  title       String
+  culprit     String?
+  status      IssueStatus @default(UNRESOLVED)
+  level       EventLevel  @default(ERROR)
+  firstSeen   DateTime    @default(now())
+  lastSeen    DateTime    @default(now())
+  eventCount  Int         @default(1)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  events  Event[]
+
+  @@unique([projectId, fingerprint])
+  @@index([projectId, status])
+  @@index([projectId, lastSeen])
+}
+
+model Event {
+  id          String     @id @default(cuid())
+  issueId     String
+  projectId   String
+  level       EventLevel @default(ERROR)
+  message     String
+  stacktrace  Json?
+  contexts    Json?
+  tags        Json?
+  userContext Json?
+  request     Json?
+  timestamp   DateTime   @default(now())
+  receivedAt  DateTime   @default(now())
+
+  issue   Issue   @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([issueId])
+  @@index([projectId, timestamp])
+}
+
+model Transaction {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String
+  traceId   String
+  status    String
+  duration  Float
+  timestamp DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  spans   Span[]
+
+  @@index([projectId, timestamp])
+}
+
+model Span {
+  id            String   @id @default(cuid())
+  transactionId String
+  parentSpanId  String?
+  operation     String
+  description   String?
+  duration      Float
+  startTime     DateTime
+  endTime       DateTime
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@index([transactionId])
+}
+
+model EventQuota {
+  id        String   @id @default(cuid())
+  orgId     String
+  month     String
+  count     Int      @default(0)
+  limit     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, month])
+}
+
+model Subscription {
+  id                  String   @id @default(cuid())
+  orgId               String   @unique
+  polarSubscriptionId String   @unique
+  polarProductId      String
+  plan                Plan
+  status              String
+  currentPeriodStart  DateTime
+  currentPeriodEnd    DateTime
+  cancelAtPeriodEnd   Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}
