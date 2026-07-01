@@ -14,6 +14,19 @@ export function errorHandler(
     return;
   }
 
+  /* malformed JSON body — rejected by express.json() before reaching routes */
+  if (
+    err instanceof SyntaxError &&
+    "type" in err &&
+    err.type === "entity.parse.failed"
+  ) {
+    return sendError(
+      res,
+      HTTP_STATUS.BAD_REQUEST,
+      "Invalid JSON in request body",
+    );
+  }
+
   if (err instanceof ZodError) {
     return sendError(
       res,

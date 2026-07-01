@@ -1,0 +1,29 @@
+{
+  "name": "@argus/sdk-node",
+  "version": "0.1.0",
+  "description": "Argus SDK for Node.js — uncaught exceptions, unhandled rejections, Express middleware.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@argus/sdk-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "typescript": "~6.0.3"
+  }
+}

@@ -198,6 +198,54 @@ importers:
         specifier: ^8.1.0
         version: 8.1.0(@types/node@24.13.2)(jiti@2.7.0)
 
+  packages/sdk-browser:
+    dependencies:
+      '@argus/sdk-core':
+        specifier: workspace:*
+        version: link:../sdk-core
+    devDependencies:
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+
+  packages/sdk-core:
+    devDependencies:
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+
+  packages/sdk-node:
+    dependencies:
+      '@argus/sdk-core':
+        specifier: workspace:*
+        version: link:../sdk-core
+    devDependencies:
+      '@types/node':
+        specifier: ^26.0.1
+        version: 26.0.1
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+
+  packages/sdk-react:
+    dependencies:
+      '@argus/sdk-browser':
+        specifier: workspace:*
+        version: link:../sdk-browser
+      '@argus/sdk-core':
+        specifier: workspace:*
+        version: link:../sdk-core
+      react:
+        specifier: '>=18'
+        version: 19.2.7
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.17
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+
 packages:
 
   '@cspotcode/source-map-support@0.8.1':
@@ -2399,11 +2447,11 @@ snapshots:
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 24.13.2
+      '@types/node': 26.0.1
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 24.13.2
+      '@types/node': 26.0.1
 
   '@types/cookie-parser@1.4.10(@types/express@5.0.6)':
     dependencies:
@@ -2415,7 +2463,7 @@ snapshots:
 
   '@types/express-serve-static-core@5.1.1':
     dependencies:
-      '@types/node': 24.13.2
+      '@types/node': 26.0.1
       '@types/qs': 6.15.1
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
@@ -2497,12 +2545,12 @@ snapshots:
 
   '@types/send@1.2.1':
     dependencies:
-      '@types/node': 24.13.2
+      '@types/node': 26.0.1
 
   '@types/serve-static@2.2.0':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 24.13.2
+      '@types/node': 26.0.1
 
   '@types/strip-bom@3.0.0': {}
 

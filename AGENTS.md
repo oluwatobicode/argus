@@ -35,6 +35,12 @@ Root README and sub-READMEs are aspirational planning docs. **Trust the source c
 | `pnpm db:migrate` | Prisma migrate dev |
 | `pnpm db:studio` | Prisma Studio |
 
+## Envelope contract (SDK ↔ API ↔ worker)
+
+- **All timestamps are MILLISECONDS since epoch** (`Date.now()`) — `envelope.timestamp` and `breadcrumbs[].timestamp`. Enforced by a min-bound (2020 in ms) in `app/backend/api/src/validators/envelope.validator.ts`, so an accidental seconds value fails validation loudly instead of storing 1970 dates. The worker passes values straight to `new Date(ms)`.
+- **DSN format**: `https://<publicKey>@<host>/<projectId>` — the path segment is the project **id** (cuid), matching the ingest route `POST /api/v1/ingest/:projectId/envelope`. Auth via `x-sentry-auth: Sentry sentry_key=<publicKey>` header or `?sentry_key=` query param.
+- Envelope shape source of truth: `envelope.validator.ts` (API) mirrored by `app/backend/worker/src/types/index.ts`.
+
 ## Gotchas
 
 - **Prisma client import**: `from "../generated/prisma/client"` — not from `@prisma/client`. Run `pnpm db:generate` before importing.

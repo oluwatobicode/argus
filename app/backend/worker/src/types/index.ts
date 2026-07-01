@@ -8,6 +8,7 @@ export interface StackFrame {
 export interface Breadcrumb {
   type: string;
   message?: string;
+  /** ms since epoch — see envelope contract in AGENTS.md */
   timestamp?: number;
   data?: Record<string, unknown>;
 }
@@ -22,6 +23,7 @@ export interface ExceptionPayload {
 
 export interface Envelope {
   level?: "fatal" | "error" | "warning" | "info" | "debug";
+  /** ms since epoch — validated at ingest, safe to pass to new Date() */
   timestamp?: number;
   environment?: string;
   release?: string;

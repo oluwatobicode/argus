@@ -1,5 +1,17 @@
 import { z } from "zod";
 
+/*
+ * CONTRACT: all timestamps are MILLISECONDS since epoch (Date.now()).
+ * A seconds value (~1.7e9) is 1000x below the 2020 bound and fails loudly —
+ * catching the classic sec-vs-ms bug at the door instead of storing 1970 dates.
+ */
+const MS_EPOCH_2020 = 1_577_836_800_000; /* 2020-01-01T00:00:00Z */
+
+const TimestampMs = z
+  .number()
+  .int()
+  .min(MS_EPOCH_2020, "timestamp must be milliseconds since epoch (Date.now())");
+
 const StackFrameSchema = z.object({
   filename: z.string(),
   function: z.string().optional(),
@@ -18,7 +30,7 @@ const ExceptionSchema = z.object({
 const BreadcrumbSchema = z.object({
   type: z.string(),
   message: z.string().optional(),
-  timestamp: z.number().positive().optional(),
+  timestamp: TimestampMs.optional(),
   data: z.record(z.string(), z.unknown()).optional(),
 });
 
@@ -41,7 +53,7 @@ const EventEnvelopeSchema = z.object({
   level: z
     .enum(["fatal", "error", "warning", "info", "debug"])
     .default("error"),
-  timestamp: z.number().positive().optional(),
+  timestamp: TimestampMs.optional(),
   environment: z.string().optional(),
   release: z.string().optional(),
   exception: ExceptionSchema,
