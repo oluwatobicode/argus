@@ -1,5 +1,4 @@
 /* Public surface of @argus/sdk-browser */
-
 export { init, captureException } from "./init";
-export type { InitOptions } from "./init";
 export { parseStack } from "./stacktrace";
+//# sourceMappingURL=index.js.map

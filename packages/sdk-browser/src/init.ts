@@ -4,6 +4,7 @@ import {
   buildEnvelope,
   sendEnvelope,
   type EnvelopeOptions,
+  type StackFrame,
 } from "@argus/sdk-core";
 import { parseStack } from "./stacktrace";
 
@@ -30,14 +31,28 @@ export function init(options: InitOptions): void {
     release: options.release,
   };
 
-  process.on("uncaughtException", (err: Error) => {
-    /* capture, wait for the send, then exit non-zero — after an uncaught
-       exception the process state is untrustworthy; Node docs say exit. */
-    void captureException(err).finally(() => process.exit(1));
-  });
+  /* chain any handler the app already installed — we observe, never replace */
+  const previousOnError = window.onerror;
+  window.onerror = (message, source, lineno, colno, error) => {
+    if (error) {
+      void captureException(error);
+    } else {
+      /* no Error object (e.g. cross-origin scripts) — build a frame from the args */
+      const frame: StackFrame = {
+        filename: source || "<unknown>",
+        lineno: lineno || 1,
+      };
+      if (colno) frame.colno = colno;
+      void send("Error", String(message), [frame], {});
+    }
+    if (previousOnError) {
+      return previousOnError.call(window, message, source, lineno, colno, error);
+    }
+    return false; /* don't suppress the console error — devs still want to see it */
+  };
 
-  process.on("unhandledRejection", (reason: unknown) => {
-    void captureException(reason);
+  window.addEventListener("unhandledrejection", (event) => {
+    void captureException(event.reason);
   });
 }
 
@@ -45,8 +60,6 @@ export async function captureException(
   err: unknown,
   extra: EnvelopeOptions = {},
 ): Promise<void> {
-  if (!client) return; /* init() not called — silently no-op */
-
   /* people reject(non-Error) all the time — normalize */
   const error = err instanceof Error ? err : new Error(String(err));
 
@@ -56,9 +69,21 @@ export async function captureException(
     frames = [{ filename: "<unknown>", lineno: 1 }];
   }
 
-  const envelope = buildEnvelope(error.name, error.message, frames, {
+  await send(error.name, error.message, frames, extra);
+}
+
+async function send(
+  type: string,
+  value: string,
+  frames: StackFrame[],
+  extra: EnvelopeOptions,
+): Promise<void> {
+  if (!client) return; /* init() not called — silently no-op */
+
+  const envelope = buildEnvelope(type, value, frames, {
     environment: client.environment,
     release: client.release,
+    request: { url: window.location.href },
     ...extra,
   });
 

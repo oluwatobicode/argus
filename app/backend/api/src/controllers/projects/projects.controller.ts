@@ -90,6 +90,7 @@ export const createProject = async (
     }
 
     const host = process.env.DSN_HOST || "localhost:3000";
+    const protocol = process.env.DSN_PROTOCOL || "http";
     const publicKey = crypto.randomUUID();
 
     /* DSN embeds project.id — the ingest route is /:projectId/envelope */
@@ -101,7 +102,7 @@ export const createProject = async (
         data: {
           projectId: created.id,
           publicKey,
-          dsn: `https://${publicKey}@${host}/${created.id}`,
+          dsn: `${protocol}://${publicKey}@${host}/${created.id}`,
         },
       });
       return { ...created, keys: [key] };

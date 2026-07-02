@@ -1,7 +1,8 @@
-/*
- * @argus/sdk-react — build LAST (rides on sdk-browser):
- *   1. ErrorBoundary.tsx — class component, componentDidCatch → captureException
- *   2. re-export init from @argus/sdk-browser so users need one import
- */
+/* Public surface of @argus/sdk-react */
 
-export {};
+export { ArgusErrorBoundary } from "./ErrorBoundary";
+
+/* re-export the browser SDK so React users need exactly one import:
+   import { init, ArgusErrorBoundary } from "@argus/sdk-react" */
+export { init, captureException } from "@argus/sdk-browser";
+export type { InitOptions } from "@argus/sdk-browser";
