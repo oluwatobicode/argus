@@ -5,14 +5,16 @@
 ```
 argus/
 ├── app/
-│   ├── backend/api/       # @argus/api — Express 5 server (ingest + REST API)
-│   ├── backend/worker/    # @argus/worker — BullMQ event processor (src/index.ts is empty stub)
+│   ├── backend/api/       # @argus/api — Express 5 server (ingest + REST API) — WORKING
+│   ├── backend/worker/    # @argus/worker — BullMQ event processor — WORKING (verified e2e)
 │   └── frontend/          # frontend — React 19 + Vite (still default Vite template, not built out)
-├── packages/              # SDK packages — currently only a README, no source code
+├── packages/              # @argus/sdk-core, sdk-node, sdk-browser, sdk-react — all implemented,
+│                          #   typechecked; sdk-node verified live; NOT published to npm
+├── docs/                  # DESIGN_BRIEF.md — dashboard design spec
 ├── infra/                 # Only README — no docker-compose files exist yet
 ```
 
-Root README and sub-READMEs are aspirational planning docs. **Trust the source code, not the READMEs**, especially for auth, route structure, and schema.
+READMEs were rewritten 2026-07-03 to match the source. Still: **when in doubt, trust the source code**, especially for auth, route structure, and schema.
 
 ## Key architecture (from actual source)
 
@@ -53,13 +55,19 @@ Root README and sub-READMEs are aspirational planning docs. **Trust the source c
 - **TypeScript ~6.0** — newer than most projects. Check for TS 6-specific syntax or breaking changes.
 - **Polar webhook** must be registered before `express.json()` (per README note — verify if this is implemented in `app.ts`).
 
-## Packages that exist as stubs only
+## SDK packages (all implemented)
 
-`packages/` has `sdk-core/`, `sdk-browser/`, `sdk-node/`, `sdk-react-native/` described in READMEs but **no actual source directories or package.json files** — only a README.md.
+- Every SDK follows: **hook** (runtime crash announcement) → **normalize** (stack string → StackFrame[]) → **delegate** (core: parseDsn/buildEnvelope/sendEnvelope).
+- Golden rule: SDKs **never throw into the host app** — worst case is a console.warn.
+- `sdk-core` tsconfig includes DOM lib only for universal-global types (URL/fetch); no `window.*`/`document.*`/node-only APIs allowed in core.
+- Build `sdk-core` before typechecking dependents (`pnpm --filter @argus/sdk-core build`).
+- Smoke tests (run from repo root, API+worker up): `npx tsx packages/sdk-{core,node}/scripts/smoke.mts "<dsn>"`.
+- Not on npm yet; `@argus` scope likely taken — rename at publish time.
 
-## Miss from root README vs. reality
+## Key facts (source-verified)
 
 - Auth is **session-based (Passport)**, not JWT
-- Routes are at `/api/auth/...`, `/api/projects/...`, etc. (not `/auth/...`)
-- Prisma schema has Organization, Account, Subscription — not in documented schema
-- All code is under `app/` subdirectory, not `backend/` and `frontend/` at root
+- Routes are at `/api/v1/auth/...`, `/api/v1/projects/...`, etc.
+- Quota is an atomic check-and-consume (`updateMany WHERE count < limit`); malformed payloads still consume 1 event
+- performance/alerts/billing/usage controllers are **empty stubs — requests to them hang**
+- Postgres is hosted on Railway in dev; Redis via REDIS_URL

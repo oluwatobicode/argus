@@ -1,19 +1,21 @@
 # Argus — Packages (SDKs)
 
-Four npm packages developers install into their own apps to send errors and performance data to Argus.
+Four TypeScript packages, zero runtime dependencies. Not yet published to npm — usable today inside the monorepo via `workspace:*`.
+
+Every SDK follows the same 3-part pattern: **hook** (how this runtime announces crashes) → **normalize** (that runtime's stack format → `StackFrame[]`) → **delegate** (sdk-core builds + sends the envelope).
 
 ---
 
 ## Overview
 
-| Package            | Where it runs    | What it does                                     |
-| ------------------ | ---------------- | ------------------------------------------------ |
-| `sdk-core`         | Everywhere       | Shared utilities — all other SDKs depend on this |
-| `sdk-browser`      | Web browsers     | Catches JS errors + web vitals                   |
-| `sdk-node`         | Node.js backends | Catches uncaught exceptions + wraps Express      |
-| `sdk-react-native` | Mobile apps (RN) | Catches JS crashes on iOS + Android              |
+| Package       | Where it runs    | Status | What it does                                                |
+| ------------- | ---------------- | ------ | ----------------------------------------------------------- |
+| `sdk-core`    | Everywhere       | ✅     | DSN parsing, envelope builder, transport — shared internals |
+| `sdk-node`    | Node.js backends | ✅     | uncaughtException/unhandledRejection + Express middleware   |
+| `sdk-browser` | Web browsers     | ✅     | window.onerror, unhandledrejection, Chrome+Firefox parsing  |
+| `sdk-react`   | React apps       | ✅     | `<ArgusErrorBoundary>` on top of sdk-browser                |
 
-`sdk-core` is never installed directly by developers. It's an internal dependency of the other three.
+`sdk-core` is never installed directly by developers — it's an internal dependency of the other three.
 
 ---
 
@@ -22,54 +24,21 @@ Four npm packages developers install into their own apps to send errors and perf
 ```
 sdk-core/
 ├── src/
-│   ├── dsn.ts          # Parses DSN string → { host, projectId, publicKey }
-│   ├── envelope.ts     # Builds + serialises the event envelope to JSON
-│   ├── transport.ts    # fetch() with exponential backoff retry — sends envelope to ingest API
-│   │                   # Silently drops event on 429 (quota exceeded) — never throws to the host app
-│   ├── types.ts        # ArgusEvent, Breadcrumb, StackFrame, Envelope interfaces
-│   └── index.ts        # Public exports
-├── package.json
-└── tsconfig.json
+│   ├── dsn.ts          # parseDsn() → { publicKey, host, projectId, protocol }; getIngestUrl()
+│   ├── envelope.ts     # buildEnvelope() — pure function, stamps timestamp: Date.now() (ms contract)
+│   ├── transport.ts    # sendEnvelope() — fetch + retry/backoff; drops on 429; NEVER throws
+│   ├── types.ts        # Envelope, StackFrame, ExceptionPayload, Breadcrumb
+│   └── index.ts        # public exports
+└── scripts/smoke.mts   # npx tsx packages/sdk-core/scripts/smoke.mts "<dsn>"
 ```
 
-The DSN format:
+DSN format (path segment is the project **id**, matching the ingest route):
 
 ```
-https://PUBLIC_KEY@your-domain.com/PROJECT_ID
+http(s)://PUBLIC_KEY@your-domain.com/PROJECT_ID
 ```
 
-`dsn.ts` parses this into the three pieces every SDK needs: where to send events, which project to attach them to, and which key to authenticate with.
-
----
-
-## `sdk-browser/`
-
-```
-sdk-browser/
-├── src/
-│   ├── init.ts         # Hooks window.onerror + window.onunhandledrejection
-│   ├── breadcrumbs.ts  # Monkey-patches console, fetch, XHR, and click events to collect breadcrumbs
-│   ├── vitals.ts       # Captures LCP, CLS, TTFB, FCP, FID via PerformanceObserver API
-│   ├── types.ts
-│   └── index.ts        # Public API: init(), captureException(), captureMessage()
-├── package.json
-└── tsconfig.json
-```
-
-**Usage:**
-
-```ts
-import { init, captureException } from "@argus/sdk-browser";
-
-init({ dsn: "https://PUBLIC_KEY@your-domain.com/PROJECT_ID" });
-
-// Manual capture — uncaught errors are captured automatically
-try {
-  doSomething();
-} catch (err) {
-  captureException(err);
-}
-```
+Transport rules: `429` (quota/rate limit) → drop silently, no retry. Other `4xx` → warn once, no retry. `5xx`/network → retry ×2 with exponential backoff. Nothing ever throws into the host app.
 
 ---
 
@@ -78,14 +47,11 @@ try {
 ```
 sdk-node/
 ├── src/
-│   ├── init.ts                     # Hooks process.on('uncaughtException') + process.on('unhandledRejection')
-│   ├── integrations/
-│   │   ├── express.ts              # Express error handler middleware
-│   │   └── http.ts                 # Traces outgoing HTTP requests via AsyncLocalStorage
-│   ├── types.ts
-│   └── index.ts                    # Public API: init(), captureException(), argusErrorHandler()
-├── package.json
-└── tsconfig.json
+│   ├── init.ts         # init() + captureException(); hooks process.on(...)
+│   ├── stacktrace.ts   # V8 "at fn (file:line:col)" parser → StackFrame[]
+│   ├── express.ts      # argusErrorHandler() middleware (no dependency on express itself)
+│   └── index.ts
+└── scripts/smoke.mts   # crashes a fake app on purpose — run from repo root
 ```
 
 **Usage:**
@@ -93,84 +59,107 @@ sdk-node/
 ```ts
 import { init, argusErrorHandler } from "@argus/sdk-node";
 
-init({ dsn: "https://PUBLIC_KEY@your-domain.com/PROJECT_ID" });
+init({ dsn: "http://KEY@localhost:3000/PROJECT_ID", environment: "production" });
 
-// Must be after all routes, before any other error handlers
+// Express apps — after all routes, before your own error handler:
 app.use(argusErrorHandler());
 ```
 
+Behavior: on `uncaughtException` the event is sent, then the process exits `1` (crash behavior preserved). `unhandledRejection` is captured without exiting. Non-Error rejections are normalized.
+
 ---
 
-## `sdk-react-native/`
+## `sdk-browser/`
 
 ```
-sdk-react-native/
+sdk-browser/
 ├── src/
-│   ├── init.ts             # Sets ErrorUtils.setGlobalHandler, catches unhandled Promise rejections
-│   ├── errorHandler.ts     # Formats React Native stack traces into Argus StackFrame shape
-│   ├── types.ts
-│   └── index.ts            # Public API: init(), captureException()
-├── package.json
-└── tsconfig.json
+│   ├── init.ts         # window.onerror (chains pre-existing handlers) + unhandledrejection
+│   ├── stacktrace.ts   # Chrome "at fn (url:l:c)" AND Firefox/Safari "fn@url:l:c" → StackFrame[]
+│   └── index.ts        # init(), captureException()
 ```
 
 **Usage:**
 
 ```ts
-import { init } from "@argus/sdk-react-native";
+import { init, captureException } from "@argus/sdk-browser";
 
-// Call at the top of index.js before everything else
-init({ dsn: "https://PUBLIC_KEY@your-domain.com/PROJECT_ID" });
+init({ dsn: "http(s)://KEY@host/PROJECT_ID" });
+
+// manual capture — uncaught errors are automatic
+try { doSomething(); } catch (err) { captureException(err); }
 ```
+
+Every event auto-attaches `request.url = window.location.href`. The same error thrown in Chrome and Firefox parses to identical frames → identical fingerprint → one Issue, not one per browser.
+
+Planned (not built): breadcrumbs (console/click/fetch trail), web vitals.
+
+---
+
+## `sdk-react/`
+
+```
+sdk-react/
+├── src/
+│   ├── ErrorBoundary.tsx  # <ArgusErrorBoundary> — componentDidCatch → captureException
+│   └── index.ts           # re-exports init from sdk-browser: one import for React users
+```
+
+**Usage:**
+
+```tsx
+import { init, ArgusErrorBoundary } from "@argus/sdk-react";
+
+init({ dsn: "http(s)://KEY@host/PROJECT_ID" });
+
+<ArgusErrorBoundary fallback={<p>Something went wrong</p>}>
+  <App />
+</ArgusErrorBoundary>
+```
+
+Why a boundary: React render crashes don't reach `window.onerror` in production builds — `componentDidCatch` is the only reliable hook. The crashing component (first line of `componentStack`) is attached as a tag.
 
 ---
 
 ## How They Connect
 
 ```
-sdk-browser / sdk-node / sdk-react-native
-        │
+sdk-node / sdk-browser / sdk-react
         │  imports
         ▼
     sdk-core
-        │
-        │  POST /ingest/:projectId/envelope
+        │  POST /api/v1/ingest/:projectId/envelope
         ▼
    Argus ingest API
-        │
-        ├─ 200 OK       → event queued, will be processed
-        ├─ 401          → invalid DSN key
-        └─ 429          → quota exceeded (FREE plan limit hit), event silently dropped
+        ├─ 200 → queued → worker → Issue
+        ├─ 400 → invalid envelope (Zod details in response)
+        ├─ 401 → invalid DSN key
+        └─ 429 → quota/rate limit — SDK drops silently
 ```
 
-The SDKs never throw or surface errors to the host app — they fail silently. A `429` from a quota breach is logged to the browser/Node console at most.
+**Envelope contract:** all timestamps are **milliseconds** since epoch (`Date.now()`). Enforced by the API's validator — a seconds value is rejected loudly. See AGENTS.md.
 
 ---
 
-## Running Locally
+## Developing Locally
 
 ```bash
-# Build all packages
-pnpm --filter sdk-core build
-pnpm --filter sdk-browser build
-pnpm --filter sdk-node build
-pnpm --filter sdk-react-native build
+pnpm --filter @argus/sdk-core build      # required once before typechecking dependents
+pnpm --filter "@argus/sdk-*" exec tsc --noEmit
 
-# Or build everything from root
-pnpm build
-```
-
-To test against your local Argus instance set the DSN host to localhost:
-
-```
-https://YOUR_PUBLIC_KEY@localhost:3001/YOUR_PROJECT_ID
+# end-to-end smoke tests (API + worker must be running):
+npx tsx packages/sdk-core/scripts/smoke.mts "<dsn>"
+npx tsx packages/sdk-node/scripts/smoke.mts "<dsn>"
 ```
 
 ---
 
 ## Build Phases
 
-- [ ] `@argus/sdk-core` — DSN parsing, envelope builder, transport with retry
-- [ ] `@argus/sdk-browser` — window.onerror, unhandledrejection, breadcrumbs, web vitals
-- [ ] `@argus/sdk-node` — uncaughtException, unhandledRejection, Express error middleware
-- [ ] `@argus/sdk-react-native` — RN crash capture, stack trace formatting
+- [x] `@argus/sdk-core` — DSN parsing, envelope builder, transport with retry
+- [x] `@argus/sdk-node` — uncaughtException, unhandledRejection, Express error middleware
+- [x] `@argus/sdk-browser` — window.onerror, unhandledrejection, dual-format stack parsing
+- [x] `@argus/sdk-react` — ErrorBoundary
+- [ ] Browser SDK breadcrumbs + web vitals
+- [ ] Publish to npm (scope TBD — `@argus` likely taken)
+- [ ] `@argus/sdk-react-native`, Vue, Go
