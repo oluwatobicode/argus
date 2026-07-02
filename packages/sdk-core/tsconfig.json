@@ -1,8 +1,10 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    /* core runs everywhere — no DOM, no Node globals allowed */
-    "lib": ["ES2020"],
+    /* DOM lib is only here for the types of universal globals (URL, fetch,
+       console, setTimeout — all exist in node 18+/browsers/RN).
+       Rule stays: no window.*, no document.*, no node-only APIs in core. */
+    "lib": ["ES2020", "DOM"],
     "rootDir": "src",
     "outDir": "dist"
   },

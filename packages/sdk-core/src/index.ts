@@ -1,8 +1,13 @@
-/* Public surface of @argus/sdk-core — uncomment as you implement each file */
+/* Public surface of @argus/sdk-core */
 
-// export { parseDsn, getIngestUrl } from "./dsn";
-// export { buildEnvelope } from "./envelope";
-// export { sendEnvelope } from "./transport";
-// export type { Envelope, StackFrame, ExceptionPayload, Breadcrumb } from "./types";
-
-export {};
+export { parseDsn, getIngestUrl } from "./dsn";
+export type { ParsedDsn } from "./dsn";
+export { buildEnvelope } from "./envelope";
+export type { EnvelopeOptions } from "./envelope";
+export { sendEnvelope } from "./transport";
+export type {
+  Envelope,
+  StackFrame,
+  ExceptionPayload,
+  Breadcrumb,
+} from "./types";

@@ -1,16 +1,41 @@
-/*
- * TODO(you): the envelope contract types.
- *
- * Mirror the shapes in app/backend/api/src/validators/envelope.validator.ts
- * (that Zod schema is the source of truth — see "Envelope contract" in AGENTS.md):
- *
- *   - StackFrame      { filename, function?, lineno, colno? }
- *   - ExceptionPayload{ type, value, stacktrace: { frames: StackFrame[] } }
- *   - Breadcrumb      { type, message?, timestamp?, data? }
- *   - Envelope        { level?, timestamp?, environment?, release?, exception,
- *                       user?, breadcrumbs?, contexts?, tags?, request? }
- *
- * Remember: all timestamps are MILLISECONDS since epoch (Date.now()).
- */
+export interface StackFrame {
+  filename: string;
+  function?: string;
+  lineno: number;
+  colno?: number;
+}
 
-export {};
+export interface Breadcrumb {
+  type: string;
+  message?: string;
+  timestamp?: number;
+  data?: Record<string, unknown>;
+}
+
+export interface ExceptionPayload {
+  type: string;
+  value: string;
+  stacktrace: {
+    frames: StackFrame[];
+  };
+}
+
+export interface Envelope {
+  level?: "fatal" | "error" | "warning" | "info" | "debug";
+  timestamp?: number;
+  environment?: string;
+  release?: string;
+  exception: ExceptionPayload;
+  user?: { id?: string; email?: string };
+  breadcrumbs?: Breadcrumb[];
+  contexts?: {
+    browser?: { name: string; version: string };
+    os?: { name: string; version: string };
+  };
+  tags?: Record<string, string>;
+  request?: {
+    url?: string;
+    method?: string;
+    headers?: Record<string, string>;
+  };
+}
