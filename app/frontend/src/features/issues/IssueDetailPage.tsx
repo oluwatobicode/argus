@@ -6,6 +6,7 @@ import { useIssue, useUpdateIssueStatus } from "../../hooks/useIssues";
 import { useEvents } from "../../hooks/useEvents";
 import type { IssueStatus } from "../../types/api";
 import { LevelBadge } from "../../ui/LevelBadge";
+import { PageLoader } from "../../ui/Loader";
 import { STATUS_META } from "../../utils/levels";
 import { relativeTime, absoluteTime } from "../../utils/time";
 import { StackTrace } from "./components/StackTrace";
@@ -44,8 +45,7 @@ export function IssueDetailPage() {
   const event = eventsData?.events[0];
   const totalEvents = eventsData?.pagination.total ?? issue?.eventCount ?? 0;
 
-  if (isLoading)
-    return <p className="font-mono text-sm text-text-3">loading…</p>;
+  if (isLoading) return <PageLoader />;
   if (isError || !issue)
     return <p className="text-sm text-error">Couldn't load this issue.</p>;
 

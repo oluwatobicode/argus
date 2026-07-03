@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router";
 import { Eyebrow } from "../../ui/Eyebrow";
+import { PageLoader } from "../../ui/Loader";
 import { useProjects } from "../../hooks/useProjects";
 import { useIssueCounts, useIssues } from "../../hooks/useIssues";
 import type { IssueStatus, Level } from "../../types/api";
@@ -96,9 +97,7 @@ export function IssuesPage() {
         </div>
 
         {isLoading ? (
-          <p className="px-[22px] py-16 text-center font-mono text-sm text-text-3">
-            loading…
-          </p>
+          <PageLoader />
         ) : isError ? (
           <p className="px-[22px] py-16 text-center text-sm text-error">
             Couldn't load issues.

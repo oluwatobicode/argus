@@ -8,6 +8,7 @@ import {
   Add01Icon,
 } from "@hugeicons/core-free-icons";
 import { Eyebrow } from "../../ui/Eyebrow";
+import { PageLoader } from "../../ui/Loader";
 import { useMe, useLogout } from "../../hooks/useAuth";
 import { useProjects } from "../../hooks/useProjects";
 import { NewProjectModal } from "./components/NewProjectModal";
@@ -78,7 +79,9 @@ export function ProjectsConsolePage() {
 
         <div className="mt-6 grid grid-cols-2 gap-4">
           {isLoading ? (
-            <p className="font-mono text-sm text-text-3">loading…</p>
+            <div className="col-span-2">
+              <PageLoader />
+            </div>
           ) : (
             projects?.map((project) => (
               <button

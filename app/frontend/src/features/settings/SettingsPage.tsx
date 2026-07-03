@@ -8,6 +8,7 @@ import { Button } from "../../ui/Button";
 import { Input } from "../../ui/Input";
 import { Modal } from "../../ui/Modal";
 import { CopyButton } from "../../ui/CopyButton";
+import { PageLoader } from "../../ui/Loader";
 import { InstallTabs } from "./components/InstallTabs";
 import {
   useProjects,
@@ -40,7 +41,7 @@ export function SettingsPage() {
   });
 
   if (isLoading) {
-    return <p className="font-mono text-sm text-text-3">loading…</p>;
+    return <PageLoader />;
   }
 
   return (

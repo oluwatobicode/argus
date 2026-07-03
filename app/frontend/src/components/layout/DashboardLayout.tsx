@@ -1,18 +1,13 @@
 import { Navigate, Outlet, useParams } from "react-router";
 import { useMe } from "../../hooks/useAuth";
 import { Sidebar } from "../../ui/Sidebar";
+import { FullScreenLoader } from "../../ui/Loader";
 
 export function DashboardLayout() {
   const { data: me, isLoading, isError } = useMe();
   const { projectId } = useParams<{ projectId: string }>();
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <span className="font-mono text-sm text-text-3">loading…</span>
-      </div>
-    );
-  }
+  if (isLoading) return <FullScreenLoader />;
 
   if (isError || !me) {
     return <Navigate to="/login" replace />;

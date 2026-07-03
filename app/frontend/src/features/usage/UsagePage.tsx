@@ -1,5 +1,6 @@
 import toast from "react-hot-toast";
 import { Eyebrow } from "../../ui/Eyebrow";
+import { PageLoader } from "../../ui/Loader";
 import { useUsage } from "../../hooks/useUsage";
 
 const fmt = (n: number) => n.toLocaleString();
@@ -7,7 +8,7 @@ const fmt = (n: number) => n.toLocaleString();
 export function UsagePage() {
   const { data: usage, isLoading, isError } = useUsage();
 
-  if (isLoading) return <p className="font-mono text-sm text-text-3">loading…</p>;
+  if (isLoading) return <PageLoader />;
   if (isError || !usage)
     return <p className="text-sm text-error">Couldn't load usage.</p>;
 
