@@ -1,6 +1,9 @@
+import { useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router";
-import { useProjects } from "../../hooks/useProjects";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { useIssue, useUpdateIssueStatus } from "../../hooks/useIssues";
+import { useEvents } from "../../hooks/useEvents";
 import type { IssueStatus } from "../../types/api";
 import { LevelBadge } from "../../ui/LevelBadge";
 import { STATUS_META } from "../../utils/levels";
@@ -27,16 +30,19 @@ function actionsFor(
 
 export function IssueDetailPage() {
   const navigate = useNavigate();
-  const { issueId } = useParams<{ issueId: string }>();
-  const { data: projects } = useProjects();
-  const project = projects?.[0];
+  const { projectId = "", issueId = "" } = useParams<{
+    projectId: string;
+    issueId: string;
+  }>();
 
-  const {
-    data: issue,
-    isLoading,
-    isError,
-  } = useIssue(project?.id ?? "", issueId ?? "");
-  const updateStatus = useUpdateIssueStatus(project?.id ?? "");
+  const { data: issue, isLoading, isError } = useIssue(projectId, issueId);
+  const updateStatus = useUpdateIssueStatus(projectId);
+
+  /* one event per page → the stack-trace stepper walks the occurrences */
+  const [eventPage, setEventPage] = useState(1);
+  const { data: eventsData } = useEvents(projectId, issueId, eventPage);
+  const event = eventsData?.events[0];
+  const totalEvents = eventsData?.pagination.total ?? issue?.eventCount ?? 0;
 
   if (isLoading)
     return <p className="font-mono text-sm text-text-3">loading…</p>;
@@ -44,15 +50,14 @@ export function IssueDetailPage() {
     return <p className="text-sm text-error">Couldn't load this issue.</p>;
 
   const statusMeta = STATUS_META[issue.status];
-  const latestEvent = issue.events[0];
 
   return (
     <div className="mx-auto max-w-[1100px]">
       <button
-        onClick={() => navigate("/")}
-        className="mb-5 cursor-pointer inline-flex items-center gap-1.5 text-xs text-text-2 hover:text-text-1"
+        onClick={() => navigate(`/projects/${projectId}/issues`)}
+        className="mb-5 inline-flex cursor-pointer items-center gap-1.5 text-xs text-text-2 hover:text-text-1"
       >
-        ← Issues
+        <HugeiconsIcon icon={ArrowLeft01Icon} size={14} /> Issues
       </button>
 
       {/* header */}
@@ -76,7 +81,7 @@ export function IssueDetailPage() {
               onClick={() =>
                 updateStatus.mutate({ issueId: issue.id, status: action.to })
               }
-              className={`rounded-full cursor-pointer px-5 py-2.5 text-[13px] transition-colors disabled:opacity-50 ${
+              className={`cursor-pointer rounded-full px-5 py-2.5 text-[13px] transition-colors disabled:opacity-50 ${
                 action.primary
                   ? "bg-lime font-bold text-lime-ink hover:bg-lime/90"
                   : "border border-border-2 bg-surface-2 text-text-1 hover:bg-surface"
@@ -101,12 +106,7 @@ export function IssueDetailPage() {
           value={relativeTime(issue.lastSeen)}
           title={absoluteTime(issue.lastSeen)}
         />
-        <Stat
-          label="STATUS"
-          value={statusMeta.label}
-          color={statusMeta.color}
-          last
-        />
+        <Stat label="STATUS" value={statusMeta.label} color={statusMeta.color} last />
       </div>
 
       {/* two-column: stack trace + context */}
@@ -114,46 +114,54 @@ export function IssueDetailPage() {
         <div className="overflow-hidden rounded-[18px] border border-border bg-surface">
           <div className="flex items-center justify-between border-b border-divider px-5 py-4">
             <div className="text-sm font-semibold">Stack trace</div>
-            <span className="font-mono text-[11px] text-text-3">
-              latest of {issue.eventCount} events
-            </span>
-          </div>
-          {latestEvent ? (
-            <StackTrace event={latestEvent} level={issue.level} />
-          ) : (
-            <p className="px-5 py-8 text-sm text-text-3">
-              No events stored yet.
-            </p>
-          )}
-
-          {issue.events.length > 0 && (
-            <div className="border-t border-divider px-5 py-4">
-              <div className="mb-3 font-mono text-[10px] uppercase tracking-[0.16em] text-text-4">
-                Recent events
-              </div>
-              <div className="flex flex-col gap-2">
-                {issue.events.map((event) => (
-                  <div
-                    key={event.id}
-                    className="flex items-center justify-between font-mono text-xs"
-                  >
-                    <span className="text-text-2">{event.id.slice(0, 12)}</span>
-                    <span
-                      className="text-text-3"
-                      title={absoluteTime(event.timestamp)}
-                    >
-                      {relativeTime(event.timestamp)}
-                    </span>
-                  </div>
-                ))}
-              </div>
+            <div className="flex items-center gap-2">
+              <StepButton
+                disabled={eventPage <= 1}
+                onClick={() => setEventPage((p) => p - 1)}
+              >
+                <HugeiconsIcon icon={ArrowLeft01Icon} size={13} />
+              </StepButton>
+              <span className="font-mono text-[11px] text-text-3">
+                event {eventPage} of {totalEvents}
+              </span>
+              <StepButton
+                disabled={eventPage >= totalEvents}
+                onClick={() => setEventPage((p) => p + 1)}
+              >
+                <HugeiconsIcon icon={ArrowRight01Icon} size={13} />
+              </StepButton>
             </div>
+          </div>
+          {event ? (
+            <StackTrace event={event} level={issue.level} />
+          ) : (
+            <p className="px-5 py-8 text-sm text-text-3">No events stored yet.</p>
           )}
         </div>
 
-        {latestEvent && <ContextPanel event={latestEvent} />}
+        {event && <ContextPanel event={event} />}
       </div>
     </div>
+  );
+}
+
+function StepButton({
+  disabled,
+  onClick,
+  children,
+}: {
+  disabled: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      disabled={disabled}
+      onClick={onClick}
+      className="flex h-6 w-7 items-center justify-center rounded-full border border-border-2 text-text-2 transition-colors hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      {children}
+    </button>
   );
 }
 

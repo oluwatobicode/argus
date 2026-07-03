@@ -66,6 +66,22 @@ export function useIssueCounts(projectId: string) {
   } as Record<IssueStatus, number>;
 }
 
+/* onboarding: poll until the project's first event lands, then stop */
+export function useFirstEvent(projectId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["firstEvent", projectId],
+    enabled: Boolean(projectId) && enabled,
+    refetchInterval: (query) => (query.state.data ? false : 3000),
+    queryFn: async () => {
+      const res = await axiosInstance.get<Envelope<IssuesResponse>>(
+        `/projects/${projectId}/issues`,
+        { params: { limit: 1 } },
+      );
+      return res.data.data!.pagination.total > 0;
+    },
+  });
+}
+
 /* single issue + its 10 latest events (embedded by the API) */
 export function useIssue(projectId: string, issueId: string) {
   return useQuery({

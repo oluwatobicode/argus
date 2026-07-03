@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useParams } from "react-router";
 import { Eyebrow } from "../../ui/Eyebrow";
 import { useProjects } from "../../hooks/useProjects";
 import { useIssueCounts, useIssues } from "../../hooks/useIssues";
@@ -25,35 +26,21 @@ const EMPTY_COPY: Record<IssueStatus, { title: string; sub: string }> = {
 };
 
 export function IssuesPage() {
-  const { data: projects, isLoading: loadingProjects } = useProjects();
-  const project = projects?.[0];
+  const { projectId = "" } = useParams<{ projectId: string }>();
+  const { data: projects } = useProjects();
+  const project = projects?.find((p) => p.id === projectId);
 
   const [status, setStatus] = useState<IssueStatus>("UNRESOLVED");
   const [level, setLevel] = useState<Level | "ALL">("ALL");
   const [page, setPage] = useState(1);
 
-  const counts = useIssueCounts(project?.id ?? "");
+  const counts = useIssueCounts(projectId);
   const { data, isLoading, isError } = useIssues({
-    projectId: project?.id ?? "",
+    projectId,
     status,
     level,
     page,
   });
-
-  if (loadingProjects) {
-    return <p className="font-mono text-sm text-text-3">loading…</p>;
-  }
-
-  if (!project) {
-    return (
-      <div className="flex flex-col items-center gap-2 rounded-3xl border border-border bg-surface py-20 text-center">
-        <p className="font-mono text-sm text-text-2">No project yet</p>
-        <p className="text-xs text-text-4">
-          Create a project to start receiving events.
-        </p>
-      </div>
-    );
-  }
 
   const issues = data?.issues ?? [];
   const pagination = data?.pagination;
@@ -71,7 +58,7 @@ export function IssuesPage() {
           <h1 className="mt-1 text-[28px] font-bold tracking-tight">Issues</h1>
           <p className="mt-1.5 text-[13px] text-text-2">
             Errors grouped by fingerprint across{" "}
-            <span className="font-mono text-text-1">{project.name}</span>
+            <span className="font-mono text-text-1">{project?.name ?? "…"}</span>
           </p>
         </div>
         <select

@@ -11,7 +11,7 @@ export function IssueRow({ issue }: { issue: Issue }) {
 
   return (
     <button
-      onClick={() => navigate(`/issues/${issue.id}`)}
+      onClick={() => navigate(`/projects/${issue.projectId}/issues/${issue.id}`)}
       className="flex w-full items-center gap-4 border-b border-divider px-[22px] py-4 text-left transition-colors hover:bg-surface-2"
       style={{ opacity: unresolved ? 1 : 0.5 }}
     >

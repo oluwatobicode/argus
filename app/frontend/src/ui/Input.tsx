@@ -1,21 +1,23 @@
 import type { InputHTMLAttributes, Ref } from "react";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  label: string;
+  label?: string;
   error?: string;
   ref?: Ref<HTMLInputElement>;
 }
 
 export function Input({ label, error, id, ...rest }: InputProps) {
-  const inputId = id ?? label.toLowerCase().replace(/\s+/g, "-");
+  const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
   return (
     <div className="flex flex-col gap-1.5">
-      <label
-        htmlFor={inputId}
-        className="text-[14px] font-sans font-medium text-white"
-      >
-        {label}
-      </label>
+      {label && (
+        <label
+          htmlFor={inputId}
+          className="text-[14px] font-sans font-medium text-white"
+        >
+          {label}
+        </label>
+      )}
       <input
         id={inputId}
         className={`h-12 rounded-[20px] border bg-bg-1 px-3.5 font-mono text-[13px] text-text-1

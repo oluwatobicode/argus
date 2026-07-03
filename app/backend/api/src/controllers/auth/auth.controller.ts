@@ -259,12 +259,26 @@ export const me = async (req: Request, res: Response, next: NextFunction) => {
         ERROR_MESSAGES.NOT_LOGGED_IN,
       );
     }
-    return sendSuccess(
-      res,
-      HTTP_STATUS.OK,
-      SUCCESS_MESSAGES.FETCH_SUCCESS,
-      req.user,
-    );
+
+    /* the console header needs the user's org (name, slug, plan) */
+    const membership = await prisma.organizationMember.findFirst({
+      where: { userId: req.user.id },
+      include: { org: true },
+    });
+
+    const organization = membership
+      ? {
+          id: membership.org.id,
+          name: membership.org.name,
+          slug: membership.org.slug,
+          plan: membership.org.plan,
+        }
+      : null;
+
+    return sendSuccess(res, HTTP_STATUS.OK, SUCCESS_MESSAGES.FETCH_SUCCESS, {
+      ...req.user,
+      organization,
+    });
   } catch (error) {
     next(error);
   }

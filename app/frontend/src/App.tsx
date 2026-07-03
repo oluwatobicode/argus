@@ -1,11 +1,16 @@
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { AuthLayout } from "./components/layout/AuthLayout";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
+import { RequireAuth } from "./components/layout/RequireAuth";
 import { LoginPage } from "./features/auth/LoginPage";
 import { RegisterPage } from "./features/auth/RegisterPage";
 import { VerifyOtpPage } from "./features/auth/VerifyOtpPage";
+import { ProjectsConsolePage } from "./features/projects/ProjectsConsolePage";
+import { OnboardingPage } from "./features/projects/OnboardingPage";
 import { IssuesPage } from "./features/issues/IssuesPage";
 import { IssueDetailPage } from "./features/issues/IssueDetailPage";
+import { SettingsPage } from "./features/settings/SettingsPage";
+import { UsagePage } from "./features/usage/UsagePage";
 
 function App() {
   return (
@@ -17,11 +22,30 @@ function App() {
           <Route path="/verify" element={<VerifyOtpPage />} />
         </Route>
 
-        {/* DashboardLayout redirects to /login when the session probe fails */}
-        <Route element={<DashboardLayout />}>
-          <Route index element={<IssuesPage />} />
-          <Route path="/issues/:issueId" element={<IssueDetailPage />} />
+        {/* console — authed, no app sidebar */}
+        <Route element={<RequireAuth />}>
+          <Route path="/projects" element={<ProjectsConsolePage />} />
+          <Route
+            path="/projects/:projectId/onboarding"
+            element={<OnboardingPage />}
+          />
         </Route>
+
+        {/* app — project-scoped, with sidebar (guards session itself) */}
+        <Route element={<DashboardLayout />}>
+          <Route path="/projects/:projectId/issues" element={<IssuesPage />} />
+          <Route
+            path="/projects/:projectId/issues/:issueId"
+            element={<IssueDetailPage />}
+          />
+          <Route
+            path="/projects/:projectId/settings"
+            element={<SettingsPage />}
+          />
+          <Route path="/projects/:projectId/usage" element={<UsagePage />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/projects" replace />} />
       </Routes>
     </BrowserRouter>
   );

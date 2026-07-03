@@ -15,6 +15,22 @@ export interface Pagination {
 
 export type Level = "FATAL" | "ERROR" | "WARNING" | "INFO" | "DEBUG";
 export type IssueStatus = "UNRESOLVED" | "RESOLVED" | "IGNORED";
+export type Plan = "FREE" | "PRO";
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  plan: Plan;
+}
+
+export interface Usage {
+  plan: Plan;
+  used: number;
+  limit: number;
+  month: string;
+  breakdown: { errors: number; warnings: number; info: number };
+}
 
 export interface StackFrame {
   filename: string;
@@ -60,6 +76,11 @@ export type IssueDetail = Issue & { events: IssueEvent[] };
 
 export interface IssuesResponse {
   issues: Issue[];
+  pagination: Pagination;
+}
+
+export interface EventsResponse {
+  events: IssueEvent[];
   pagination: Pagination;
 }
 

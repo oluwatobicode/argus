@@ -12,7 +12,8 @@ const base =
   "disabled:cursor-not-allowed disabled:opacity-50";
 
 const variants = {
-  primary: "bg-lime text-lime-ink font-bold cursor-pointer hover:bg-lime/90",
+  primary:
+    "bg-[#9fe871]/70   text-lime-ink font-bold cursor-pointer hover:bg-lime/90",
   secondary: "border border-border-2 bg-surface-2 text-text-1 hover:bg-surface",
   ghost: "text-text-2 hover:text-text-1",
 };

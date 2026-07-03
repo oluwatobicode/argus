@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosInstance } from "../api/axiosInstance";
-import type { Envelope } from "../types/api";
+import type { Envelope, Organization } from "../types/api";
 
 export interface User {
   id: string;
@@ -10,13 +10,16 @@ export interface User {
   emailVerified: boolean;
 }
 
+/* /auth/me returns the user plus their org (for the console header) */
+export type Me = User & { organization: Organization | null };
+
 /* the session probe — a rejected request means "not logged in", not "broken" */
 export function useMe() {
   return useQuery({
     queryKey: ["me"],
     queryFn: async () => {
-      const res = await axiosInstance.get<Envelope<User>>("/auth/me");
-      return res.data.data as User;
+      const res = await axiosInstance.get<Envelope<Me>>("/auth/me");
+      return res.data.data as Me;
     },
     retry: false,
     staleTime: 5 * 60 * 1000,
