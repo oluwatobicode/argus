@@ -69,5 +69,7 @@ READMEs were rewritten 2026-07-03 to match the source. Still: **when in doubt, t
 - Auth is **session-based (Passport)**, not JWT
 - Routes are at `/api/v1/auth/...`, `/api/v1/projects/...`, etc.
 - Quota is an atomic check-and-consume (`updateMany WHERE count < limit`); malformed payloads still consume 1 event
-- performance/alerts/billing/usage controllers are **empty stubs — requests to them hang**
+- alerts + usage are **implemented**; **performance + billing** controllers are still **empty stubs — requests to them hang**
+- alerts engine lives in the **worker** (`services/alert.service.ts` + `email.service.ts` + `templates/alertemail.ts`); fires on new issue (eventCount===1) → email (Resend) + webhook
+- full React 19 dashboard exists under `app/frontend` (session-cookie auth, React Query + Axios, feature folders)
 - Postgres is hosted on Railway in dev; Redis via REDIS_URL

@@ -10,7 +10,7 @@ Argus watches your applications across browser, Node.js, and React — capturing
 
 - **Error Tracking** — catches uncaught exceptions and unhandled promise rejections, groups duplicates into issues (SHA-256 stack fingerprinting), shows full stack trace
 - **Performance Monitoring** *(planned)* — transaction durations, p50/p75/p95 latency, web vitals (LCP, CLS, TTFB, FCP)
-- **Alerting** *(planned)* — email or webhook when a new issue appears or error rate spikes
+- **Alerting** — email (Resend) or webhook when a new issue appears (error-rate rules planned)
 - **Free + Pro tiers** — free tier for small projects, Pro for higher volume with Polar billing
 
 ---
@@ -89,7 +89,7 @@ argus/
 | Database  | PostgreSQL (TimescaleDB planned for perf data)          |
 | Email     | Resend (planned — OTP currently logs to console)        |
 | Payments  | Polar                                                   |
-| Dashboard | React 19, Vite, Tailwind v4, TanStack Query v5, Zustand |
+| Dashboard | React 19, Vite, Tailwind v4, TanStack Query v5, Axios, react-hook-form + Zod |
 | SDKs      | TypeScript, zero runtime dependencies                   |
 | Monorepo  | pnpm workspaces                                         |
 
@@ -142,7 +142,7 @@ npx tsx packages/sdk-node/scripts/smoke.mts "<your DSN>"
 - [x] Event storage — save each raw occurrence
 - [x] BullMQ worker (job-name routing, malformed-payload guards)
 - [x] API routes: issues list/detail/status, events list (paginated + filtered)
-- [ ] Dashboard: Issues list page + Issue detail page
+- [x] Dashboard: Issues list page + Issue detail page
 
 ### Phase 2 — SDKs ✅ (JS family done)
 
@@ -158,28 +158,29 @@ npx tsx packages/sdk-node/scripts/smoke.mts "<your DSN>"
 - [x] Organization auto-creation on signup
 - [x] Project CRUD + project limit (1 for FREE)
 - [ ] Organization member management (invite, roles)
-- [ ] Dashboard: project settings, team page
+- [x] Dashboard: project settings page
 
-### Phase 4 — Dashboard
+### Phase 4 — Dashboard ✅ (React 19, session auth)
 
-- [ ] Auth pages (register → OTP → login, OAuth)
-- [ ] Onboarding: create project → DSN reveal → waiting-for-first-event
-- [ ] Issues list + Issue detail (stack trace viewer, resolve/ignore)
-- [ ] Dogfood: dashboard monitors itself with `@argus/sdk-react`
-- [ ] Design spec: [docs/DESIGN_BRIEF.md](./docs/DESIGN_BRIEF.md)
+- [x] Auth pages (register → OTP → login, OAuth buttons)
+- [x] Projects console + create modal + onboarding DSN reveal (waiting-for-first-event)
+- [x] Issues list + Issue detail (stack-trace stepper, resolve/ignore)
+- [x] Settings (rename, DSN reveal, framework install tabs, delete) + Usage meter
+- [x] Dogfood: dashboard monitors itself with `@argus/sdk-react`
+- [x] Design spec: [docs/DESIGN_BRIEF.md](./docs/DESIGN_BRIEF.md)
 
-### Phase 5 — Alerting
+### Phase 5 — Alerting ✅ (verified live 2026-07-03 — real email delivered)
 
-- [ ] Alert rule CRUD (NEW_ISSUE, ERROR_RATE types)
-- [ ] Alert engine in worker
-- [ ] Email notifications via Resend
-- [ ] Dashboard: alert management page
+- [x] Alert rule CRUD (NEW_ISSUE; ERROR_RATE reserved)
+- [x] Alert engine in worker (fires on new issue)
+- [x] Email notifications via Resend + webhook (POST) delivery, AlertLog
+- [x] Dashboard: alert management page
 
-### Phase 6 — Billing
+### Phase 6 — Billing *(next)*
 
 - [ ] Polar checkout session + webhook handler
 - [ ] Plan enforcement (project limit, quota limit)
-- [ ] Dashboard: billing page + usage meter
+- [ ] Dashboard: billing page (usage meter already built)
 
 ### Phase 7 — Performance Monitoring
 

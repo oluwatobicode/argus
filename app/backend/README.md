@@ -102,6 +102,8 @@ Key models — see [api/prisma/schema.prisma](./api/prisma/schema.prisma) for th
 - **Issue** — `@@unique([projectId, fingerprint])`, `eventCount`, `firstSeen/lastSeen`, status UNRESOLVED/RESOLVED/IGNORED
 - **Event** — raw occurrence: stacktrace/contexts/tags/userContext/request as Json, `timestamp` + `receivedAt`
 - **EventQuota** — `@@unique([orgId, month])`, `count` vs `limit` — the atomic quota row
+- **AlertRule** — per project: `type` (NEW_ISSUE; ERROR_RATE reserved), `notifyEmail?`/`webhookUrl?`, `enabled`, `lastTriggeredAt`
+- **AlertLog** — one row per delivery attempt: `channel` (email/webhook), `target`, `success`, `error?`
 - **Transaction/Span/Subscription** — schema ready, features planned
 
 ---
@@ -119,7 +121,7 @@ Key models — see [api/prisma/schema.prisma](./api/prisma/schema.prisma) for th
    └─ req.login() → session cookie (Redis store, httpOnly,
       sameSite lax dev / none+secure prod, 7 days)
 
-4. GET  /api/v1/auth/me         → current user (session cookie)
+4. GET  /api/v1/auth/me         → current user + their organization (name, slug, plan)
 
 OAuth: GET /api/v1/auth/google | /github → provider → callback → session → redirect to FRONTEND_URL
 ```
@@ -154,7 +156,12 @@ Known trade-off: quota is consumed *before* validation — a malformed payload c
 3. Fingerprint           → SHA-256 of top 5 frames "filename:function:lineno|…"
 4. Upsert Issue          → existing fingerprint? eventCount++ + lastSeen; new? INSERT
 5. Write Event           → raw occurrence with stacktrace/contexts/tags/user/request JSON
+6. Alerts (if new issue) → eventCount === 1 → evaluateNewIssue: enabled NEW_ISSUE rules →
+                           email (Resend) + webhook (fetch) → AlertLog per channel; never throws
 ```
+
+Alerts live entirely in the worker (`services/alert.service.ts`, `services/email.service.ts`,
+`templates/alertemail.ts`) — the API only does rule CRUD.
 
 ---
 
@@ -173,7 +180,10 @@ Auth column: 🍪 = session cookie required.
 | GET/PATCH | `/projects/:pid/issues/:id` | 🍪 | detail incl. 10 latest events / update status |
 | GET | `/projects/:pid/issues/:iid/events` | 🍪 | paginated |
 | POST | `/ingest/:projectId/envelope` | DSN key | the SDK endpoint |
-| — | `/usage`, `/billing/*`, `/projects/:pid/alerts`, `/projects/:pid/performance/*` | 🍪 | **stubs — hang if called** |
+| GET | `/usage` | 🍪 | org quota (`used`/`limit`/`plan`) + level breakdown |
+| GET/POST | `/projects/:pid/alerts` | 🍪 | list / create rule (email &/or webhook) |
+| PATCH/DELETE | `/projects/:pid/alerts/:id` | 🍪 | update (incl. enable toggle) / delete |
+| — | `/billing/*`, `/projects/:pid/performance/*` | 🍪 | **stubs — hang if called** |
 
 ---
 
@@ -201,6 +211,9 @@ GITHUB_CLIENT_SECRET=
 ```env
 DATABASE_URL=
 REDIS_URL=
+FRONTEND_URL=http://localhost:5173   # for the "View issue" link in alert emails
+RESEND_API_KEY=                      # alerts email (empty → email logged as failed, webhook still works)
+FROM_EMAIL=Argus <onboarding@resend.dev>
 ```
 
 ---
@@ -227,9 +240,14 @@ REDIS_URL=
 - [x] Fingerprinting, Issue upsert, Event storage
 - [x] Projects / Issues / Events REST APIs
 - [x] Global error handler
-- [ ] Usage REST API (stub — small, do soon)
+- [x] Usage REST API (`GET /usage`)
 
-### Phase 5 — Alerting *(planned)*
+### Phase 5 — Alerting ✅ (verified live 2026-07-03 — real email delivered)
+
+- [x] AlertRule / AlertLog models + migration
+- [x] Alert rule CRUD (org-scoped, Zod-validated)
+- [x] Worker engine — NEW_ISSUE → email (Resend) + webhook, AlertLog
+- [ ] ERROR_RATE type (enum reserved; windowed count + cooldown)
 
 ### Phase 6 — Billing (Polar) *(planned)*
 
