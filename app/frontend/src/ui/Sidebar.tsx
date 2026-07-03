@@ -25,7 +25,7 @@ interface NavItem {
 const PROJECT_NAV: NavItem[] = [
   { key: "issues", label: "Issues", icon: BugIcon, live: true },
   { key: "performance", label: "Performance", icon: ChartLineData01Icon, live: false },
-  { key: "alerts", label: "Alerts", icon: Notification01Icon, live: false },
+  { key: "alerts", label: "Alerts", icon: Notification01Icon, live: true },
   { key: "settings", label: "Settings", icon: Settings01Icon, live: true },
 ];
 

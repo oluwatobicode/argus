@@ -32,6 +32,30 @@ export interface Usage {
   breakdown: { errors: number; warnings: number; info: number };
 }
 
+export type AlertType = "NEW_ISSUE" | "ERROR_RATE";
+
+export interface AlertRule {
+  id: string;
+  projectId: string;
+  name: string;
+  type: AlertType;
+  threshold: number | null;
+  windowMinutes: number | null;
+  notifyEmail: string | null;
+  webhookUrl: string | null;
+  enabled: boolean;
+  lastTriggeredAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AlertInput {
+  name: string;
+  notifyEmail?: string;
+  webhookUrl?: string;
+  enabled?: boolean;
+}
+
 export interface StackFrame {
   filename: string;
   function?: string;
