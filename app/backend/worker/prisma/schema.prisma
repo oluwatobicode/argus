@@ -38,6 +38,11 @@ enum EventLevel {
   DEBUG
 }
 
+enum AlertType {
+  NEW_ISSUE
+  ERROR_RATE
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String?   @unique
@@ -107,6 +112,7 @@ model Project {
   issues       Issue[]
   events       Event[]
   transactions Transaction[]
+  alertRules   AlertRule[]
 
   @@unique([orgId, slug])
 }
@@ -224,4 +230,39 @@ model Subscription {
   updatedAt           DateTime @updatedAt
 
   org Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+}
+
+model AlertRule {
+  id              String     @id @default(cuid())
+  projectId       String
+  name            String
+  type            AlertType  @default(NEW_ISSUE)
+  threshold       Int?
+  windowMinutes   Int?
+  notifyEmail     String?
+  webhookUrl      String?
+  enabled         Boolean    @default(true)
+  lastTriggeredAt DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  project Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  logs    AlertLog[]
+
+  @@index([projectId])
+}
+
+model AlertLog {
+  id          String    @id @default(cuid())
+  alertRuleId String
+  issueId     String?
+  channel     String
+  target      String
+  success     Boolean
+  error       String?
+  triggeredAt DateTime  @default(now())
+
+  rule AlertRule @relation(fields: [alertRuleId], references: [id], onDelete: Cascade)
+
+  @@index([alertRuleId])
 }
