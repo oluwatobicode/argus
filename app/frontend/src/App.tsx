@@ -5,6 +5,7 @@ import { LoginPage } from "./features/auth/LoginPage";
 import { RegisterPage } from "./features/auth/RegisterPage";
 import { VerifyOtpPage } from "./features/auth/VerifyOtpPage";
 import { IssuesPage } from "./features/issues/IssuesPage";
+import { IssueDetailPage } from "./features/issues/IssueDetailPage";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         {/* DashboardLayout redirects to /login when the session probe fails */}
         <Route element={<DashboardLayout />}>
           <Route index element={<IssuesPage />} />
+          <Route path="/issues/:issueId" element={<IssueDetailPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

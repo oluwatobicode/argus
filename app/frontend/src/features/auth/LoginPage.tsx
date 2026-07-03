@@ -8,7 +8,7 @@ import { GoogleIcon, GithubIcon } from "@hugeicons/core-free-icons";
 import { Button } from "../../ui/Button";
 import { Input } from "../../ui/Input";
 import { useLogin } from "../../hooks/useAuth";
-import { ApiError, oauthUrl } from "../../lib/api";
+import { ApiError, oauthUrl } from "../../api/axiosInstance";
 
 const LoginSchema = z.object({
   email: z.email("Enter a valid email"),

@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router";
 import { Button } from "../../ui/Button";
 import { Input } from "../../ui/Input";
 import { useRegister } from "../../hooks/useAuth";
-import { ApiError } from "../../lib/api";
+import { ApiError } from "../../api/axiosInstance";
 
 const RegisterSchema = z.object({
   name: z.string().min(1, "Name is required"),

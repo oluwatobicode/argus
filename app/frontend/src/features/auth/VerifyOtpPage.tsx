@@ -6,7 +6,7 @@ import { Link, useLocation, useNavigate } from "react-router";
 import { Button } from "../../ui/Button";
 import { Input } from "../../ui/Input";
 import { useResendOtp, useVerifyOtp } from "../../hooks/useAuth";
-import { ApiError } from "../../lib/api";
+import { ApiError } from "../../api/axiosInstance";
 
 const OtpSchema = z.object({
   otp: z.string().length(6, "The code is 6 characters"),
