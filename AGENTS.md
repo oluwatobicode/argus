@@ -7,9 +7,8 @@ argus/
 ├── app/
 │   ├── backend/api/       # @argus/api — Express 5 server (ingest + REST API) — WORKING
 │   ├── backend/worker/    # @argus/worker — BullMQ event processor — WORKING (verified e2e)
-│   └── frontend/          # frontend — React 19 + Vite (still default Vite template, not built out)
-├── packages/              # @argus/sdk-core, sdk-node, sdk-browser, sdk-react — all implemented,
-│                          #   typechecked; sdk-node verified live; NOT published to npm
+│   └── frontend/          # React 19 + Vite dashboard — WORKING (auth → issues → billing)
+├── packages/              # @argusdev/sdk-{core,node,browser,react} — PUBLISHED to npm (v0.1.0)
 ├── docs/                  # DESIGN_BRIEF.md — dashboard design spec
 ├── infra/                 # Only README — no docker-compose files exist yet
 ```
@@ -60,16 +59,16 @@ READMEs were rewritten 2026-07-03 to match the source. Still: **when in doubt, t
 - Every SDK follows: **hook** (runtime crash announcement) → **normalize** (stack string → StackFrame[]) → **delegate** (core: parseDsn/buildEnvelope/sendEnvelope).
 - Golden rule: SDKs **never throw into the host app** — worst case is a console.warn.
 - `sdk-core` tsconfig includes DOM lib only for universal-global types (URL/fetch); no `window.*`/`document.*`/node-only APIs allowed in core.
-- Build `sdk-core` before typechecking dependents (`pnpm --filter @argus/sdk-core build`).
-- Smoke tests (run from repo root, API+worker up): `npx tsx packages/sdk-{core,node}/scripts/smoke.mts "<dsn>"`.
-- Not on npm yet; `@argus` scope likely taken — rename at publish time.
+- Build `sdk-core` before typechecking dependents (`pnpm --filter @argusdev/sdk-core build`).
+- **Published to npm** under `@argusdev/*` (v0.1.0, public). Package names are `@argusdev/sdk-{core,node,browser,react}` — NOT `@argus/*`. (Note: the api/worker workspace packages are still named `@argus/api`, `@argus/worker` — private, unpublished.)
 
 ## Key facts (source-verified)
 
 - Auth is **session-based (Passport)**, not JWT
 - Routes are at `/api/v1/auth/...`, `/api/v1/projects/...`, etc.
 - Quota is an atomic check-and-consume (`updateMany WHERE count < limit`); malformed payloads still consume 1 event
-- alerts + usage are **implemented**; **performance + billing** controllers are still **empty stubs — requests to them hang**
-- alerts engine lives in the **worker** (`services/alert.service.ts` + `email.service.ts` + `templates/alertemail.ts`); fires on new issue (eventCount===1) → email (Resend) + webhook
-- full React 19 dashboard exists under `app/frontend` (session-cookie auth, React Query + Axios, feature folders)
+- alerts, usage, and billing are **implemented**; only the **performance** controller (+ worker `perfEvent`) remains unbuilt
+- alerts engine lives in the **worker** (`services/alert.service.ts` + `email.service.ts` + `templates/alertemail.ts`): `evaluateNewIssue` (eventCount===1) + `evaluateErrorRate` (windowed count + cooldown, every event) → email (Resend) + webhook
+- billing is **Polar** (`@polar-sh/sdk`, sandbox): checkout/portal/webhook in api; webhook signature needs raw body (captured via `express.json({ verify })` in `app.ts`)
+- full React 19 dashboard exists under `app/frontend` (session-cookie auth, React Query + Axios, feature folders), and dogfoods `@argusdev/sdk-react`
 - Postgres is hosted on Railway in dev; Redis via REDIS_URL

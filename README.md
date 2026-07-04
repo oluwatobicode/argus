@@ -10,7 +10,7 @@ Argus watches your applications across browser, Node.js, and React — capturing
 
 - **Error Tracking** — catches uncaught exceptions and unhandled promise rejections, groups duplicates into issues (SHA-256 stack fingerprinting), shows full stack trace
 - **Performance Monitoring** *(planned)* — transaction durations, p50/p75/p95 latency, web vitals (LCP, CLS, TTFB, FCP)
-- **Alerting** — email (Resend) or webhook when a new issue appears (error-rate rules planned)
+- **Alerting** — email (Resend) or webhook on a new issue or an error-rate spike (windowed threshold + cooldown)
 - **Free + Pro tiers** — free tier for small projects, Pro for higher volume with Polar billing
 
 ---
@@ -119,11 +119,10 @@ pnpm db:migrate
 pnpm dev
 ```
 
-Smoke-test the pipeline end to end (register → create a project → copy its DSN):
+Then create a project in the dashboard, install an SDK, and errors start flowing:
 
 ```bash
-npx tsx packages/sdk-node/scripts/smoke.mts "<your DSN>"
-# → crashes a fake app on purpose; an Issue appears, grouped on rerun
+npm install @argusdev/sdk-browser   # or @argusdev/sdk-node, @argusdev/sdk-react
 ```
 
 ---
@@ -144,14 +143,14 @@ npx tsx packages/sdk-node/scripts/smoke.mts "<your DSN>"
 - [x] API routes: issues list/detail/status, events list (paginated + filtered)
 - [x] Dashboard: Issues list page + Issue detail page
 
-### Phase 2 — SDKs ✅ (JS family done)
+### Phase 2 — SDKs ✅ (published to npm under `@argusdev/*`)
 
-- [x] `@argus/sdk-core` — DSN parser, envelope builder, transport (never throws, drops on 429)
-- [x] `@argus/sdk-node` — uncaughtException/unhandledRejection, V8 stack parser, Express middleware
-- [x] `@argus/sdk-browser` — window.onerror, unhandledrejection, Chrome+Firefox stack parsing
-- [x] `@argus/sdk-react` — `<ArgusErrorBoundary>` on top of sdk-browser
-- [ ] Publish to npm (scope TBD — `@argus` likely taken)
-- [ ] `@argus/sdk-react-native`
+- [x] `@argusdev/sdk-core` — DSN parser, envelope builder, transport (never throws, drops on 429)
+- [x] `@argusdev/sdk-node` — uncaughtException/unhandledRejection, V8 stack parser, Express middleware
+- [x] `@argusdev/sdk-browser` — window.onerror, unhandledrejection, Chrome+Firefox stack parsing
+- [x] `@argusdev/sdk-react` — `<ArgusErrorBoundary>` on top of sdk-browser
+- [x] Published to npm (`@argusdev` scope, v0.1.0, public)
+- [ ] `@argusdev/sdk-react-native`
 
 ### Phase 3 — Team & Projects
 
@@ -166,21 +165,21 @@ npx tsx packages/sdk-node/scripts/smoke.mts "<your DSN>"
 - [x] Projects console + create modal + onboarding DSN reveal (waiting-for-first-event)
 - [x] Issues list + Issue detail (stack-trace stepper, resolve/ignore)
 - [x] Settings (rename, DSN reveal, framework install tabs, delete) + Usage meter
-- [x] Dogfood: dashboard monitors itself with `@argus/sdk-react`
+- [x] Dogfood: dashboard monitors itself with `@argusdev/sdk-react` (verified — live browser crash)
 - [x] Design spec: [docs/DESIGN_BRIEF.md](./docs/DESIGN_BRIEF.md)
 
-### Phase 5 — Alerting ✅ (verified live 2026-07-03 — real email delivered)
+### Phase 5 — Alerting ✅ (verified live — real emails delivered)
 
-- [x] Alert rule CRUD (NEW_ISSUE; ERROR_RATE reserved)
-- [x] Alert engine in worker (fires on new issue)
+- [x] Alert rule CRUD — both NEW_ISSUE and ERROR_RATE (windowed threshold + cooldown)
+- [x] Alert engine in worker (new-issue + error-rate, per-event)
 - [x] Email notifications via Resend + webhook (POST) delivery, AlertLog
-- [x] Dashboard: alert management page
+- [x] Dashboard: alert management page (type selector, threshold/window)
 
-### Phase 6 — Billing *(next)*
+### Phase 6 — Billing ✅ (Polar sandbox, verified live — payment → PRO flip)
 
-- [ ] Polar checkout session + webhook handler
-- [ ] Plan enforcement (project limit, quota limit)
-- [ ] Dashboard: billing page (usage meter already built)
+- [x] Polar checkout session + customer portal + webhook handler (signature-verified)
+- [x] Plan enforcement — org PRO flip + quota ceiling synced mid-cycle
+- [x] Dashboard: billing page (upgrade / manage) + usage meter
 
 ### Phase 7 — Performance Monitoring
 

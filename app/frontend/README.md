@@ -1,6 +1,6 @@
 # Argus — Frontend
 
-React 19 dashboard: auth, projects console, issues, settings, usage, and alert rules. Session-cookie auth (no tokens). Dogfoods `@argus/sdk-react` — the dashboard reports its own crashes to Argus.
+React 19 dashboard: auth, projects console, issues, settings, usage, alert rules, and billing. Session-cookie auth (no tokens). Dogfoods `@argusdev/sdk-react` — the dashboard reports its own crashes to Argus.
 
 Engineering conventions live in [claude.md](./claude.md); the visual system in [design.md](./design.md).
 
@@ -17,7 +17,7 @@ Engineering conventions live in [claude.md](./claude.md); the visual system in [
 | Icons | `@hugeicons/react` + `@hugeicons/core-free-icons` |
 | Toasts | react-hot-toast (pill style) |
 | Fonts | Space Grotesk (UI) + Plus Jakarta Sans (mono token) — self-hosted / Google Fonts |
-| Own SDK | `@argus/sdk-react` (`workspace:*`) — `init()` + `<ArgusErrorBoundary>` in `main.tsx` |
+| Own SDK | `@argusdev/sdk-react` (`workspace:*`) — `init()` + `<ArgusErrorBoundary>` in `main.tsx` |
 
 ---
 
@@ -48,7 +48,8 @@ src/
 │   ├── useIssues.ts             # list, counts, single, updateStatus, useFirstEvent (onboarding poll)
 │   ├── useEvents.ts             # paginated events (stack-trace stepper)
 │   ├── useUsage.ts              # GET /usage
-│   └── useAlerts.ts             # list + create/update/delete
+│   ├── useAlerts.ts             # list + create/update/delete
+│   └── useBilling.ts            # checkout + portal (redirect to Polar)
 │
 ├── utils/                       # levels.ts (color meta), time.ts (relative timestamps)
 └── features/
@@ -57,7 +58,8 @@ src/
     ├── issues/                  # IssuesPage, IssueDetailPage, components/{IssueRow,StackTrace,ContextPanel,StatusTabs}
     ├── settings/                # SettingsPage, components/InstallTabs (Browser/React/Node)
     ├── usage/                   # UsagePage (quota meter + level breakdown)
-    └── alerts/                  # AlertsPage, components/AlertRuleModal
+    ├── alerts/                  # AlertsPage, components/AlertRuleModal (both alert types)
+    └── billing/                 # BillingPage (Free/Pro cards, Polar upgrade/manage)
 ```
 
 ---
@@ -73,12 +75,13 @@ src/
 | `/projects/:projectId/issues/:issueId` | issue detail (stack-trace stepper, resolve/ignore) | 🍪 |
 | `/projects/:projectId/settings` | rename, DSN, install tabs, delete | 🍪 |
 | `/projects/:projectId/usage` | quota meter + breakdown | 🍪 |
-| `/projects/:projectId/alerts` | alert-rule CRUD | 🍪 |
+| `/projects/:projectId/alerts` | alert-rule CRUD (new-issue + error-rate) | 🍪 |
+| `/projects/:projectId/billing` | plan cards, Polar upgrade / manage | 🍪 |
 | `*` | → redirect to `/projects` | |
 
 🍪 = session cookie. `DashboardLayout`/`RequireAuth` redirect to `/login` when `useMe` fails.
 
-Nav items still `soon` (non-clickable): **Performance**, **Billing**, **Docs**.
+Nav items still `soon` (non-clickable): **Performance**, **Docs**.
 
 ---
 
@@ -112,4 +115,4 @@ pnpm --filter frontend build
 ## Status
 
 Built ✅: auth, projects console + create + onboarding DSN reveal, issues list + detail, settings (rename/DSN/install-tabs/delete), usage meter, alerts CRUD, brand loader.
-Planned 🔜: Performance dashboard, Billing (Polar) page. Both are `soon` nav stubs today.
+Planned 🔜: Performance dashboard (the only `soon` nav stub left).

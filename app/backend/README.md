@@ -102,7 +102,7 @@ Key models — see [api/prisma/schema.prisma](./api/prisma/schema.prisma) for th
 - **Issue** — `@@unique([projectId, fingerprint])`, `eventCount`, `firstSeen/lastSeen`, status UNRESOLVED/RESOLVED/IGNORED
 - **Event** — raw occurrence: stacktrace/contexts/tags/userContext/request as Json, `timestamp` + `receivedAt`
 - **EventQuota** — `@@unique([orgId, month])`, `count` vs `limit` — the atomic quota row
-- **AlertRule** — per project: `type` (NEW_ISSUE; ERROR_RATE reserved), `notifyEmail?`/`webhookUrl?`, `enabled`, `lastTriggeredAt`
+- **AlertRule** — per project: `type` (NEW_ISSUE or ERROR_RATE), `threshold`/`windowMinutes` (rate rules), `notifyEmail?`/`webhookUrl?`, `enabled`, `lastTriggeredAt`
 - **AlertLog** — one row per delivery attempt: `channel` (email/webhook), `target`, `success`, `error?`
 - **Transaction/Span/Subscription** — schema ready, features planned
 
@@ -156,8 +156,9 @@ Known trade-off: quota is consumed *before* validation — a malformed payload c
 3. Fingerprint           → SHA-256 of top 5 frames "filename:function:lineno|…"
 4. Upsert Issue          → existing fingerprint? eventCount++ + lastSeen; new? INSERT
 5. Write Event           → raw occurrence with stacktrace/contexts/tags/user/request JSON
-6. Alerts (if new issue) → eventCount === 1 → evaluateNewIssue: enabled NEW_ISSUE rules →
-                           email (Resend) + webhook (fetch) → AlertLog per channel; never throws
+6. Alerts                → new issue (eventCount === 1) → evaluateNewIssue;
+                           every event → evaluateErrorRate (windowed count + cooldown).
+                           Both: email (Resend) + webhook (fetch) → AlertLog; never throws
 ```
 
 Alerts live entirely in the worker (`services/alert.service.ts`, `services/email.service.ts`,
@@ -181,9 +182,11 @@ Auth column: 🍪 = session cookie required.
 | GET | `/projects/:pid/issues/:iid/events` | 🍪 | paginated |
 | POST | `/ingest/:projectId/envelope` | DSN key | the SDK endpoint |
 | GET | `/usage` | 🍪 | org quota (`used`/`limit`/`plan`) + level breakdown |
-| GET/POST | `/projects/:pid/alerts` | 🍪 | list / create rule (email &/or webhook) |
+| GET/POST | `/projects/:pid/alerts` | 🍪 | list / create rule (NEW_ISSUE or ERROR_RATE) |
 | PATCH/DELETE | `/projects/:pid/alerts/:id` | 🍪 | update (incl. enable toggle) / delete |
-| — | `/billing/*`, `/projects/:pid/performance/*` | 🍪 | **stubs — hang if called** |
+| POST | `/billing/checkout` `/billing/portal` | 🍪 | Polar checkout / customer portal → `{ url }` |
+| POST | `/billing/webhook` | Polar sig | subscription events → org plan flip |
+| — | `/projects/:pid/performance/*` | 🍪 | **stub — hangs if called** |
 
 ---
 
@@ -204,6 +207,11 @@ GOOGLE_CLIENT_ID=        # optional — OAuth
 GOOGLE_CLIENT_SECRET=
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
+POLAR_ACCESS_TOKEN=      # billing — Polar sandbox
+POLAR_PRO_PRODUCT_ID=
+POLAR_WEBHOOK_SECRET=
+POLAR_SERVER=sandbox     # production when live
+POLAR_SUCCESS_URL=http://localhost:5173/projects?upgraded=true
 ```
 
 ### `worker/.env`
@@ -242,13 +250,15 @@ FROM_EMAIL=Argus <onboarding@resend.dev>
 - [x] Global error handler
 - [x] Usage REST API (`GET /usage`)
 
-### Phase 5 — Alerting ✅ (verified live 2026-07-03 — real email delivered)
+### Phase 5 — Alerting ✅ (verified live — real emails delivered)
 
 - [x] AlertRule / AlertLog models + migration
 - [x] Alert rule CRUD (org-scoped, Zod-validated)
-- [x] Worker engine — NEW_ISSUE → email (Resend) + webhook, AlertLog
-- [ ] ERROR_RATE type (enum reserved; windowed count + cooldown)
+- [x] Worker engine — NEW_ISSUE + ERROR_RATE (windowed count + cooldown) → email (Resend) + webhook, AlertLog
 
-### Phase 6 — Billing (Polar) *(planned)*
+### Phase 6 — Billing ✅ (Polar sandbox, verified live — payment → PRO flip)
 
-### Phase 7 — Performance Monitoring *(planned)*
+- [x] Checkout + customer portal (`@polar-sh/sdk`)
+- [x] Webhook (signature-verified via raw body) → subscription events → org plan + quota sync
+
+### Phase 7 — Performance Monitoring *(planned — only remaining stub)*

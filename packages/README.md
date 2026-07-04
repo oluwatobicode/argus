@@ -1,6 +1,6 @@
 # Argus — Packages (SDKs)
 
-Four TypeScript packages, zero runtime dependencies. Not yet published to npm — usable today inside the monorepo via `workspace:*`.
+Four TypeScript packages, zero runtime dependencies. **Published to npm under the `@argusdev/*` scope** (v0.1.0, public). Linked inside the monorepo via `workspace:*`.
 
 Every SDK follows the same 3-part pattern: **hook** (how this runtime announces crashes) → **normalize** (that runtime's stack format → `StackFrame[]`) → **delegate** (sdk-core builds + sends the envelope).
 
@@ -29,7 +29,6 @@ sdk-core/
 │   ├── transport.ts    # sendEnvelope() — fetch + retry/backoff; drops on 429; NEVER throws
 │   ├── types.ts        # Envelope, StackFrame, ExceptionPayload, Breadcrumb
 │   └── index.ts        # public exports
-└── scripts/smoke.mts   # npx tsx packages/sdk-core/scripts/smoke.mts "<dsn>"
 ```
 
 DSN format (path segment is the project **id**, matching the ingest route):
@@ -51,13 +50,12 @@ sdk-node/
 │   ├── stacktrace.ts   # V8 "at fn (file:line:col)" parser → StackFrame[]
 │   ├── express.ts      # argusErrorHandler() middleware (no dependency on express itself)
 │   └── index.ts
-└── scripts/smoke.mts   # crashes a fake app on purpose — run from repo root
 ```
 
 **Usage:**
 
 ```ts
-import { init, argusErrorHandler } from "@argus/sdk-node";
+import { init, argusErrorHandler } from "@argusdev/sdk-node";
 
 init({ dsn: "http://KEY@localhost:3000/PROJECT_ID", environment: "production" });
 
@@ -82,7 +80,7 @@ sdk-browser/
 **Usage:**
 
 ```ts
-import { init, captureException } from "@argus/sdk-browser";
+import { init, captureException } from "@argusdev/sdk-browser";
 
 init({ dsn: "http(s)://KEY@host/PROJECT_ID" });
 
@@ -108,7 +106,7 @@ sdk-react/
 **Usage:**
 
 ```tsx
-import { init, ArgusErrorBoundary } from "@argus/sdk-react";
+import { init, ArgusErrorBoundary } from "@argusdev/sdk-react";
 
 init({ dsn: "http(s)://KEY@host/PROJECT_ID" });
 
@@ -144,22 +142,22 @@ sdk-node / sdk-browser / sdk-react
 ## Developing Locally
 
 ```bash
-pnpm --filter @argus/sdk-core build      # required once before typechecking dependents
-pnpm --filter "@argus/sdk-*" exec tsc --noEmit
-
-# end-to-end smoke tests (API + worker must be running):
-npx tsx packages/sdk-core/scripts/smoke.mts "<dsn>"
-npx tsx packages/sdk-node/scripts/smoke.mts "<dsn>"
+pnpm --filter @argusdev/sdk-core build      # required once before typechecking dependents
+pnpm --filter "@argusdev/sdk-*" exec tsc --noEmit
+pnpm --filter "@argusdev/sdk-*" build       # build all four (topological order)
 ```
+
+To test the full pipeline, create a project in the dashboard, install an SDK
+(`npm install @argusdev/sdk-browser`), and call `init({ dsn })`.
 
 ---
 
 ## Build Phases
 
-- [x] `@argus/sdk-core` — DSN parsing, envelope builder, transport with retry
-- [x] `@argus/sdk-node` — uncaughtException, unhandledRejection, Express error middleware
-- [x] `@argus/sdk-browser` — window.onerror, unhandledrejection, dual-format stack parsing
-- [x] `@argus/sdk-react` — ErrorBoundary
+- [x] `@argusdev/sdk-core` — DSN parsing, envelope builder, transport with retry
+- [x] `@argusdev/sdk-node` — uncaughtException, unhandledRejection, Express error middleware
+- [x] `@argusdev/sdk-browser` — window.onerror, unhandledrejection, dual-format stack parsing
+- [x] `@argusdev/sdk-react` — ErrorBoundary
+- [x] Published to npm (`@argusdev` scope, v0.1.0, public)
 - [ ] Browser SDK breadcrumbs + web vitals
-- [ ] Publish to npm (scope TBD — `@argus` likely taken)
-- [ ] `@argus/sdk-react-native`, Vue, Go
+- [ ] `@argusdev/sdk-react-native`, Vue, Go
