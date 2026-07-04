@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@argus/sdk-react": "workspace:*",
+    "@argusdev/sdk-react": "workspace:*",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@fontsource-variable/space-grotesk": "^5.2.10",
     "@hookform/resolvers": "^5.4.0",

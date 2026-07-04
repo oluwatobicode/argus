@@ -1,4 +1,4 @@
-/* Public surface of @argus/sdk-core */
+/* Public surface of @argusdev/sdk-core */
 
 export { parseDsn, getIngestUrl } from "./dsn";
 export type { ParsedDsn } from "./dsn";

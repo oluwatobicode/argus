@@ -1,5 +1,5 @@
 {
-  "name": "@argus/sdk-core",
+  "name": "@argusdev/sdk-core",
   "version": "0.1.0",
   "description": "Shared internals for Argus SDKs — DSN parsing, envelope building, transport. Not installed directly.",
   "type": "module",
@@ -21,5 +21,22 @@
   },
   "devDependencies": {
     "typescript": "~6.0.3"
+  },
+  "license": "MIT",
+  "author": "Treasure Odetokun",
+  "homepage": "https://github.com/oluwatobicode/argus#readme",
+  "keywords": [
+    "argus",
+    "error-tracking",
+    "monitoring",
+    "sdk"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oluwatobicode/argus.git",
+    "directory": "packages/sdk-core"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

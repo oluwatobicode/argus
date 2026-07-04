@@ -5,7 +5,7 @@ import {
   sendEnvelope,
   type EnvelopeOptions,
   type StackFrame,
-} from "@argus/sdk-core";
+} from "@argusdev/sdk-core";
 import { parseStack } from "./stacktrace";
 
 export interface InitOptions {

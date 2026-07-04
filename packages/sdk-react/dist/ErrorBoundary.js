@@ -1,5 +1,5 @@
 import { Component } from "react";
-import { captureException } from "@argus/sdk-browser";
+import { captureException } from "@argusdev/sdk-browser";
 /*
  * Usage:
  *   <ArgusErrorBoundary fallback={<p>Something went wrong</p>}>

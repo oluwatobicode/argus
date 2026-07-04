@@ -1,5 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
-import { captureException } from "@argus/sdk-browser";
+import { captureException } from "@argusdev/sdk-browser";
 
 interface Props {
   children?: ReactNode;

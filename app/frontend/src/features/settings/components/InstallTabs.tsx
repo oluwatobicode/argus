@@ -12,23 +12,23 @@ const FRAMEWORKS: Framework[] = [
   {
     key: "browser",
     label: "Browser",
-    pkg: "@argus/sdk-browser",
+    pkg: "@argusdev/sdk-browser",
     snippet: (dsn) =>
-      `import { init } from "@argus/sdk-browser";\n\ninit({ dsn: "${dsn}" });`,
+      `import { init } from "@argusdev/sdk-browser";\n\ninit({ dsn: "${dsn}" });`,
   },
   {
     key: "react",
     label: "React",
-    pkg: "@argus/sdk-react",
+    pkg: "@argusdev/sdk-react",
     snippet: (dsn) =>
-      `import { init, ArgusErrorBoundary } from "@argus/sdk-react";\n\ninit({ dsn: "${dsn}" });\n\n// wrap your tree:\n// <ArgusErrorBoundary><App /></ArgusErrorBoundary>`,
+      `import { init, ArgusErrorBoundary } from "@argusdev/sdk-react";\n\ninit({ dsn: "${dsn}" });\n\n// wrap your tree:\n// <ArgusErrorBoundary><App /></ArgusErrorBoundary>`,
   },
   {
     key: "node",
     label: "Node",
-    pkg: "@argus/sdk-node",
+    pkg: "@argusdev/sdk-node",
     snippet: (dsn) =>
-      `import { init } from "@argus/sdk-node";\n\ninit({ dsn: "${dsn}" });`,
+      `import { init } from "@argusdev/sdk-node";\n\ninit({ dsn: "${dsn}" });`,
   },
 ];
 

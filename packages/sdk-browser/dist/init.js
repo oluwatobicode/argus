@@ -1,4 +1,4 @@
-import { parseDsn, getIngestUrl, buildEnvelope, sendEnvelope, } from "@argus/sdk-core";
+import { parseDsn, getIngestUrl, buildEnvelope, sendEnvelope, } from "@argusdev/sdk-core";
 import { parseStack } from "./stacktrace";
 /* set once by init(); null means "not initialized — do nothing, never crash" */
 let client = null;

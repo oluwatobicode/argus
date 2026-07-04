@@ -1,4 +1,4 @@
-import type { StackFrame } from "@argus/sdk-core";
+import type { StackFrame } from "@argusdev/sdk-core";
 
 /* V8 stack lines come in two shapes:
  *   at inner (/app/src/service.ts:42:17)   ← named

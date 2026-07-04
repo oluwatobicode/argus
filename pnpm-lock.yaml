@@ -172,7 +172,7 @@ importers:
 
   app/frontend:
     dependencies:
-      '@argus/sdk-react':
+      '@argusdev/sdk-react':
         specifier: workspace:*
         version: link:../../packages/sdk-react
       '@fontsource-variable/jetbrains-mono':
@@ -245,7 +245,7 @@ importers:
 
   packages/sdk-browser:
     dependencies:
-      '@argus/sdk-core':
+      '@argusdev/sdk-core':
         specifier: workspace:*
         version: link:../sdk-core
     devDependencies:
@@ -261,7 +261,7 @@ importers:
 
   packages/sdk-node:
     dependencies:
-      '@argus/sdk-core':
+      '@argusdev/sdk-core':
         specifier: workspace:*
         version: link:../sdk-core
     devDependencies:
@@ -274,10 +274,10 @@ importers:
 
   packages/sdk-react:
     dependencies:
-      '@argus/sdk-browser':
+      '@argusdev/sdk-browser':
         specifier: workspace:*
         version: link:../sdk-browser
-      '@argus/sdk-core':
+      '@argusdev/sdk-core':
         specifier: workspace:*
         version: link:../sdk-core
       react:

@@ -1,5 +1,5 @@
 {
-  "name": "@argus/sdk-node",
+  "name": "@argusdev/sdk-node",
   "version": "0.1.0",
   "description": "Argus SDK for Node.js — uncaught exceptions, unhandled rejections, Express middleware.",
   "type": "module",
@@ -20,10 +20,29 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@argus/sdk-core": "workspace:*"
+    "@argusdev/sdk-core": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^26.0.1",
     "typescript": "~6.0.3"
+  },
+  "license": "MIT",
+  "author": "Treasure Odetokun",
+  "homepage": "https://github.com/oluwatobicode/argus#readme",
+  "keywords": [
+    "argus",
+    "error-tracking",
+    "monitoring",
+    "sdk",
+    "node",
+    "express"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oluwatobicode/argus.git",
+    "directory": "packages/sdk-node"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -1,4 +1,4 @@
-import type { StackFrame } from "@argus/sdk-core";
+import type { StackFrame } from "@argusdev/sdk-core";
 
 /* Chrome/Edge (V8):        at fn (https://site.com/app.js:42:17)
  *                          at https://site.com/app.js:7:3

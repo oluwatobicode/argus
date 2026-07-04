@@ -1,5 +1,5 @@
 {
-  "name": "@argus/sdk-browser",
+  "name": "@argusdev/sdk-browser",
   "version": "0.1.0",
   "description": "Argus SDK for browsers — window.onerror, unhandled rejections, breadcrumbs.",
   "type": "module",
@@ -20,9 +20,27 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@argus/sdk-core": "workspace:*"
+    "@argusdev/sdk-core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~6.0.3"
+  },
+  "license": "MIT",
+  "author": "Treasure Odetokun",
+  "homepage": "https://github.com/oluwatobicode/argus#readme",
+  "keywords": [
+    "argus",
+    "error-tracking",
+    "monitoring",
+    "sdk",
+    "browser"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oluwatobicode/argus.git",
+    "directory": "packages/sdk-browser"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

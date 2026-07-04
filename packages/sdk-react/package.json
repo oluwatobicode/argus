@@ -1,7 +1,7 @@
 {
-  "name": "@argus/sdk-react",
+  "name": "@argusdev/sdk-react",
   "version": "0.1.0",
-  "description": "Argus SDK for React — ErrorBoundary component on top of @argus/sdk-browser.",
+  "description": "Argus SDK for React — ErrorBoundary component on top of @argusdev/sdk-browser.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -20,8 +20,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@argus/sdk-browser": "workspace:*",
-    "@argus/sdk-core": "workspace:*"
+    "@argusdev/sdk-browser": "workspace:*",
+    "@argusdev/sdk-core": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18"
@@ -29,5 +29,23 @@
   "devDependencies": {
     "@types/react": "^19.0.0",
     "typescript": "~6.0.3"
+  },
+  "license": "MIT",
+  "author": "Treasure Odetokun",
+  "homepage": "https://github.com/oluwatobicode/argus#readme",
+  "keywords": [
+    "argus",
+    "error-tracking",
+    "monitoring",
+    "sdk",
+    "react"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oluwatobicode/argus.git",
+    "directory": "packages/sdk-react"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

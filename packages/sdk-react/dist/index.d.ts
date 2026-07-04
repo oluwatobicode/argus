@@ -1,3 +1,3 @@
 export { ArgusErrorBoundary } from "./ErrorBoundary";
-export { init, captureException } from "@argus/sdk-browser";
-export type { InitOptions } from "@argus/sdk-browser";
+export { init, captureException } from "@argusdev/sdk-browser";
+export type { InitOptions } from "@argusdev/sdk-browser";
