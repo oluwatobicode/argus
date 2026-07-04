@@ -51,6 +51,9 @@ export interface AlertRule {
 
 export interface AlertInput {
   name: string;
+  type?: AlertType;
+  threshold?: number;
+  windowMinutes?: number;
   notifyEmail?: string;
   webhookUrl?: string;
   enabled?: boolean;

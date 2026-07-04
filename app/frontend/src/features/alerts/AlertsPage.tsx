@@ -40,7 +40,7 @@ export function AlertsPage() {
           <Eyebrow>project</Eyebrow>
           <h1 className="mt-1 text-[28px] font-bold tracking-tight">Alerts</h1>
           <p className="mt-1.5 text-[13px] text-text-2">
-            Get notified the moment a new issue appears.
+            Get notified on new issues or error-rate spikes.
           </p>
         </div>
         <button
@@ -61,7 +61,8 @@ export function AlertsPage() {
           </div>
           <div className="text-[15px] font-semibold">No alert rules yet</div>
           <div className="max-w-xs text-[13px] text-text-2">
-            Create a rule to fire on a new issue — via email or webhook.
+            Create a rule to fire on a new issue or an error spike — via email
+            or webhook.
           </div>
         </div>
       ) : (
@@ -76,10 +77,15 @@ export function AlertsPage() {
                 <div className="flex items-center gap-2">
                   <span className="truncate text-sm font-semibold">{rule.name}</span>
                   <span className="rounded-full border border-border-2 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wide text-text-3">
-                    new issue
+                    {rule.type === "ERROR_RATE" ? "error rate" : "new issue"}
                   </span>
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-3 font-mono text-[11px] text-text-3">
+                  {rule.type === "ERROR_RATE" && (
+                    <span className="text-warning">
+                      ≥{rule.threshold} / {rule.windowMinutes}min
+                    </span>
+                  )}
                   {rule.notifyEmail && (
                     <span className="flex items-center gap-1.5">
                       <HugeiconsIcon icon={Mail01Icon} size={13} /> {rule.notifyEmail}

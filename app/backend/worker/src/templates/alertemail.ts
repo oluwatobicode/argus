@@ -43,3 +43,47 @@ export function buildNewIssueEmail({
 
   return { subject, html };
 }
+
+interface ErrorRateEmailInput {
+  projectName: string;
+  count: number;
+  windowMinutes: number;
+  threshold: number;
+  issuesUrl: string;
+}
+
+/* dark-themed HTML email for an ERROR_RATE alert */
+export function buildErrorRateEmail({
+  projectName,
+  count,
+  windowMinutes,
+  threshold,
+  issuesUrl,
+}: ErrorRateEmailInput): { subject: string; html: string } {
+  const subject = `[Argus] Error spike in ${projectName}`;
+
+  const html = `
+  <div style="background:#0A0A0A;padding:32px;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#ECEFE8;">
+    <div style="max-width:520px;margin:0 auto;background:#111311;border:1px solid #20241E;border-radius:16px;padding:28px;">
+      <div style="font-family:monospace;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#F59E0B;">
+        Error rate · ${projectName}
+      </div>
+      <h1 style="font-size:18px;line-height:1.4;margin:12px 0 6px;color:#ECEFE8;">
+        ${count} events in the last ${windowMinutes} min
+      </h1>
+      <div style="font-family:monospace;font-size:12px;color:#666B60;">
+        threshold: ${threshold} / ${windowMinutes} min
+      </div>
+      <a href="${issuesUrl}"
+        style="display:inline-block;margin-top:22px;background:#A3E635;color:#0C0F08;font-weight:700;
+        text-decoration:none;padding:11px 22px;border-radius:999px;font-size:14px;">
+        View issues →
+      </a>
+      <p style="margin-top:24px;font-size:12px;color:#565B52;">
+        You're receiving this because an error-rate rule fired for ${projectName}.
+      </p>
+    </div>
+  </div>`;
+
+  return { subject, html };
+}

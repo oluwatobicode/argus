@@ -2,7 +2,7 @@ import type { Job } from "bullmq";
 import { UnrecoverableError } from "bullmq";
 import { prisma } from "../config/db.config";
 import { computeFingerprint } from "../utils/fingerprint.util";
-import { evaluateNewIssue } from "../services/alert.service";
+import { evaluateNewIssue, evaluateErrorRate } from "../services/alert.service";
 import type { JobData } from "../types";
 
 export async function processErrorEvent(job: Job<JobData>): Promise<void> {
@@ -58,9 +58,10 @@ export async function processErrorEvent(job: Job<JobData>): Promise<void> {
     },
   });
 
-  /* brand-new issue (eventCount just became 1) → fire NEW_ISSUE alerts.
-     never let alert delivery fail the job. */
+  /* brand-new issue (eventCount just became 1) → fire NEW_ISSUE alerts */
   if (issue.eventCount === 1) {
     await evaluateNewIssue(issue);
   }
+  /* every event → check ERROR_RATE rules (windowed count + cooldown) */
+  await evaluateErrorRate(projectId);
 }
