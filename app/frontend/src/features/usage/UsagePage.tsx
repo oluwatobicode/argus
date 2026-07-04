@@ -1,4 +1,4 @@
-import toast from "react-hot-toast";
+import { useNavigate, useParams } from "react-router";
 import { Eyebrow } from "../../ui/Eyebrow";
 import { PageLoader } from "../../ui/Loader";
 import { useUsage } from "../../hooks/useUsage";
@@ -6,6 +6,8 @@ import { useUsage } from "../../hooks/useUsage";
 const fmt = (n: number) => n.toLocaleString();
 
 export function UsagePage() {
+  const navigate = useNavigate();
+  const { projectId = "" } = useParams<{ projectId: string }>();
   const { data: usage, isLoading, isError } = useUsage();
 
   if (isLoading) return <PageLoader />;
@@ -63,7 +65,7 @@ export function UsagePage() {
                 : "You're approaching your quota. Over-limit events are dropped."}
             </span>
             <button
-              onClick={() => toast("Billing is coming soon")}
+              onClick={() => navigate(`/projects/${projectId}/billing`)}
               className="shrink-0 rounded-full bg-lime px-4 py-2 text-xs font-bold text-lime-ink hover:bg-lime/90"
             >
               Upgrade

@@ -11,6 +11,7 @@ declare global {
     interface Request {
       project?: PrismaProject;
       projectKey?: PrismaProjectKey;
+      rawBody?: Buffer; /* captured by express.json verify — Polar webhook signature */
     }
   }
 }

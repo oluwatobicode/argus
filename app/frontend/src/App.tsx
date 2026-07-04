@@ -11,6 +11,7 @@ import { IssuesPage } from "./features/issues/IssuesPage";
 import { IssueDetailPage } from "./features/issues/IssueDetailPage";
 import { SettingsPage } from "./features/settings/SettingsPage";
 import { UsagePage } from "./features/usage/UsagePage";
+import { BillingPage } from "./features/billing/BillingPage";
 import { AlertsPage } from "./features/alerts/AlertsPage";
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
             element={<SettingsPage />}
           />
           <Route path="/projects/:projectId/usage" element={<UsagePage />} />
+          <Route path="/projects/:projectId/billing" element={<BillingPage />} />
           <Route path="/projects/:projectId/alerts" element={<AlertsPage />} />
         </Route>
 

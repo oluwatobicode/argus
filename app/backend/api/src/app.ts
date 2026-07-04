@@ -33,7 +33,15 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.use(helmet());
-app.use(express.json());
+/* stash the raw body so the Polar webhook can verify its signature
+   (needs the exact bytes, before JSON parsing) */
+app.use(
+  express.json({
+    verify: (req, _res, buf) => {
+      (req as Request).rawBody = buf;
+    },
+  }),
+);
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:5173",

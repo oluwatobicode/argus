@@ -31,7 +31,7 @@ const PROJECT_NAV: NavItem[] = [
 
 const ORG_NAV: NavItem[] = [
   { key: "usage", label: "Usage", icon: GaugeIcon, live: true },
-  { key: "billing", label: "Billing", icon: CreditCardIcon, live: false },
+  { key: "billing", label: "Billing", icon: CreditCardIcon, live: true },
 ];
 
 interface Props {
