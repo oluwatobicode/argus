@@ -30,9 +30,10 @@ export const getUsage = async (
       where: { orgId_month: { orgId: org.id, month } },
     });
 
+    /* limit follows the org's CURRENT plan, not the value frozen on the quota
+       row when it was first created (which would be stale after an upgrade) */
     const limit =
-      quota?.limit ??
-      (org.plan === "PRO" ? PLAN_EVENT_LIMITS.PRO : PLAN_EVENT_LIMITS.FREE);
+      org.plan === "PRO" ? PLAN_EVENT_LIMITS.PRO : PLAN_EVENT_LIMITS.FREE;
     const used = quota?.count ?? 0;
 
     /* breakdown by level across the org's projects this month */

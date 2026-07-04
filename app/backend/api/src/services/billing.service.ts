@@ -1,9 +1,21 @@
 import { prisma } from "../config/db.config";
+import { PLAN_EVENT_LIMITS } from "../config/constants.config";
 import {
   polar,
   POLAR_PRO_PRODUCT_ID,
   POLAR_SUCCESS_URL,
 } from "../config/polar.config";
+
+/* keep the current month's quota ceiling in sync with the plan (mid-cycle change) */
+async function syncQuotaLimit(orgId: string, plan: "FREE" | "PRO") {
+  const month = new Date().toISOString().slice(0, 7);
+  await prisma.eventQuota.updateMany({
+    where: { orgId, month },
+    data: {
+      limit: plan === "PRO" ? PLAN_EVENT_LIMITS.PRO : PLAN_EVENT_LIMITS.FREE,
+    },
+  });
+}
 
 /* create a Polar checkout for the Pro plan, linked to our org via externalCustomerId */
 export async function createProCheckout(orgId: string, email: string | null) {
@@ -84,6 +96,7 @@ export async function activateSubscription(sub: PolarSubscription) {
     data: { plan: "PRO", polarCustomerId: sub.customerId },
   });
   await upsertSubscription(orgId, sub, "PRO");
+  await syncQuotaLimit(orgId, "PRO");
 }
 
 /* revoked → access removed now → back to FREE */
@@ -95,6 +108,7 @@ export async function revokeSubscription(sub: PolarSubscription) {
     data: { plan: "FREE" },
   });
   await upsertSubscription(orgId, sub, "FREE");
+  await syncQuotaLimit(orgId, "FREE");
 }
 
 /* canceled → keeps PRO until currentPeriodEnd; just flag it */
