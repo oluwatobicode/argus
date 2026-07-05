@@ -11,6 +11,7 @@ import { Eyebrow } from "../../ui/Eyebrow";
 import { PageLoader } from "../../ui/Loader";
 import { useMe, useLogout } from "../../hooks/useAuth";
 import { useProjects } from "../../hooks/useProjects";
+import { usePermissions } from "../../hooks/usePermissions";
 import { NewProjectModal } from "./components/NewProjectModal";
 
 export function ProjectsConsolePage() {
@@ -18,6 +19,7 @@ export function ProjectsConsolePage() {
   const { data: me } = useMe();
   const { data: projects, isLoading } = useProjects();
   const logout = useLogout();
+  const { canManageProjects } = usePermissions();
   const [modalOpen, setModalOpen] = useState(false);
 
   const org = me?.organization;
@@ -41,13 +43,15 @@ export function ProjectsConsolePage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setModalOpen(true)}
-              className="flex items-center font-sans text-black cursor-pointer gap-2 rounded-full bg-lime px-5 py-2.5 text-sm font-bold hover:bg-lime/90"
-            >
-              <HugeiconsIcon icon={Add01Icon} size={16} strokeWidth={2} />
-              New project
-            </button>
+            {canManageProjects && (
+              <button
+                onClick={() => setModalOpen(true)}
+                className="flex items-center font-sans text-black cursor-pointer gap-2 rounded-full bg-lime px-5 py-2.5 text-sm font-bold hover:bg-lime/90"
+              >
+                <HugeiconsIcon icon={Add01Icon} size={16} strokeWidth={2} />
+                New project
+              </button>
+            )}
             <button
               onClick={() =>
                 logout.mutate(undefined, {

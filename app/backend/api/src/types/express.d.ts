@@ -3,6 +3,7 @@ import type {
   ProjectKey as PrismaProjectKey,
   User as PrismaUser,
 } from "../generated/prisma/client";
+import type { MemberRole } from "../config/permissions.config";
 
 declare global {
   namespace Express {
@@ -12,6 +13,7 @@ declare global {
       project?: PrismaProject;
       projectKey?: PrismaProjectKey;
       rawBody?: Buffer; /* captured by express.json verify — Polar webhook signature */
+      memberRole?: MemberRole; /* set by requirePermission middleware */
     }
   }
 }

@@ -12,6 +12,7 @@ import { IssueDetailPage } from "./features/issues/IssueDetailPage";
 import { SettingsPage } from "./features/settings/SettingsPage";
 import { UsagePage } from "./features/usage/UsagePage";
 import { BillingPage } from "./features/billing/BillingPage";
+import { MembersPage } from "./features/members/MembersPage";
 import { AlertsPage } from "./features/alerts/AlertsPage";
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
           />
           <Route path="/projects/:projectId/usage" element={<UsagePage />} />
           <Route path="/projects/:projectId/billing" element={<BillingPage />} />
+          <Route path="/projects/:projectId/members" element={<MembersPage />} />
           <Route path="/projects/:projectId/alerts" element={<AlertsPage />} />
         </Route>
 

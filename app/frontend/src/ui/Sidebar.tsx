@@ -8,6 +8,7 @@ import {
   GaugeIcon,
   Settings01Icon,
   CreditCardIcon,
+  UserMultiple02Icon,
   BookOpen01Icon,
   Logout01Icon,
 } from "@hugeicons/core-free-icons";
@@ -30,6 +31,7 @@ const PROJECT_NAV: NavItem[] = [
 ];
 
 const ORG_NAV: NavItem[] = [
+  { key: "members", label: "Members", icon: UserMultiple02Icon, live: true },
   { key: "usage", label: "Usage", icon: GaugeIcon, live: true },
   { key: "billing", label: "Billing", icon: CreditCardIcon, live: true },
 ];

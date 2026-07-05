@@ -17,11 +17,35 @@ export type Level = "FATAL" | "ERROR" | "WARNING" | "INFO" | "DEBUG";
 export type IssueStatus = "UNRESOLVED" | "RESOLVED" | "IGNORED";
 export type Plan = "FREE" | "PRO";
 
+export type MemberRole = "OWNER" | "ADMIN" | "MEMBER";
+
+export type Permission =
+  | "project:manage"
+  | "alert:manage"
+  | "member:manage"
+  | "member:manage_owner"
+  | "billing:manage"
+  | "issue:triage";
+
 export interface Organization {
   id: string;
   name: string;
   slug: string;
   plan: Plan;
+  role: MemberRole;
+  permissions: Permission[];
+}
+
+export interface OrgMember {
+  id: string;
+  role: MemberRole;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string | null;
+    email: string | null;
+    avatarUrl: string | null;
+  };
 }
 
 export interface Usage {

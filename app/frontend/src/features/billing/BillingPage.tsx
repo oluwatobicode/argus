@@ -5,6 +5,10 @@ import toast from "react-hot-toast";
 import { Eyebrow } from "../../ui/Eyebrow";
 import { useMe } from "../../hooks/useAuth";
 import { useCheckout, usePortal } from "../../hooks/useBilling";
+import { useUsage } from "../../hooks/useUsage";
+import { usePermissions } from "../../hooks/usePermissions";
+
+const fmt = (n: number) => n.toLocaleString();
 
 const FREE_FEATURES = ["10,000 events / month", "1 project", "30-day retention"];
 const PRO_FEATURES = [
@@ -15,12 +19,18 @@ const PRO_FEATURES = [
 
 export function BillingPage() {
   const { data: me } = useMe();
+  const { data: usage } = useUsage();
+  const { canManageBilling } = usePermissions();
   const checkout = useCheckout();
   const portal = usePortal();
   const queryClient = useQueryClient();
   const [params, setParams] = useSearchParams();
 
   const isPro = me?.organization?.plan === "PRO";
+
+  const pct =
+    usage && usage.limit > 0 ? Math.min(100, (usage.used / usage.limit) * 100) : 0;
+  const meterColor = pct >= 100 ? "#F04438" : pct >= 80 ? "#F59E0B" : "#A3E635";
 
   /* returning from Polar checkout */
   useEffect(() => {
@@ -40,7 +50,24 @@ export function BillingPage() {
         Powered by Polar. {isPro ? "You're on Pro." : "Upgrade for more headroom."}
       </p>
 
-      <div className="mt-6 grid grid-cols-2 gap-4">
+      {usage && (
+        <div className="mt-6 rounded-[18px] border border-border bg-surface p-5">
+          <div className="flex items-end justify-between">
+            <div className="text-[13px] text-text-2">Events this month</div>
+            <div className="font-mono text-xs" style={{ color: meterColor }}>
+              {fmt(usage.used)} / {fmt(usage.limit)}
+            </div>
+          </div>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-divider">
+            <div
+              className="h-full rounded-full transition-[width]"
+              style={{ width: `${pct}%`, background: meterColor }}
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="mt-4 grid grid-cols-2 gap-4">
         <PlanCard
           name="Free"
           price="$0"
@@ -54,7 +81,11 @@ export function BillingPage() {
           current={isPro}
           highlight
           action={
-            isPro ? (
+            !canManageBilling ? (
+              <p className="text-center text-xs text-text-3">
+                Only the organization owner can change billing.
+              </p>
+            ) : isPro ? (
               <button
                 onClick={() => portal.mutate()}
                 disabled={portal.isPending}

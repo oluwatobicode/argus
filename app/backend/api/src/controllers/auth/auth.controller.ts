@@ -8,6 +8,10 @@ import {
   HTTP_STATUS,
   SUCCESS_MESSAGES,
 } from "../../config/constants.config";
+import {
+  permissionsForRole,
+  type MemberRole,
+} from "../../config/permissions.config";
 import { comparePassword, hashPassword } from "../../utils/password.util";
 import { generateAlphaNumeric } from "../../utils/otp.utils";
 import redis from "../../config/redis.config";
@@ -272,6 +276,8 @@ export const me = async (req: Request, res: Response, next: NextFunction) => {
           name: membership.org.name,
           slug: membership.org.slug,
           plan: membership.org.plan,
+          role: membership.role,
+          permissions: permissionsForRole(membership.role as MemberRole),
         }
       : null;
 

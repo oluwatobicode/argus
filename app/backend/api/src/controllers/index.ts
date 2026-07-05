@@ -7,3 +7,4 @@ export * as performanceController from "./performance/performance.controller";
 export * as alertsController from "./alerts/alerts.controller";
 export * as billingController from "./billing/billing.controller";
 export * as usageController from "./usage/usage.controller";
+export * as organizationsController from "./organizations/organizations.controller";

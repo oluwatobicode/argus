@@ -12,6 +12,7 @@ import {
 import { Eyebrow } from "../../ui/Eyebrow";
 import { PageLoader } from "../../ui/Loader";
 import { useAlerts, useDeleteAlert, useUpdateAlert } from "../../hooks/useAlerts";
+import { usePermissions } from "../../hooks/usePermissions";
 import type { AlertRule } from "../../types/api";
 import { AlertRuleModal } from "./components/AlertRuleModal";
 
@@ -20,6 +21,7 @@ export function AlertsPage() {
   const { data: rules, isLoading } = useAlerts(projectId);
   const update = useUpdateAlert(projectId);
   const del = useDeleteAlert(projectId);
+  const { canManageAlerts } = usePermissions();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<AlertRule | null>(null);
@@ -43,13 +45,15 @@ export function AlertsPage() {
             Get notified on new issues or error-rate spikes.
           </p>
         </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-2 rounded-full bg-lime px-5 py-2.5 text-sm font-bold text-lime-ink hover:bg-lime/90"
-        >
-          <HugeiconsIcon icon={Add01Icon} size={16} strokeWidth={2} />
-          New rule
-        </button>
+        {canManageAlerts && (
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-2 rounded-full bg-lime px-5 py-2.5 text-sm font-bold text-lime-ink hover:bg-lime/90"
+          >
+            <HugeiconsIcon icon={Add01Icon} size={16} strokeWidth={2} />
+            New rule
+          </button>
+        )}
       </div>
 
       {isLoading ? (
@@ -99,37 +103,47 @@ export function AlertsPage() {
                 </div>
               </div>
 
-              {/* enabled toggle */}
-              <button
-                onClick={() =>
-                  update.mutate({ id: rule.id, enabled: !rule.enabled })
-                }
-                title={rule.enabled ? "Disable" : "Enable"}
-                className={`relative h-6 w-10 shrink-0 rounded-full transition-colors ${
-                  rule.enabled ? "bg-lime" : "bg-surface-2 border border-border-2"
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 size-5 rounded-full bg-white transition-all ${
-                    rule.enabled ? "left-[18px]" : "left-0.5 bg-text-3"
-                  }`}
-                />
-              </button>
+              {canManageAlerts && (
+                <>
+                  {/* enabled toggle */}
+                  <button
+                    onClick={() =>
+                      update.mutate({ id: rule.id, enabled: !rule.enabled })
+                    }
+                    title={rule.enabled ? "Disable" : "Enable"}
+                    className={`relative h-6 w-10 shrink-0 rounded-full transition-colors ${
+                      rule.enabled
+                        ? "bg-lime"
+                        : "bg-surface-2 border border-border-2"
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 size-5 rounded-full bg-white transition-all ${
+                        rule.enabled ? "left-[18px]" : "left-0.5 bg-text-3"
+                      }`}
+                    />
+                  </button>
 
-              <button
-                onClick={() => openEdit(rule)}
-                title="Edit"
-                className="text-text-3 hover:text-text-1"
-              >
-                <HugeiconsIcon icon={Edit02Icon} size={17} strokeWidth={1.8} />
-              </button>
-              <button
-                onClick={() => del.mutate(rule.id)}
-                title="Delete"
-                className="text-text-3 hover:text-error"
-              >
-                <HugeiconsIcon icon={Delete02Icon} size={17} strokeWidth={1.8} />
-              </button>
+                  <button
+                    onClick={() => openEdit(rule)}
+                    title="Edit"
+                    className="text-text-3 hover:text-text-1"
+                  >
+                    <HugeiconsIcon icon={Edit02Icon} size={17} strokeWidth={1.8} />
+                  </button>
+                  <button
+                    onClick={() => del.mutate(rule.id)}
+                    title="Delete"
+                    className="text-text-3 hover:text-error"
+                  >
+                    <HugeiconsIcon
+                      icon={Delete02Icon}
+                      size={17}
+                      strokeWidth={1.8}
+                    />
+                  </button>
+                </>
+              )}
             </div>
           ))}
         </div>

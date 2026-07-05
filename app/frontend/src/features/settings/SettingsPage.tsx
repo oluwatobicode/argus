@@ -15,6 +15,7 @@ import {
   useUpdateProject,
   useDeleteProject,
 } from "../../hooks/useProjects";
+import { usePermissions } from "../../hooks/usePermissions";
 
 const nameSchema = z.object({ name: z.string().min(1, "Name is required") });
 type NameValues = z.infer<typeof nameSchema>;
@@ -28,6 +29,7 @@ export function SettingsPage() {
 
   const updateProject = useUpdateProject(projectId);
   const deleteProject = useDeleteProject();
+  const { canManageProjects } = usePermissions();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   /* `values` keeps the field in sync once the project finishes loading */
@@ -61,11 +63,18 @@ export function SettingsPage() {
         </p>
         <div className="mt-4 flex items-start gap-3">
           <div className="flex-1">
-            <Input label="" error={errors.name?.message} {...register("name")} />
+            <Input
+              label=""
+              disabled={!canManageProjects}
+              error={errors.name?.message}
+              {...register("name")}
+            />
           </div>
-          <Button type="submit" loading={updateProject.isPending}>
-            Save
-          </Button>
+          {canManageProjects && (
+            <Button type="submit" loading={updateProject.isPending}>
+              Save
+            </Button>
+          )}
         </div>
       </form>
 
@@ -95,19 +104,21 @@ export function SettingsPage() {
       </div>
 
       {/* danger zone */}
-      <div className="mt-4 rounded-[20px] border border-error/25 bg-error/5 p-6">
-        <div className="text-sm font-semibold text-error">Danger zone</div>
-        <p className="mt-1 text-xs text-text-2">
-          Deleting a project cascades all of its issues and events. This can't be
-          undone.
-        </p>
-        <button
-          onClick={() => setConfirmOpen(true)}
-          className="mt-4 rounded-full border border-error/35 bg-error/10 px-4 py-2 text-[13px] font-medium text-error hover:bg-error/15"
-        >
-          Delete project
-        </button>
-      </div>
+      {canManageProjects && (
+        <div className="mt-4 rounded-[20px] border border-error/25 bg-error/5 p-6">
+          <div className="text-sm font-semibold text-error">Danger zone</div>
+          <p className="mt-1 text-xs text-text-2">
+            Deleting a project cascades all of its issues and events. This can't
+            be undone.
+          </p>
+          <button
+            onClick={() => setConfirmOpen(true)}
+            className="mt-4 rounded-full border border-error/35 bg-error/10 px-4 py-2 text-[13px] font-medium text-error hover:bg-error/15"
+          >
+            Delete project
+          </button>
+        </div>
+      )}
 
       <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <h2 className="text-xl font-bold tracking-tight">Delete this project?</h2>

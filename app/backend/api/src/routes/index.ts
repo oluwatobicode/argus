@@ -7,3 +7,4 @@ export { default as alertsRoutes } from "./alerts.routes";
 export { default as billingRoutes } from "./billing.routes";
 export { default as usageRoutes } from "./usage.routes";
 export { default as ingestRoutes } from "./ingest.routes";
+export { default as organizationsRoutes } from "./organizations.routes";
