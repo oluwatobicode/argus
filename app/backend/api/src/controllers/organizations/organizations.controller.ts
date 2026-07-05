@@ -10,6 +10,8 @@ import {
   AddMemberSchema,
   UpdateMemberSchema,
 } from "../../validators/member.validator";
+import { CreateOrgSchema } from "../../validators/organization.validator";
+import { generateAlphaNumeric } from "../../utils/otp.utils";
 
 const USER_SELECT = {
   select: { id: true, name: true, email: true, avatarUrl: true },
@@ -18,6 +20,45 @@ const USER_SELECT = {
 async function getRequesterMembership(userId: string) {
   return prisma.organizationMember.findFirst({ where: { userId } });
 }
+
+/* onboarding for org-less users (OAuth signups) — caller has NO membership yet */
+export const createOrganization = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const existing = await getRequesterMembership(req.user!.id);
+    if (existing) {
+      return sendError(
+        res,
+        HTTP_STATUS.CONFLICT,
+        "You already belong to an organization.",
+      );
+    }
+
+    const { name } = CreateOrgSchema.parse(req.body);
+    const slug = `${name.toLowerCase().trim().replace(/\s+/g, "-")}-${generateAlphaNumeric(6).toLowerCase()}`;
+
+    const org = await prisma.organization.create({
+      data: {
+        name: name.trim(),
+        slug,
+        members: { create: { userId: req.user!.id, role: "OWNER" } },
+      },
+      select: { id: true, name: true, slug: true, plan: true },
+    });
+
+    return sendSuccess(
+      res,
+      HTTP_STATUS.CREATED,
+      SUCCESS_MESSAGES.CREATE_SUCCESS,
+      org,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const listMembers = async (
   req: Request,

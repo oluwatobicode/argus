@@ -8,6 +8,8 @@ export function RequireAuth() {
 
   if (isLoading) return <FullScreenLoader />;
   if (isError || !me) return <Navigate to="/login" replace />;
+  /* every user must belong to an org — OAuth signups create theirs here */
+  if (!me.organization) return <Navigate to="/welcome" replace />;
 
   return <Outlet />;
 }

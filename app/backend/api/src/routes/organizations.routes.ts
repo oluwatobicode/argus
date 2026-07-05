@@ -6,6 +6,9 @@ import { organizationsController } from "../controllers";
 
 const router = Router();
 
+/* onboarding: org-less users create their org — no permission gate (no membership yet) */
+router.post("/", ensureAuth, organizationsController.createOrganization);
+
 router.get("/members", ensureAuth, organizationsController.listMembers);
 router.post(
   "/members",

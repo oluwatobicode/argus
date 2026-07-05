@@ -12,6 +12,10 @@ export function DashboardLayout() {
   if (isError || !me) {
     return <Navigate to="/login" replace />;
   }
+  /* every user must belong to an org — OAuth signups create theirs first */
+  if (!me.organization) {
+    return <Navigate to="/welcome" replace />;
+  }
 
   return (
     <div className="flex min-h-screen">

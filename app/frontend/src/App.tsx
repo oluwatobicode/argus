@@ -6,6 +6,7 @@ import { LoginPage } from "./features/auth/LoginPage";
 import { RegisterPage } from "./features/auth/RegisterPage";
 import { VerifyOtpPage } from "./features/auth/VerifyOtpPage";
 import { ProjectsConsolePage } from "./features/projects/ProjectsConsolePage";
+import { CreateOrgPage } from "./features/organizations/CreateOrgPage";
 import { OnboardingPage } from "./features/projects/OnboardingPage";
 import { IssuesPage } from "./features/issues/IssuesPage";
 import { IssueDetailPage } from "./features/issues/IssueDetailPage";
@@ -23,6 +24,8 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify" element={<VerifyOtpPage />} />
+          {/* org-less onboarding — guards itself (needs session, must NOT have an org) */}
+          <Route path="/welcome" element={<CreateOrgPage />} />
         </Route>
 
         {/* console — authed, no app sidebar */}
