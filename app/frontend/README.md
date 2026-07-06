@@ -81,7 +81,7 @@ src/
 
 🍪 = session cookie. `DashboardLayout`/`RequireAuth` redirect to `/login` when `useMe` fails.
 
-Nav items still `soon` (non-clickable): **Performance**, **Docs**.
+Performance is live at `/projects/:projectId/performance` (vitals cards + transactions table). Only **Docs** remains a `soon` nav item.
 
 ---
 
@@ -114,5 +114,5 @@ pnpm --filter frontend build
 
 ## Status
 
-Built ✅: auth, projects console + create + onboarding DSN reveal, issues list + detail, settings (rename/DSN/install-tabs/delete), usage meter, alerts CRUD, brand loader.
-Planned 🔜: Performance dashboard (the only `soon` nav stub left).
+Built ✅: auth + org onboarding, projects console + DSN reveal, issues list + detail, settings, usage meter, alerts (both types), billing (Polar), team members + RBAC, **performance (vitals + transactions)**, brand loader.
+The dashboard is feature-complete; only the Docs nav item remains `soon`.

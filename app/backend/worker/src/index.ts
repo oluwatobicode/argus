@@ -2,13 +2,16 @@ import { Worker, UnrecoverableError } from "bullmq";
 import type { Job } from "bullmq";
 import connection from "./config/redis.config";
 import { processErrorEvent } from "./processors/errorEvent.processor";
-import type { JobData } from "./types";
+import { processPerfEvent } from "./processors/perfEvent.processor";
+import type { JobData, PerfJobData } from "./types";
 
-/* route by job name so future job types (perf events) get their own processor */
-async function processJob(job: Job<JobData>): Promise<void> {
+/* route by job name — each event kind gets its own processor */
+async function processJob(job: Job<JobData | PerfJobData>): Promise<void> {
   switch (job.name) {
     case "error-event":
-      return processErrorEvent(job);
+      return processErrorEvent(job as Job<JobData>);
+    case "perf-event":
+      return processPerfEvent(job as Job<PerfJobData>);
     default:
       throw new UnrecoverableError(`Unknown job name: ${job.name}`);
   }

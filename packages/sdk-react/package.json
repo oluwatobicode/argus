@@ -1,6 +1,6 @@
 {
   "name": "@argusdev/sdk-react",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Argus SDK for React — ErrorBoundary component on top of @argusdev/sdk-browser.",
   "type": "module",
   "main": "./dist/index.js",

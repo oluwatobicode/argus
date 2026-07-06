@@ -1,7 +1,12 @@
-import type { Envelope } from "./types";
+import type { Envelope, TransactionEnvelope } from "./types";
 
 const MAX_RETRIES = 2;
 const BACKOFF_MS = 1_000;
+
+export interface SendOptions {
+  /* survive page unload (perf reports sent on pagehide) */
+  keepalive?: boolean;
+}
 
 /*
  * Golden rule of an error-tracking SDK: NEVER throw into the host app.
@@ -10,7 +15,8 @@ const BACKOFF_MS = 1_000;
 export async function sendEnvelope(
   url: string,
   publicKey: string,
-  envelope: Envelope,
+  envelope: Envelope | TransactionEnvelope,
+  options: SendOptions = {},
 ): Promise<void> {
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
@@ -21,6 +27,7 @@ export async function sendEnvelope(
           "x-sentry-auth": `Sentry sentry_key=${publicKey}`,
         },
         body: JSON.stringify(envelope),
+        keepalive: options.keepalive ?? false,
       });
 
       if (res.ok) return;

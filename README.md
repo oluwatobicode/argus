@@ -9,7 +9,7 @@ Argus watches your applications across browser, Node.js, and React — capturing
 ## What It Does
 
 - **Error Tracking** — catches uncaught exceptions and unhandled promise rejections, groups duplicates into issues (SHA-256 stack fingerprinting), shows full stack trace
-- **Performance Monitoring** *(planned)* — transaction durations, p50/p75/p95 latency, web vitals (LCP, CLS, TTFB, FCP)
+- **Performance Monitoring** — web vitals (LCP, CLS, FCP, TTFB) + page-load transactions with p50/p75/p95 latency (browser; Node timing planned)
 - **Alerting** — email (Resend) or webhook on a new issue or an error-rate spike (windowed threshold + cooldown)
 - **Free + Pro tiers** — free tier for small projects, Pro for higher volume with Polar billing
 
@@ -181,11 +181,14 @@ npm install @argusdev/sdk-browser   # or @argusdev/sdk-node, @argusdev/sdk-react
 - [x] Plan enforcement — org PRO flip + quota ceiling synced mid-cycle
 - [x] Dashboard: billing page (upgrade / manage) + usage meter
 
-### Phase 7 — Performance Monitoring
+### Phase 7 — Performance Monitoring ✅ (browser MVP, dogfood-verified 2026-07-06)
 
-- [ ] Transaction/span ingest
-- [ ] Web vitals aggregation (LCP, CLS, TTFB, FCP)
-- [ ] TimescaleDB setup for time-series data
+- [x] Transaction ingest (`type: "transaction"` envelopes → `perf-event` jobs)
+- [x] Web vitals capture in sdk-browser (LCP, CLS, FCP, TTFB — one report per page view)
+- [x] Aggregation API: p50/p75/p95 per transaction name + p75 vitals with ratings
+- [x] Dashboard: Performance page (vitals cards + transactions table, 24h/7d/30d)
+- [ ] Node/Express timing middleware + spans
+- [ ] TimescaleDB when volume demands it
 
 ### Phase 8 — Polish
 

@@ -83,6 +83,33 @@ export interface AlertInput {
   enabled?: boolean;
 }
 
+export interface TransactionSummary {
+  name: string;
+  count: number;
+  p50: number;
+  p75: number;
+  p95: number;
+  lastSeen: string;
+}
+
+export type VitalRating = "good" | "needs-improvement" | "poor";
+
+export interface VitalStat {
+  p75: number;
+  rating: VitalRating;
+  samples: number;
+}
+
+export interface VitalsSummary {
+  vitals: {
+    lcp: VitalStat | null;
+    cls: VitalStat | null;
+    fcp: VitalStat | null;
+    ttfb: VitalStat | null;
+  };
+  sampleCount: number;
+}
+
 export interface StackFrame {
   filename: string;
   function?: string;

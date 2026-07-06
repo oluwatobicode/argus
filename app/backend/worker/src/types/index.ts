@@ -46,3 +46,20 @@ export interface JobData {
   projectId: string;
   envelope: Envelope;
 }
+
+/* performance envelope — mirrors the api's TransactionEnvelopeSchema */
+export interface TransactionEnvelope {
+  type: "transaction";
+  name: string;
+  duration: number;
+  /** ms since epoch — validated at ingest */
+  timestamp: number;
+  status?: string;
+  traceId?: string;
+  vitals?: { lcp?: number; cls?: number; fcp?: number; ttfb?: number };
+}
+
+export interface PerfJobData {
+  projectId: string;
+  envelope: TransactionEnvelope;
+}

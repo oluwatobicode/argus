@@ -7,11 +7,14 @@ import {
   type StackFrame,
 } from "@argusdev/sdk-core";
 import { parseStack } from "./stacktrace";
+import { startVitals } from "./vitals";
 
 export interface InitOptions {
   dsn: string;
   environment?: string;
   release?: string;
+  /* capture web vitals + a page.load transaction per page view (default: true) */
+  vitals?: boolean;
 }
 
 /* set once by init(); null means "not initialized — do nothing, never crash" */
@@ -30,6 +33,11 @@ export function init(options: InitOptions): void {
     environment: options.environment,
     release: options.release,
   };
+
+  /* web vitals + page.load transaction (opt out with vitals: false) */
+  if (options.vitals !== false) {
+    startVitals(client.url, client.publicKey);
+  }
 
   /* chain any handler the app already installed — we observe, never replace */
   const previousOnError = window.onerror;

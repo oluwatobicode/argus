@@ -32,4 +32,12 @@ try {
 
 Handles both Chrome and Firefox/Safari stack formats. Using React? Install `@argusdev/sdk-react` for an error boundary.
 
+## Web vitals (v0.2+)
+
+Each page view automatically reports a `page.load` transaction with core web vitals — **LCP, CLS, FCP, TTFB** — sent once on page hide (keepalive, survives navigation). Opt out with:
+
+```ts
+init({ dsn: "...", vitals: false });
+```
+
 MIT © Treasure Odetokun

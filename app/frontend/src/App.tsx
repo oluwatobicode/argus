@@ -15,6 +15,7 @@ import { UsagePage } from "./features/usage/UsagePage";
 import { BillingPage } from "./features/billing/BillingPage";
 import { MembersPage } from "./features/members/MembersPage";
 import { AlertsPage } from "./features/alerts/AlertsPage";
+import { PerformancePage } from "./features/performance/PerformancePage";
 
 function App() {
   return (
@@ -47,6 +48,10 @@ function App() {
           <Route
             path="/projects/:projectId/settings"
             element={<SettingsPage />}
+          />
+          <Route
+            path="/projects/:projectId/performance"
+            element={<PerformancePage />}
           />
           <Route path="/projects/:projectId/usage" element={<UsagePage />} />
           <Route path="/projects/:projectId/billing" element={<BillingPage />} />

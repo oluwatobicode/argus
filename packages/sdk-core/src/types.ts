@@ -20,6 +20,25 @@ export interface ExceptionPayload {
   };
 }
 
+/* core web vitals captured by browser SDKs — all ms except CLS (unitless) */
+export interface WebVitals {
+  lcp?: number;
+  cls?: number;
+  fcp?: number;
+  ttfb?: number;
+}
+
+/* performance envelope — one unit of work (e.g. a page load) */
+export interface TransactionEnvelope {
+  type: "transaction";
+  name: string;
+  duration: number; /* ms */
+  timestamp: number; /* ms since epoch — the contract */
+  status?: string;
+  traceId?: string;
+  vitals?: WebVitals;
+}
+
 export interface Envelope {
   level?: "fatal" | "error" | "warning" | "info" | "debug";
   timestamp?: number;

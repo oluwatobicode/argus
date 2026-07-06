@@ -4,7 +4,7 @@ const BACKOFF_MS = 1000;
  * Golden rule of an error-tracking SDK: NEVER throw into the host app.
  * Whatever happens here, the worst outcome is a console.warn and a lost event.
  */
-export async function sendEnvelope(url, publicKey, envelope) {
+export async function sendEnvelope(url, publicKey, envelope, options = {}) {
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         try {
             const res = await fetch(url, {
@@ -14,6 +14,7 @@ export async function sendEnvelope(url, publicKey, envelope) {
                     "x-sentry-auth": `Sentry sentry_key=${publicKey}`,
                 },
                 body: JSON.stringify(envelope),
+                keepalive: options.keepalive ?? false,
             });
             if (res.ok)
                 return;

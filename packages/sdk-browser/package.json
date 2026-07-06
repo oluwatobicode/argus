@@ -1,6 +1,6 @@
 {
   "name": "@argusdev/sdk-browser",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Argus SDK for browsers — window.onerror, unhandled rejections, breadcrumbs.",
   "type": "module",
   "main": "./dist/index.js",

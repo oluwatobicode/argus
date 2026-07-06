@@ -178,6 +178,7 @@ model Transaction {
   traceId   String
   status    String
   duration  Float
+  vitals    Json?
   timestamp DateTime @default(now())
   createdAt DateTime @default(now())
 

@@ -17,7 +17,7 @@ Does no heavy processing — validates, quota-checks, queues, and responds immed
 
 ### `worker/`
 
-BullMQ processor on the `argus-events` queue. Picks up events and does the actual work: fingerprinting, grouping into issues, writing events. (Alerting: planned.)
+BullMQ processor on the `argus-events` queue. Error events: fingerprint → group into issues → write events → fire alerts (email/webhook). Perf events: write transactions (+ vitals).
 
 ---
 
@@ -41,7 +41,8 @@ api/
 │   │   ├── issues/                   # list (paginated + status/level filters), get, update status
 │   │   ├── events/                   # list raw events for an issue (paginated)
 │   │   ├── ingest/                   # Zod-validate envelope → queue → 200
-│   │   ├── performance/ alerts/ billing/ usage/   # STUBS — routes exist, controllers empty
+│   │   ├── performance/              # transactions grouped (p50/p75/p95) + vitals p75 w/ ratings
+│   │   ├── alerts/ billing/ usage/ organizations/  # all implemented
 │   │
 │   ├── middlewares/
 │   │   ├── auth.middleware.ts        # ensureAuth — req.isAuthenticated() (Passport session)
@@ -77,8 +78,11 @@ worker/
 │   ├── processors/
 │   │   ├── errorEvent.processor.ts   # guard shape (UnrecoverableError) → fingerprint →
 │   │   │                             #   upsert Issue → write Event
-│   │   └── perfEvent.processor.ts    # stub (Phase 7)
-│   ├── services/alert.service.ts     # stub (Phase 5)
+│   │   └── perfEvent.processor.ts    # guard shape → write Transaction row (+ vitals Json)
+│   ├── services/
+│   │   ├── alert.service.ts          # NEW_ISSUE + ERROR_RATE engines → email/webhook + AlertLog
+│   │   └── email.service.ts          # Resend
+│   ├── templates/alertemail.ts       # new-issue + error-rate HTML emails
 │   ├── utils/
 │   │   ├── fingerprint.util.ts       # SHA-256 of top 5 frames "filename:function:lineno|…"
 │   │   └── sourceMap.util.ts         # stub (Phase 8)
@@ -104,7 +108,8 @@ Key models — see [api/prisma/schema.prisma](./api/prisma/schema.prisma) for th
 - **EventQuota** — `@@unique([orgId, month])`, `count` vs `limit` — the atomic quota row
 - **AlertRule** — per project: `type` (NEW_ISSUE or ERROR_RATE), `threshold`/`windowMinutes` (rate rules), `notifyEmail?`/`webhookUrl?`, `enabled`, `lastTriggeredAt`
 - **AlertLog** — one row per delivery attempt: `channel` (email/webhook), `target`, `success`, `error?`
-- **Transaction/Span/Subscription** — schema ready, features planned
+- **Transaction** — perf rows: `name`, `duration` (ms), `status`, `traceId`, `vitals Json?` (LCP/CLS/FCP/TTFB), indexed by `[projectId, timestamp]`
+- **Span/Subscription** — Span awaits the Node timing follow-up; Subscription backs Polar billing
 
 ---
 
@@ -151,7 +156,7 @@ Known trade-off: quota is consumed *before* validation — a malformed payload c
 ## Worker Pipeline (actual)
 
 ```
-1. Route by job.name     → "error-event" → processor; unknown → UnrecoverableError (no retry)
+1. Route by job.name     → "error-event" / "perf-event" → processor; unknown → UnrecoverableError
 2. Guard envelope shape  → missing frames/projectId → UnrecoverableError (fail once, no loop)
 3. Fingerprint           → SHA-256 of top 5 frames "filename:function:lineno|…"
 4. Upsert Issue          → existing fingerprint? eventCount++ + lastSeen; new? INSERT
@@ -186,7 +191,8 @@ Auth column: 🍪 = session cookie required.
 | PATCH/DELETE | `/projects/:pid/alerts/:id` | 🍪 | update (incl. enable toggle) / delete |
 | POST | `/billing/checkout` `/billing/portal` | 🍪 | Polar checkout / customer portal → `{ url }` |
 | POST | `/billing/webhook` | Polar sig | subscription events → org plan flip |
-| — | `/projects/:pid/performance/*` | 🍪 | **stub — hangs if called** |
+| GET | `/projects/:pid/performance/transactions` | 🍪 | grouped by name: count, p50/p75/p95, lastSeen (`?days=1\|7\|30`) |
+| GET | `/projects/:pid/performance/vitals` | 🍪 | p75 per vital (LCP/CLS/FCP/TTFB) + web.dev rating |
 
 ---
 
@@ -261,4 +267,8 @@ FROM_EMAIL=Argus <onboarding@resend.dev>
 - [x] Checkout + customer portal (`@polar-sh/sdk`)
 - [x] Webhook (signature-verified via raw body) → subscription events → org plan + quota sync
 
-### Phase 7 — Performance Monitoring *(planned — only remaining stub)*
+### Phase 7 — Performance Monitoring ✅ (browser MVP, dogfood-verified 2026-07-06)
+
+- [x] `type: "transaction"` envelopes at ingest → `perf-event` jobs → `perfEvent.processor` → Transaction rows (with `vitals Json`)
+- [x] Aggregation endpoints (transactions percentiles + vitals p75/ratings)
+- [ ] Node/Express timing middleware + spans; TimescaleDB at scale

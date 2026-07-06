@@ -75,5 +75,24 @@ const EventEnvelopeSchema = z.object({
     .optional(),
 });
 
-export { EventEnvelopeSchema };
+/* performance envelope — page.load transactions with optional web vitals */
+const TransactionEnvelopeSchema = z.object({
+  type: z.literal("transaction"),
+  name: z.string().min(1).max(200),
+  duration: z.number().min(0),
+  timestamp: TimestampMs,
+  status: z.string().max(40).optional(),
+  traceId: z.string().max(64).optional(),
+  vitals: z
+    .object({
+      lcp: z.number().min(0).optional(),
+      cls: z.number().min(0).optional(),
+      fcp: z.number().min(0).optional(),
+      ttfb: z.number().min(0).optional(),
+    })
+    .optional(),
+});
+
+export { EventEnvelopeSchema, TransactionEnvelopeSchema };
 export type ValidatedEnvelope = z.infer<typeof EventEnvelopeSchema>;
+export type ValidatedTransaction = z.infer<typeof TransactionEnvelopeSchema>;

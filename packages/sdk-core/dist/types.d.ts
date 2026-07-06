@@ -17,6 +17,21 @@ export interface ExceptionPayload {
         frames: StackFrame[];
     };
 }
+export interface WebVitals {
+    lcp?: number;
+    cls?: number;
+    fcp?: number;
+    ttfb?: number;
+}
+export interface TransactionEnvelope {
+    type: "transaction";
+    name: string;
+    duration: number;
+    timestamp: number;
+    status?: string;
+    traceId?: string;
+    vitals?: WebVitals;
+}
 export interface Envelope {
     level?: "fatal" | "error" | "warning" | "info" | "debug";
     timestamp?: number;

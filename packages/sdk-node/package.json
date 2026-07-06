@@ -1,6 +1,6 @@
 {
   "name": "@argusdev/sdk-node",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Argus SDK for Node.js — uncaught exceptions, unhandled rejections, Express middleware.",
   "type": "module",
   "main": "./dist/index.js",

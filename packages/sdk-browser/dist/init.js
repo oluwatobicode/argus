@@ -1,5 +1,6 @@
 import { parseDsn, getIngestUrl, buildEnvelope, sendEnvelope, } from "@argusdev/sdk-core";
 import { parseStack } from "./stacktrace";
+import { startVitals } from "./vitals";
 /* set once by init(); null means "not initialized — do nothing, never crash" */
 let client = null;
 export function init(options) {
@@ -10,6 +11,10 @@ export function init(options) {
         environment: options.environment,
         release: options.release,
     };
+    /* web vitals + page.load transaction (opt out with vitals: false) */
+    if (options.vitals !== false) {
+        startVitals(client.url, client.publicKey);
+    }
     /* chain any handler the app already installed — we observe, never replace */
     const previousOnError = window.onerror;
     window.onerror = (message, source, lineno, colno, error) => {

@@ -1,6 +1,6 @@
 # Argus — Packages (SDKs)
 
-Four TypeScript packages, zero runtime dependencies. **Published to npm under the `@argusdev/*` scope** (v0.1.0, public). Linked inside the monorepo via `workspace:*`.
+Four TypeScript packages, zero runtime dependencies. **Published to npm under the `@argusdev/*` scope** (public; v0.2.0 adds web vitals). Linked inside the monorepo via `workspace:*`.
 
 Every SDK follows the same 3-part pattern: **hook** (how this runtime announces crashes) → **normalize** (that runtime's stack format → `StackFrame[]`) → **delegate** (sdk-core builds + sends the envelope).
 
@@ -90,7 +90,9 @@ try { doSomething(); } catch (err) { captureException(err); }
 
 Every event auto-attaches `request.url = window.location.href`. The same error thrown in Chrome and Firefox parses to identical frames → identical fingerprint → one Issue, not one per browser.
 
-Planned (not built): breadcrumbs (console/click/fetch trail), web vitals.
+**Web vitals (v0.2+):** every page view reports a `page.load` transaction with LCP, CLS, FCP, TTFB — buffered `PerformanceObserver`s, one send on page hide (`keepalive`). On by default; `init({ vitals: false })` opts out.
+
+Planned (not built): breadcrumbs (console/click/fetch trail).
 
 ---
 
@@ -158,6 +160,7 @@ To test the full pipeline, create a project in the dashboard, install an SDK
 - [x] `@argusdev/sdk-node` — uncaughtException, unhandledRejection, Express error middleware
 - [x] `@argusdev/sdk-browser` — window.onerror, unhandledrejection, dual-format stack parsing
 - [x] `@argusdev/sdk-react` — ErrorBoundary
-- [x] Published to npm (`@argusdev` scope, v0.1.0, public)
-- [ ] Browser SDK breadcrumbs + web vitals
+- [x] Published to npm (`@argusdev` scope, public)
+- [x] Browser SDK web vitals + page.load transactions (v0.2.0)
+- [ ] Browser SDK breadcrumbs
 - [ ] `@argusdev/sdk-react-native`, Vue, Go
