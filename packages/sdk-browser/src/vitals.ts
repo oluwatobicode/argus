@@ -27,7 +27,9 @@ export function startVitals(url: string, publicKey: string): void {
       onEntries: (entries: PerformanceEntry[]) => void,
     ) => {
       try {
-        const po = new PerformanceObserver((list) => onEntries(list.getEntries()));
+        const po = new PerformanceObserver((list) =>
+          onEntries(list.getEntries()),
+        );
         po.observe({ type, buffered: true } as PerformanceObserverInit);
         observers.push(po);
       } catch {
@@ -66,9 +68,9 @@ export function startVitals(url: string, publicKey: string): void {
       /* TTFB + total page duration from the navigation entry */
       let duration = 0;
       try {
-        const nav = performance.getEntriesByType(
-          "navigation",
-        )[0] as PerformanceNavigationTiming | undefined;
+        const nav = performance.getEntriesByType("navigation")[0] as
+          | PerformanceNavigationTiming
+          | undefined;
         if (nav) {
           vitals.ttfb = Math.round(nav.responseStart);
           duration = Math.round(nav.duration || nav.loadEventEnd || 0);
