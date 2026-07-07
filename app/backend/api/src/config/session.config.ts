@@ -22,8 +22,8 @@ export const sessionMiddleware = session({
   cookie: {
     secure: isProduction,
     httpOnly: true,
-    /* dashboard and api live on different domains in prod → cross-site cookie */
-    sameSite: isProduction ? "none" : "lax",
+    // sameSite: isProduction ? "none" : "lax",
+    sameSite: "lax",
     maxAge: 1000 * 60 * 60 * 24 * 7,
   },
 });
