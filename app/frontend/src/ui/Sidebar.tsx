@@ -25,7 +25,12 @@ interface NavItem {
 
 const PROJECT_NAV: NavItem[] = [
   { key: "issues", label: "Issues", icon: BugIcon, live: true },
-  { key: "performance", label: "Performance", icon: ChartLineData01Icon, live: true },
+  {
+    key: "performance",
+    label: "Performance",
+    icon: ChartLineData01Icon,
+    live: true,
+  },
   { key: "alerts", label: "Alerts", icon: Notification01Icon, live: true },
   { key: "settings", label: "Settings", icon: Settings01Icon, live: true },
 ];
@@ -79,7 +84,11 @@ export function Sidebar({ user, projectId }: Props) {
       <div className="mb-6 flex items-center gap-2 px-2">
         {/* PNG has heavy transparent padding — zoom-crop so the mark fills the box */}
         <div className="flex h-7 w-7 items-center justify-center overflow-hidden">
-          <img src="/argus-logo.png" alt="Argus" className="h-full w-full scale-[3.2] object-contain" />
+          <img
+            src="/argus-logo.png"
+            alt="Argus"
+            className="h-full w-full scale-[3.2] object-contain"
+          />
         </div>
         <span className="font-mono font-bold tracking-tight">argus</span>
       </div>
@@ -91,14 +100,16 @@ export function Sidebar({ user, projectId }: Props) {
 
       <SectionLabel className="mt-6">Organization</SectionLabel>
       <nav className="flex flex-col gap-1">{ORG_NAV.map(renderItem)}</nav>
-
       <div className="mt-auto flex flex-col gap-1">
         <div className="flex cursor-default items-center gap-3 rounded-2xl px-3 py-2.5 text-sm text-text-3">
-          <HugeiconsIcon icon={BookOpen01Icon} size={17} strokeWidth={1.8} />
-          Docs
-          <span className="ml-auto rounded-full border border-border-2 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-text-4">
-            soon
-          </span>
+          <a
+            href="https://argus-7960b943.mintlify.site/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className="text-text-3">Docs</span>
+            <HugeiconsIcon icon={BookOpen01Icon} size={17} strokeWidth={1.8} />
+          </a>
         </div>
 
         <div className="mt-2 flex items-center gap-2.5 border-t border-divider px-2 pt-4">
@@ -107,7 +118,9 @@ export function Sidebar({ user, projectId }: Props) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs font-medium">{user.name ?? "—"}</p>
-            <p className="truncate font-mono text-[10px] text-text-3">{user.email}</p>
+            <p className="truncate font-mono text-[10px] text-text-3">
+              {user.email}
+            </p>
           </div>
           <button
             onClick={() =>

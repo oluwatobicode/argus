@@ -12,7 +12,7 @@ const FOOTER_COLS = [
   {
     title: "Developers",
     links: [
-      { label: "Documentation", href: "#" },
+      { label: "Documentation", href: "https://argus-7960b943.mintlify.site/" },
       { label: "SDKs on npm", href: "https://www.npmjs.com/org/argusdev" },
       { label: "Self-hosting", href: "#" },
       { label: "GitHub", href: "#" },
@@ -66,8 +66,8 @@ export function Footer() {
               <span className="text-base font-bold">Argus</span>
             </div>
             <p className="font-code text-[12px] leading-[1.7] text-[#777b87]">
-              Open-source error tracking and performance monitoring. Self-host it
-              or let us run it.
+              Open-source error tracking and performance monitoring. Self-host
+              it or let us run it.
             </p>
           </div>
           <div className="flex flex-wrap gap-14">
