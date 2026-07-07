@@ -23,7 +23,7 @@ export const sessionMiddleware = session({
     secure: false, // isProduction,
     httpOnly: true,
     // sameSite: isProduction ? "none" : "lax",
-    sameSite: "lax",
+    sameSite: "none",
     maxAge: 1000 * 60 * 60 * 24 * 7,
   },
 });
