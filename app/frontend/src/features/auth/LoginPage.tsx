@@ -2,12 +2,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import toast from "react-hot-toast";
-import { Link, useNavigate } from "react-router";
+import { Link, Navigate, useNavigate } from "react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { GoogleIcon, GithubIcon } from "@hugeicons/core-free-icons";
 import { Button } from "../../ui/Button";
 import { Input } from "../../ui/Input";
-import { useLogin } from "../../hooks/useAuth";
+import { FullScreenLoader } from "../../ui/Loader";
+import { useLogin, useMe } from "../../hooks/useAuth";
 import { ApiError, oauthUrl } from "../../api/axiosInstance";
 
 const LoginSchema = z.object({
@@ -20,6 +21,10 @@ type LoginValues = z.infer<typeof LoginSchema>;
 export function LoginPage() {
   const navigate = useNavigate();
   const login = useLogin();
+  const { data: me, isLoading } = useMe();
+
+  if (isLoading) return <FullScreenLoader />;
+  if (me) return <Navigate to="/projects" replace />;
   const {
     register,
     handleSubmit,

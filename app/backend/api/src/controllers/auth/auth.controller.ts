@@ -322,6 +322,11 @@ export const me = async (req: Request, res: Response, next: NextFunction) => {
 //  Google OAuth
 
 export const googleAuth = (req: Request, res: Response, next: NextFunction) => {
+  if (req.isAuthenticated()) {
+    return res.redirect(
+      `${process.env.FRONTEND_URL || "http://localhost:5173"}/projects`,
+    );
+  }
   passport.authenticate("google", { scope: ["profile", "email"] })(
     req,
     res,
@@ -343,6 +348,11 @@ export const googleCallback = (
 //  GitHub OAuth
 
 export const githubAuth = (req: Request, res: Response, next: NextFunction) => {
+  if (req.isAuthenticated()) {
+    return res.redirect(
+      `${process.env.FRONTEND_URL || "http://localhost:5173"}/projects`,
+    );
+  }
   passport.authenticate("github", { scope: ["user:email"] })(req, res, next);
 };
 
