@@ -20,7 +20,7 @@ export const sessionMiddleware = session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // isProduction,
+    secure: isProduction, // isProduction,
     httpOnly: true,
     // sameSite: isProduction ? "none" : "lax",
     sameSite: "none",
