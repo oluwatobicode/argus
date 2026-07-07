@@ -2,7 +2,7 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM_EMAIL = process.env.FROM_EMAIL || "Argus <noreply@argus.dev>";
+const FROM_EMAIL = process.env.FROM_EMAIL || "Argus <argus@oluwatobii.xyz>";
 
 interface SendEmailOptions {
   to: string;
