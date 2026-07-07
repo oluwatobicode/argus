@@ -16,11 +16,14 @@ import { BillingPage } from "./features/billing/BillingPage";
 import { MembersPage } from "./features/members/MembersPage";
 import { AlertsPage } from "./features/alerts/AlertsPage";
 import { PerformancePage } from "./features/performance/PerformancePage";
+import { LandingPage } from "./landing/LandingPage";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<LandingPage />} />
+
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

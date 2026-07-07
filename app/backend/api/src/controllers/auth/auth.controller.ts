@@ -16,6 +16,23 @@ import { comparePassword, hashPassword } from "../../utils/password.util";
 import { generateAlphaNumeric } from "../../utils/otp.utils";
 import redis from "../../config/redis.config";
 import crypto from "crypto";
+import { sendEmail } from "../../services/email.service";
+import { buildOtpEmail, buildWelcomeEmail } from "../../templates/authemail";
+
+/*
+ * Fire-and-forget email: a Resend hiccup must never break the auth flow.
+ * In non-production we also log the OTP so local dev works without a verified
+ * sending domain.
+ */
+function dispatchOtpEmail(email: string, otp: string) {
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[dev] OTP for ${email}: ${otp}`);
+  }
+  const { subject, html } = buildOtpEmail({ otp });
+  void sendEmail({ to: email, subject, html }).catch((err) =>
+    console.error(`Failed to send OTP email to ${email}:`, err),
+  );
+}
 
 export const register = async (
   req: Request,
@@ -76,8 +93,7 @@ export const register = async (
     const otp = generateAlphaNumeric(6);
     const hashedOtp = crypto.createHash("sha512").update(otp).digest("hex");
     await redis.set(`otp:${normalizedEmail}`, hashedOtp, "EX", 600);
-    /* will change to render later */
-    console.log(otp);
+    dispatchOtpEmail(normalizedEmail, otp);
 
     return sendSuccess(res, HTTP_STATUS.OK, SUCCESS_MESSAGES.SIGNUP_SUCCESS, {
       email: newUser.email,
@@ -118,7 +134,7 @@ export const verifyOtp = async (
       return sendError(res, HTTP_STATUS.BAD_REQUEST, AUTH_MESSAGES.INVALID_OTP);
     }
 
-    await prisma.user.update({
+    const verifiedUser = await prisma.user.update({
       where: { email: normalizedEmail },
       data: {
         emailVerified: true,
@@ -126,6 +142,20 @@ export const verifyOtp = async (
     });
 
     await redis.del(`otp:${normalizedEmail}`);
+
+    /* welcome email — fire-and-forget, never blocks verification */
+    const appUrl = process.env.FRONTEND_URL || "https://argus.dev";
+    const welcome = buildWelcomeEmail({
+      name: verifiedUser.name ?? "",
+      appUrl,
+    });
+    void sendEmail({
+      to: normalizedEmail,
+      subject: welcome.subject,
+      html: welcome.html,
+    }).catch((err) =>
+      console.error(`Failed to send welcome email to ${normalizedEmail}:`, err),
+    );
 
     return sendSuccess(res, HTTP_STATUS.OK, SUCCESS_MESSAGES.OTP_VERIFIED);
   } catch (error) {
@@ -171,8 +201,7 @@ export const sendOtp = async (
     const otp = generateAlphaNumeric(6);
     const hashedOtp = crypto.createHash("sha512").update(otp).digest("hex");
     await redis.set(`otp:${normalizedEmail}`, hashedOtp, "EX", 600);
-    /* will change to render later */
-    console.log(otp);
+    dispatchOtpEmail(normalizedEmail, otp);
 
     return sendSuccess(res, HTTP_STATUS.OK, SUCCESS_MESSAGES.OTP_RESENT);
   } catch (error) {
