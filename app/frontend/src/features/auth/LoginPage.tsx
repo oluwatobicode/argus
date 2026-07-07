@@ -32,7 +32,7 @@ export function LoginPage() {
         toast.success(
           `Welcome back${user.name ? `, ${user.name.split(" ")[0]}` : ""}`,
         );
-        navigate("/");
+        navigate("/projects");
       },
     });
   };
