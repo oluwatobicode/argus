@@ -22,14 +22,14 @@ export function LoginPage() {
   const navigate = useNavigate();
   const login = useLogin();
   const { data: me, isLoading } = useMe();
-
-  if (isLoading) return <FullScreenLoader />;
-  if (me) return <Navigate to="/projects" replace />;
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginValues>({ resolver: zodResolver(LoginSchema) });
+
+  if (isLoading) return <FullScreenLoader />;
+  if (me) return <Navigate to="/projects" replace />;
 
   const onSubmit = (values: LoginValues) => {
     login.mutate(values, {
