@@ -96,3 +96,10 @@ body {
   82% { opacity: 0.35; }
   86% { opacity: 1; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  [class*="landing-"] {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
