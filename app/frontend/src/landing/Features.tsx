@@ -1,43 +1,12 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { ERR_POOL, clock } from "./demoData";
 
-/* ---- real, published SDKs only ---- */
-const ReactIcon = (
-  <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="2.1" fill="#61DAFB" />
-    <ellipse cx="12" cy="12" rx="10" ry="4" stroke="#61DAFB" strokeWidth="1.2" />
-    <ellipse cx="12" cy="12" rx="10" ry="4" stroke="#61DAFB" strokeWidth="1.2" transform="rotate(60 12 12)" />
-    <ellipse cx="12" cy="12" rx="10" ry="4" stroke="#61DAFB" strokeWidth="1.2" transform="rotate(120 12 12)" />
-  </svg>
-);
-const BrowserIcon = (
-  <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#e7e8ee" strokeWidth="1.3">
-    <circle cx="12" cy="12" r="9" />
-    <path d="M3 12h18" />
-    <path d="M12 3a14.5 14.5 0 0 1 0 18a14.5 14.5 0 0 1 0-18" />
-  </svg>
-);
-const NodeIcon = (
-  <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
-    <path d="M12 1.8 L20.9 6.9 V17.1 L12 22.2 L3.1 17.1 V6.9 Z" stroke="#3DD68C" strokeWidth="1.3" />
-    <path d="M12 6.5 L16.8 9.25 V14.75 L12 17.5 L7.2 14.75 V9.25 Z" fill="#3DD68C" />
-  </svg>
-);
-const Badge = ({ bg, fg, label }: { bg: string; fg: string; label: string }) => (
-  <div
-    className="flex h-[38px] w-[38px] items-center justify-center text-[16px] font-extrabold"
-    style={{ background: bg, color: fg }}
-  >
-    {label}
-  </div>
-);
-
-const SDKS: { name: string; sub: string; icon: ReactNode }[] = [
-  { name: "React", sub: "@argusdev/sdk-react", icon: ReactIcon },
-  { name: "Browser", sub: "@argusdev/sdk-browser", icon: BrowserIcon },
-  { name: "Node.js", sub: "@argusdev/sdk-node", icon: NodeIcon },
-  { name: "JavaScript", sub: "@argusdev/sdk-core", icon: <Badge bg="#F7DF1E" fg="#08090c" label="JS" /> },
-  { name: "TypeScript", sub: "first-class types", icon: <Badge bg="#3178C6" fg="#ffffff" label="TS" /> },
+const SDKS = [
+  { name: "React", sub: "@argusdev/sdk-react", logo: "/React-icon.svg", alt: "React logo" },
+  { name: "Next.js", sub: "React + Node ready", logo: "/next-js.svg", alt: "Next.js logo", markClassName: "rounded-full bg-[#e7e8ee] p-1" },
+  { name: "Node.js", sub: "@argusdev/sdk-node", logo: "/Node.js.svg", alt: "Node.js logo" },
+  { name: "JavaScript", sub: "@argusdev/sdk-core", logo: "/js-logo.png", alt: "JavaScript logo" },
+  { name: "TypeScript", sub: "first-class types", logo: "/ts-logo.png", alt: "TypeScript logo" },
 ];
 
 const FW: Record<
@@ -121,7 +90,14 @@ export function Features() {
               key={s.name}
               className="flex min-w-0 flex-col items-center gap-1.5 border border-[#343843] bg-[rgba(17,19,24,0.72)] px-3.5 py-5 text-center transition-colors hover:border-lime/45 sm:py-[26px]"
             >
-              <div className="mb-2">{s.icon}</div>
+              <div className={`mb-2 flex h-11 w-11 items-center justify-center ${s.markClassName ?? ""}`}>
+                <img
+                  src={s.logo}
+                  alt={s.alt}
+                  className="h-full w-full object-contain"
+                  loading="lazy"
+                />
+              </div>
               <div className="text-[14.5px] font-bold text-[#e7e8ee]">{s.name}</div>
               <div className="max-w-full break-all font-code text-[11px] text-[#5a5f6d]">
                 {s.sub}
