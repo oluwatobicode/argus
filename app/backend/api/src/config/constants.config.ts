@@ -49,7 +49,7 @@ export const ERROR_MESSAGES = {
 export const SUCCESS_MESSAGES = {
   LOGIN_SUCCESS: "Login successful",
   LOGOUT_SUCCESS: "Logout successful",
-  SIGNUP_SUCCESS: "Signup successful, check your email for verification code",
+  SIGNUP_SUCCESS: "Signup successful, check your email or spam for verification code",
   UPDATE_SUCCESS: "Update successful",
   DELETE_SUCCESS: "Delete successful",
   CREATE_SUCCESS: "Create successful",

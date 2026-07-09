@@ -73,7 +73,7 @@ argus/
 │   ├── sdk-browser/        # Browser SDK — window.onerror, Chrome+Firefox stack parsing
 │   └── sdk-react/          # React SDK — <ArgusErrorBoundary>, re-exports sdk-browser
 ├── docs/                   # DESIGN_BRIEF.md — dashboard design spec
-└── infra/                  # planned: docker-compose, TimescaleDB migrations
+└── infra/                  # docker-compose (dev deps + full stack), Dockerfiles
 ```
 
 ---
@@ -105,11 +105,11 @@ git clone https://github.com/oluwatobicode/argus
 cd argus
 pnpm install
 
-# 2. Environment variables (no .env.example yet — create by hand)
-#    app/backend/api/.env    → DATABASE_URL, REDIS_URL, SESSION_SECRET, FRONTEND_URL,
-#                              DSN_HOST, DSN_PROTOCOL (http for dev),
-#                              GOOGLE_/GITHUB_ OAuth keys (optional)
-#    app/backend/worker/.env → DATABASE_URL, REDIS_URL
+# 2. Environment variables
+#    Option A — Docker deps only (Postgres + Redis):
+#      pnpm docker:deps
+#      Copy values from infra/.env.docker into app/backend/api/.env and app/backend/worker/.env
+#    Option B — Full Docker stack: see infra/README.md
 
 # 3. Generate Prisma clients + run migrations
 pnpm db:generate

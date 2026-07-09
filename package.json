@@ -12,7 +12,11 @@
     "db:generate": "pnpm --filter @argus/api exec prisma generate && pnpm --filter @argus/worker exec prisma generate",
     "db:migrate": "pnpm --filter @argus/api exec prisma migrate dev",
     "db:studio": "pnpm --filter @argus/api exec prisma studio",
-    "db:reset": "pnpm --filter @argus/api exec prisma migrate reset"
+    "db:reset": "pnpm --filter @argus/api exec prisma migrate reset",
+    "docker:deps": "docker compose -f infra/docker-compose.yml up -d",
+    "docker:deps:down": "docker compose -f infra/docker-compose.yml down",
+    "docker:prod": "docker compose -f infra/docker-compose.prod.yml --env-file infra/.env up -d --build",
+    "docker:prod:down": "docker compose -f infra/docker-compose.prod.yml --env-file infra/.env down"
   },
   "devDependencies": {
     "@types/node": "^26.0.1"

@@ -1,0 +1,12 @@
+node_modules
+**/node_modules
+.git
+.env
+**/.env
+dist
+**/dist
+app/frontend/dist
+.agents
+**/.turbo
+*.md
+!infra/README.md

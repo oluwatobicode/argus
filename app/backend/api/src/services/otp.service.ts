@@ -1,6 +1,5 @@
 import redisClient from "../config/redis.config";
 import { generateAlphaNumeric } from "../utils/otp.utils";
-import { TIME } from "../config/constants.config";
 
 const OTP_LENGTH = 6;
 const OTP_TTL = 10 * 60; // 10 minutes in seconds
