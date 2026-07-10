@@ -13,8 +13,7 @@ Argus watches your applications across browser, Node.js, and React — capturing
 - **Alerting** — email (Resend) or webhook on a new issue or an error-rate spike (windowed threshold + cooldown)
 - **Free + Pro tiers** — free tier for small projects, Pro for higher volume with Polar billing
 
----
-
+-------
 ## Pricing
 
 | Tier | Events / month | Projects  | Price  |
