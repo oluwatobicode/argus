@@ -101,14 +101,14 @@ export function Sidebar({ user, projectId }: Props) {
       <SectionLabel className="mt-6">Organization</SectionLabel>
       <nav className="flex flex-col gap-1">{ORG_NAV.map(renderItem)}</nav>
       <div className="mt-auto flex flex-col gap-1">
-        <div className="flex cursor-default items-center gap-3 rounded-2xl px-3 py-2.5 text-sm text-text-3">
+        <div className="flex cursor-default items-center gap-3 rounded-2xl px-3 py-2.5 text-[15px] text-text-3">
+          <HugeiconsIcon icon={BookOpen01Icon} size={17} strokeWidth={1.8} />
           <a
             href="https://argus-7960b943.mintlify.site/"
             target="_blank"
             rel="noopener noreferrer"
           >
             <span className="text-text-3">Docs</span>
-            <HugeiconsIcon icon={BookOpen01Icon} size={17} strokeWidth={1.8} />
           </a>
         </div>
 

@@ -109,7 +109,7 @@ Key models — see [api/prisma/schema.prisma](./api/prisma/schema.prisma) for th
 - **AlertRule** — per project: `type` (NEW_ISSUE or ERROR_RATE), `threshold`/`windowMinutes` (rate rules), `notifyEmail?`/`webhookUrl?`, `enabled`, `lastTriggeredAt`
 - **AlertLog** — one row per delivery attempt: `channel` (email/webhook), `target`, `success`, `error?`
 - **Transaction** — perf rows: `name`, `duration` (ms), `status`, `traceId`, `vitals Json?` (LCP/CLS/FCP/TTFB), indexed by `[projectId, timestamp]`
-- **Span/Subscription** — Span awaits the Node timing follow-up; Subscription backs Polar billing
+- **Span/Subscription** — Span awaits the Node timing follow-up; Subscription backs Bachs billing
 
 ---
 
@@ -189,8 +189,8 @@ Auth column: 🍪 = session cookie required.
 | GET | `/usage` | 🍪 | org quota (`used`/`limit`/`plan`) + level breakdown |
 | GET/POST | `/projects/:pid/alerts` | 🍪 | list / create rule (NEW_ISSUE or ERROR_RATE) |
 | PATCH/DELETE | `/projects/:pid/alerts/:id` | 🍪 | update (incl. enable toggle) / delete |
-| POST | `/billing/checkout` `/billing/portal` | 🍪 | Polar checkout / customer portal → `{ url }` |
-| POST | `/billing/webhook` | Polar sig | subscription events → org plan flip |
+| POST | `/billing/checkout` `/billing/cancel` | 🍪 | Bachs checkout / cancel subscription → `{ url }` |
+| POST | `/billing/webhook` | Bachs HMAC sig | subscription events → org plan flip |
 | GET | `/projects/:pid/performance/transactions` | 🍪 | grouped by name: count, p50/p75/p95, lastSeen (`?days=1\|7\|30`) |
 | GET | `/projects/:pid/performance/vitals` | 🍪 | p75 per vital (LCP/CLS/FCP/TTFB) + web.dev rating |
 
@@ -213,7 +213,7 @@ GOOGLE_CLIENT_ID=        # optional — OAuth
 GOOGLE_CLIENT_SECRET=
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
-POLAR_ACCESS_TOKEN=      # billing — Polar sandbox
+POLAR_ACCESS_TOKEN=      # billing — Polar sandbox (deprecated, now Bachs)
 POLAR_PRO_PRODUCT_ID=
 POLAR_WEBHOOK_SECRET=
 POLAR_SERVER=sandbox     # production when live
@@ -237,7 +237,7 @@ FROM_EMAIL=Argus <onboarding@resend.dev>
 - **Error handling**: controllers `try/catch → next(error)`; `error.middleware.ts` (mounted last) maps ZodError→400 (with issues), Prisma P2002→409, P2025→404, malformed JSON→400, everything else→500 with server-side logging only.
 - **Prisma client import**: `from "../generated/prisma/client"`, not `@prisma/client`. Run `pnpm db:generate` first.
 - The worker keeps its **own copy** of the Prisma schema + generated client — keep both in sync (dedupe planned).
-- When billing lands: the Polar webhook route must be registered **before** `express.json()` (raw body needed for signature verification). Not yet implemented — current `app.ts` would need reordering.
+- When billing lands: the Bachs webhook route must be registered **before** `express.json()` (raw body needed for signature verification). Not yet implemented — current `app.ts` would need reordering.
 
 ---
 
@@ -262,9 +262,9 @@ FROM_EMAIL=Argus <onboarding@resend.dev>
 - [x] Alert rule CRUD (org-scoped, Zod-validated)
 - [x] Worker engine — NEW_ISSUE + ERROR_RATE (windowed count + cooldown) → email (Resend) + webhook, AlertLog
 
-### Phase 6 — Billing ✅ (Polar sandbox, verified live — payment → PRO flip)
+### Phase 6 — Billing ✅ (Bachs sandbox, verified live — payment → PRO flip)
 
-- [x] Checkout + customer portal (`@polar-sh/sdk`)
+- [x] Checkout + cancel subscription (native fetch, no SDK)
 - [x] Webhook (signature-verified via raw body) → subscription events → org plan + quota sync
 
 ### Phase 7 — Performance Monitoring ✅ (browser MVP, dogfood-verified 2026-07-06)

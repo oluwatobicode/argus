@@ -11,7 +11,7 @@ Argus watches your applications across browser, Node.js, and React — capturing
 - **Error Tracking** — catches uncaught exceptions and unhandled promise rejections, groups duplicates into issues (SHA-256 stack fingerprinting), shows full stack trace
 - **Performance Monitoring** — web vitals (LCP, CLS, FCP, TTFB) + page-load transactions with p50/p75/p95 latency (browser; Node timing planned)
 - **Alerting** — email (Resend) or webhook on a new issue or an error-rate spike (windowed threshold + cooldown)
-- **Free + Pro tiers** — free tier for small projects, Pro for higher volume with Polar billing
+- **Free + Pro tiers** — free tier for small projects, Pro for higher volume with Bachs billing
 
 -------
 ## Pricing
@@ -19,7 +19,7 @@ Argus watches your applications across browser, Node.js, and React — capturing
 | Tier | Events / month | Projects  | Price  |
 | ---- | -------------- | --------- | ------ |
 | Free | 10,000         | 1         | $0     |
-| Pro  | 500,000        | Unlimited | $12/mo |
+| Pro  | 500,000        | Unlimited | $5/mo |
 
 Events over the limit are rejected with `429` at the ingest layer (atomic check-and-consume — bursts can't overshoot). Users see usage in the dashboard and get prompted to upgrade.
 
@@ -87,7 +87,7 @@ argus/
 | Worker    | BullMQ processors, TypeScript                           |
 | Database  | PostgreSQL (TimescaleDB planned for perf data)          |
 | Email     | Resend (planned — OTP currently logs to console)        |
-| Payments  | Polar                                                   |
+| Payments  | Bachs                                                   |
 | Dashboard | React 19, Vite, Tailwind v4, TanStack Query v5, Axios, react-hook-form + Zod |
 | SDKs      | TypeScript, zero runtime dependencies                   |
 | Monorepo  | pnpm workspaces                                         |
@@ -174,9 +174,9 @@ npm install @argusdev/sdk-browser   # or @argusdev/sdk-node, @argusdev/sdk-react
 - [x] Email notifications via Resend + webhook (POST) delivery, AlertLog
 - [x] Dashboard: alert management page (type selector, threshold/window)
 
-### Phase 6 — Billing ✅ (Polar sandbox, verified live — payment → PRO flip)
+### Phase 6 — Billing ✅ (Bachs sandbox, verified live — payment → PRO flip)
 
-- [x] Polar checkout session + customer portal + webhook handler (signature-verified)
+- [x] Bachs checkout session + cancel subscription + webhook handler (HMAC-SHA256 signature-verified)
 - [x] Plan enforcement — org PRO flip + quota ceiling synced mid-cycle
 - [x] Dashboard: billing page (upgrade / manage) + usage meter
 

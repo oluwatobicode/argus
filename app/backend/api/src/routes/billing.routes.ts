@@ -9,7 +9,7 @@ const router = Router();
 const manageBilling = requirePermission(PERMISSIONS.BILLING_MANAGE);
 
 router.post("/checkout", ensureAuth, manageBilling, billingController.createCheckoutSession);
-router.post("/portal", ensureAuth, manageBilling, billingController.createBillingPortal);
+router.post("/cancel", ensureAuth, manageBilling, billingController.cancelBilling);
 router.post("/webhook", billingController.handleWebhook);
 
 export default router;

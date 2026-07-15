@@ -1,10 +1,11 @@
 import { prisma } from "../config/db.config";
 import { PLAN_EVENT_LIMITS } from "../config/constants.config";
 import {
-  polar,
-  POLAR_PRO_PRODUCT_ID,
-  POLAR_SUCCESS_URL,
-} from "../config/polar.config";
+  bachsFetch,
+  BACHS_PRO_PRODUCT_ID,
+  BACHS_SUCCESS_URL,
+  BACHS_CANCEL_URL,
+} from "../config/bachs.config";
 
 /* keep the current month's quota ceiling in sync with the plan (mid-cycle change) */
 async function syncQuotaLimit(orgId: string, plan: "FREE" | "PRO") {
@@ -17,90 +18,114 @@ async function syncQuotaLimit(orgId: string, plan: "FREE" | "PRO") {
   });
 }
 
-/* create a Polar checkout for the Pro plan, linked to our org via externalCustomerId */
-export async function createProCheckout(orgId: string, email: string | null) {
-  const checkout = await polar.checkouts.create({
-    products: [POLAR_PRO_PRODUCT_ID],
-    successUrl: POLAR_SUCCESS_URL,
-    externalCustomerId: orgId,
-    customerEmail: email ?? undefined,
-    metadata: { orgId },
+/* create a Bachs checkout for the Pro plan, linked to our org via metadata */
+export async function createProCheckout(
+  orgId: string,
+  email: string | null,
+  name: string | null,
+) {
+  const body = await bachsFetch<{
+    checkout_id: string;
+    checkout_url: string;
+    status: string;
+  }>("/v1/checkout-sessions", {
+    method: "POST",
+    body: JSON.stringify({
+      product_cart: [{ product_id: BACHS_PRO_PRODUCT_ID, quantity: 1 }],
+      customer: {
+        email: email ?? undefined,
+        name: name ?? undefined,
+      },
+      success_url: BACHS_SUCCESS_URL,
+      cancel_url: BACHS_CANCEL_URL,
+      metadata: { orgId },
+    }),
   });
-  return checkout.url;
+
+  return body.checkout_url;
 }
 
-/* customer portal session (manage/cancel) — Polar resolves the customer by our org id */
-export async function createPortalSession(orgId: string) {
-  const session = await polar.customerSessions.create({
-    externalCustomerId: orgId,
+/* cancel a subscription (immediately or at period end) */
+export async function cancelSubscription(
+  orgId: string,
+  cancelAtPeriodEnd: boolean,
+) {
+  const sub = await prisma.subscription.findUnique({ where: { orgId } });
+  if (!sub) return;
+
+  await bachsFetch(`/v1/subscriptions/${sub.bachsSubscriptionId}`, {
+    method: "DELETE",
+    body: JSON.stringify({ cancel_at_period_end: cancelAtPeriodEnd }),
   });
-  return session.customerPortalUrl;
 }
 
-/* Polar Subscription shape (only the fields we use) */
-interface PolarSubscription {
-  id: string;
+/* Bachs subscription shape from webhook event.data */
+export interface BachsSubscription {
+  subscription_id: string;
+  product_id: string;
   status: string;
-  productId: string;
-  customerId: string;
-  currentPeriodStart?: Date | null;
-  currentPeriodEnd?: Date | null;
-  cancelAtPeriodEnd?: boolean | null;
-  customer?: { externalId?: string | null } | null;
-  metadata?: Record<string, unknown> | null;
+  current_period_start: string;
+  current_period_end: string;
+  cancel_at_period_end: boolean;
+  customer: { customer_id: string; email?: string; name?: string };
+  metadata?: Record<string, unknown>;
 }
 
-/* find the org this subscription belongs to (externalId set at checkout, or metadata) */
-function orgIdFrom(sub: PolarSubscription): string | null {
-  return (
-    sub.customer?.externalId ??
-    (typeof sub.metadata?.orgId === "string" ? sub.metadata.orgId : null)
-  );
+/* find the org this subscription belongs to (metadata.orgId set at checkout) */
+function orgIdFrom(sub: BachsSubscription): string | null {
+  return typeof sub.metadata?.orgId === "string" ? sub.metadata.orgId : null;
 }
 
 async function upsertSubscription(
   orgId: string,
-  sub: PolarSubscription,
+  sub: BachsSubscription,
   plan: "FREE" | "PRO",
 ) {
   const now = new Date();
+  const periodStart = sub.current_period_start
+    ? new Date(sub.current_period_start)
+    : now;
+  const periodEnd = sub.current_period_end
+    ? new Date(sub.current_period_end)
+    : now;
+
   await prisma.subscription.upsert({
     where: { orgId },
     create: {
       orgId,
-      polarSubscriptionId: sub.id,
-      polarProductId: sub.productId,
+      bachsSubscriptionId: sub.subscription_id,
+      bachsProductId: sub.product_id,
       plan,
       status: sub.status,
-      currentPeriodStart: sub.currentPeriodStart ?? now,
-      currentPeriodEnd: sub.currentPeriodEnd ?? now,
-      cancelAtPeriodEnd: sub.cancelAtPeriodEnd ?? false,
+      currentPeriodStart: periodStart,
+      currentPeriodEnd: periodEnd,
+      cancelAtPeriodEnd: sub.cancel_at_period_end ?? false,
     },
     update: {
-      polarSubscriptionId: sub.id,
-      polarProductId: sub.productId,
+      bachsSubscriptionId: sub.subscription_id,
+      bachsProductId: sub.product_id,
       plan,
       status: sub.status,
-      currentPeriodEnd: sub.currentPeriodEnd ?? now,
-      cancelAtPeriodEnd: sub.cancelAtPeriodEnd ?? false,
+      currentPeriodEnd: periodEnd,
+      cancelAtPeriodEnd: sub.cancel_at_period_end ?? false,
     },
   });
 }
 
 /* subscription became/stays active → org is PRO */
-export async function activateSubscription(sub: PolarSubscription) {
+export async function activateSubscription(sub: BachsSubscription) {
   const orgId = orgIdFrom(sub);
   if (!orgId) return;
   await prisma.organization.update({
     where: { id: orgId },
-    data: { plan: "PRO", polarCustomerId: sub.customerId },
+    data: { plan: "PRO", bachsCustomerId: sub.customer.customer_id },
   });
   await upsertSubscription(orgId, sub, "PRO");
   await syncQuotaLimit(orgId, "PRO");
 }
 
-/* revoked → access removed now → back to FREE */
-export async function revokeSubscription(sub: PolarSubscription) {
+/* deleted/canceled → access removed now → back to FREE */
+export async function revokeSubscription(sub: BachsSubscription) {
   const orgId = orgIdFrom(sub);
   if (!orgId) return;
   await prisma.organization.update({
@@ -111,8 +136,8 @@ export async function revokeSubscription(sub: PolarSubscription) {
   await syncQuotaLimit(orgId, "FREE");
 }
 
-/* canceled → keeps PRO until currentPeriodEnd; just flag it */
-export async function markSubscriptionCanceled(sub: PolarSubscription) {
+/* canceled but not yet expired → keeps PRO until currentPeriodEnd; just flag it */
+export async function markSubscriptionCanceled(sub: BachsSubscription) {
   const orgId = orgIdFrom(sub);
   if (!orgId) return;
   await upsertSubscription(orgId, sub, "PRO");

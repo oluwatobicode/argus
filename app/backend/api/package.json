@@ -8,7 +8,6 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@polar-sh/sdk": "^0.48.1",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "bcryptjs": "^3.0.3",
@@ -27,7 +26,6 @@
     "pg": "^8.22.0",
     "redis": "^6.0.1",
     "resend": "^6.14.0",
-    "stripe": "^22.3.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

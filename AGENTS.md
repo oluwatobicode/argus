@@ -51,7 +51,7 @@ READMEs were rewritten 2026-07-03 to match the source. Still: **when in doubt, t
 - **No tests, no CI, no docker-compose, no linter** (except `oxlint` in frontend/package.json).
 - **Express 5** — note breaking changes from Express 4 (e.g., async error handling, route param syntax).
 - **TypeScript ~6.0** — newer than most projects. Check for TS 6-specific syntax or breaking changes.
-- **Polar webhook** must be registered before `express.json()` (per README note — verify if this is implemented in `app.ts`).
+- **Bachs webhook** must be registered before `express.json()` (raw body needed for signature verification — implemented in `app.ts`).
 
 ## SDK packages (all implemented)
 
@@ -68,6 +68,6 @@ READMEs were rewritten 2026-07-03 to match the source. Still: **when in doubt, t
 - Quota is an atomic check-and-consume (`updateMany WHERE count < limit`); malformed payloads still consume 1 event
 - **every feature is implemented** — alerts, usage, billing, team/RBAC, and performance (browser vitals + page.load transactions; ingest forks on `type: "transaction"` → `perf-event` job → Transaction rows with `vitals Json`; sdk-browser ≥0.2 captures LCP/CLS/FCP/TTFB, one report per page view on pagehide)
 - alerts engine lives in the **worker** (`services/alert.service.ts` + `email.service.ts` + `templates/alertemail.ts`): `evaluateNewIssue` (eventCount===1) + `evaluateErrorRate` (windowed count + cooldown, every event) → email (Resend) + webhook
-- billing is **Polar** (`@polar-sh/sdk`, sandbox): checkout/portal/webhook in api; webhook signature needs raw body (captured via `express.json({ verify })` in `app.ts`)
+- billing is **Bachs** (native fetch, sandbox): checkout/cancel/webhook in api; webhook signature is HMAC-SHA256 over `"{timestamp}.{rawBody}"` verified via `X-Bachs-Signature` + `X-Bachs-Timestamp` headers (raw body captured via `express.json({ verify })` in `app.ts`)
 - full React 19 dashboard exists under `app/frontend` (session-cookie auth, React Query + Axios, feature folders), and dogfoods `@argusdev/sdk-react`
 - Postgres is hosted on Railway in dev; Redis via REDIS_URL

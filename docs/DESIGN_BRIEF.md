@@ -112,9 +112,9 @@ Route: `/projects/:projectId/issues/:issueId`. The API returns the issue **plus 
 - monthly event quota meter: `count / limit` (FREE = 10,000/mo, PRO = 500,000/mo)
 - progress bar that goes amber at ~80%, red at 100% with "events are being dropped" warning + upgrade CTA
 
-### 3.7 Billing page 🔜 (Polar, not Stripe)
+### 3.7 Billing page (Bachs)
 
-- current plan card (FREE/PRO), upgrade button → Polar checkout, manage subscription → Polar portal
+- current plan card (FREE/PRO), upgrade button → Bachs checkout, cancel subscription
 - pricing: FREE $0 (10k events, 1 project) / PRO $12/mo (500k events, unlimited projects)
 
 ### 3.8 Alerts page 🔜

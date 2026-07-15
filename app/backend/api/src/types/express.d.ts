@@ -12,7 +12,7 @@ declare global {
     interface Request {
       project?: PrismaProject;
       projectKey?: PrismaProjectKey;
-      rawBody?: Buffer; /* captured by express.json verify — Polar webhook signature */
+      rawBody?: Buffer; /* captured by express.json verify — Bachs webhook signature */
       memberRole?: MemberRole; /* set by requirePermission middleware */
     }
   }

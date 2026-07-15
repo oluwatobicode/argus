@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { Eyebrow } from "../../ui/Eyebrow";
 import { useMe } from "../../hooks/useAuth";
-import { useCheckout, usePortal } from "../../hooks/useBilling";
+import { useCheckout, useCancelSubscription } from "../../hooks/useBilling";
 import { useUsage } from "../../hooks/useUsage";
 import { usePermissions } from "../../hooks/usePermissions";
 
@@ -22,7 +22,7 @@ export function BillingPage() {
   const { data: usage } = useUsage();
   const { canManageBilling } = usePermissions();
   const checkout = useCheckout();
-  const portal = usePortal();
+  const cancelSub = useCancelSubscription();
   const queryClient = useQueryClient();
   const [params, setParams] = useSearchParams();
 
@@ -32,7 +32,7 @@ export function BillingPage() {
     usage && usage.limit > 0 ? Math.min(100, (usage.used / usage.limit) * 100) : 0;
   const meterColor = pct >= 100 ? "#F04438" : pct >= 80 ? "#F59E0B" : "#A3E635";
 
-  /* returning from Polar checkout */
+  /* returning from Bachs checkout */
   useEffect(() => {
     if (params.get("upgraded") === "true") {
       toast.success("Payment received — welcome to Pro 🎉");
@@ -47,7 +47,7 @@ export function BillingPage() {
       <Eyebrow>organization</Eyebrow>
       <h1 className="mt-1 text-[28px] font-bold tracking-tight">Billing</h1>
       <p className="mt-1.5 text-[13px] text-text-2">
-        Powered by Polar. {isPro ? "You're on Pro." : "Upgrade for more headroom."}
+        Powered by Bachs. {isPro ? "You're on Pro." : "Upgrade for more headroom."}
       </p>
 
       {usage && (
@@ -87,11 +87,11 @@ export function BillingPage() {
               </p>
             ) : isPro ? (
               <button
-                onClick={() => portal.mutate()}
-                disabled={portal.isPending}
+                onClick={() => cancelSub.mutate(true)}
+                disabled={cancelSub.isPending}
                 className="w-full rounded-full border border-border-2 bg-surface-2 py-3 text-sm font-medium text-text-1 hover:bg-surface disabled:opacity-50"
               >
-                Manage subscription
+                {cancelSub.isPending ? "Canceling…" : "Cancel subscription"}
               </button>
             ) : (
               <button

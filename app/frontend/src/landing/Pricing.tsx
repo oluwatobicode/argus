@@ -16,7 +16,10 @@ const PRO_FEATURES = [
 
 export function Pricing() {
   return (
-    <section id="pricing" className="relative mx-auto w-[min(1180px,calc(100%_-_24px))] pt-16 sm:w-[min(1180px,calc(100%_-_40px))] sm:pt-28">
+    <section
+      id="pricing"
+      className="relative mx-auto w-[min(1180px,calc(100%_-_24px))] pt-16 sm:w-[min(1180px,calc(100%_-_40px))] sm:pt-28"
+    >
       <div className="mx-auto mb-9 max-w-[640px] text-center sm:mb-[50px]">
         <div className="mb-3.5 font-code text-[11px] tracking-[0.2em] text-[#ff4f9a] uppercase">
           Pricing
@@ -34,7 +37,8 @@ export function Pricing() {
         <div className="border border-[rgba(52,56,67,0.85)] bg-[rgba(17,19,24,0.78)] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.22)] sm:p-8">
           <div className="text-base font-extrabold">Free</div>
           <div className="mt-3.5 mb-1.5 font-code text-[38px] font-bold tracking-[-0.02em] sm:text-[44px]">
-            $0<span className="text-[15px] font-normal text-[#777b87]">/mo</span>
+            $0
+            <span className="text-[15px] font-normal text-[#777b87]">/mo</span>
           </div>
           <div className="mb-[22px] font-code text-[12px] text-[#9699a6]">
             For solo devs and side projects.
@@ -61,7 +65,8 @@ export function Pricing() {
           </span>
           <div className="text-base font-extrabold">Pro</div>
           <div className="mt-3.5 mb-1.5 font-code text-[38px] font-bold tracking-[-0.02em] sm:text-[44px]">
-            $10<span className="text-[15px] font-normal text-[#777b87]">/mo</span>
+            $5
+            <span className="text-[15px] font-normal text-[#777b87]">/mo</span>
           </div>
           <div className="mb-[22px] font-code text-[12px] text-[#9699a6]">
             For teams that ship every day.

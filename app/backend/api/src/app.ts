@@ -34,7 +34,7 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.use(helmet());
-/* stash the raw body so the Polar webhook can verify its signature
+/* stash the raw body so the Bachs webhook can verify its signature
    (needs the exact bytes, before JSON parsing) */
 app.use(
   express.json({

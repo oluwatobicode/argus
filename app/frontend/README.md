@@ -49,7 +49,7 @@ src/
 │   ├── useEvents.ts             # paginated events (stack-trace stepper)
 │   ├── useUsage.ts              # GET /usage
 │   ├── useAlerts.ts             # list + create/update/delete
-│   └── useBilling.ts            # checkout + portal (redirect to Polar)
+│   └── useBilling.ts            # checkout + cancel (Bachs)
 │
 ├── utils/                       # levels.ts (color meta), time.ts (relative timestamps)
 └── features/
@@ -59,7 +59,7 @@ src/
     ├── settings/                # SettingsPage, components/InstallTabs (Browser/React/Node)
     ├── usage/                   # UsagePage (quota meter + level breakdown)
     ├── alerts/                  # AlertsPage, components/AlertRuleModal (both alert types)
-    └── billing/                 # BillingPage (Free/Pro cards, Polar upgrade/manage)
+    └── billing/                 # BillingPage (Free/Pro cards, Bachs upgrade/cancel)
 ```
 
 ---
@@ -76,7 +76,7 @@ src/
 | `/projects/:projectId/settings` | rename, DSN, install tabs, delete | 🍪 |
 | `/projects/:projectId/usage` | quota meter + breakdown | 🍪 |
 | `/projects/:projectId/alerts` | alert-rule CRUD (new-issue + error-rate) | 🍪 |
-| `/projects/:projectId/billing` | plan cards, Polar upgrade / manage | 🍪 |
+| `/projects/:projectId/billing` | plan cards, Bachs upgrade / cancel | 🍪 |
 | `*` | → redirect to `/projects` | |
 
 🍪 = session cookie. `DashboardLayout`/`RequireAuth` redirect to `/login` when `useMe` fails.
@@ -114,5 +114,5 @@ pnpm --filter frontend build
 
 ## Status
 
-Built ✅: auth + org onboarding, projects console + DSN reveal, issues list + detail, settings, usage meter, alerts (both types), billing (Polar), team members + RBAC, **performance (vitals + transactions)**, brand loader.
+Built ✅: auth + org onboarding, projects console + DSN reveal, issues list + detail, settings, usage meter, alerts (both types), billing (Bachs), team members + RBAC, **performance (vitals + transactions)**, brand loader.
 The dashboard is feature-complete; only the Docs nav item remains `soon`.

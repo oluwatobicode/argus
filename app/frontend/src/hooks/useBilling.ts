@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { ApiError, axiosInstance } from "../api/axiosInstance";
 import type { Envelope } from "../types/api";
 
-/* start a Polar checkout → redirect the browser to the hosted checkout */
+/* start a Bachs checkout → redirect the browser to the hosted checkout */
 export function useCheckout() {
   return useMutation({
     mutationFn: async () => {
@@ -22,21 +22,21 @@ export function useCheckout() {
   });
 }
 
-/* open the Polar customer portal (manage / cancel) */
-export function usePortal() {
+/* cancel subscription (at period end or immediately) */
+export function useCancelSubscription() {
   return useMutation({
-    mutationFn: async () => {
-      const res = await axiosInstance.post<Envelope<{ url: string }>>(
-        "/billing/portal",
-      );
-      return res.data.data!.url;
+    mutationFn: async (cancelAtPeriodEnd = true) => {
+      const res = await axiosInstance.post<Envelope<null>>("/billing/cancel", {
+        cancel_at_period_end: cancelAtPeriodEnd,
+      });
+      return res.data.message;
     },
-    onSuccess: (url) => {
-      window.location.href = url;
+    onSuccess: (msg) => {
+      toast.success(msg ?? "Subscription canceled");
     },
     onError: (err) =>
       toast.error(
-        err instanceof ApiError ? err.message : "Couldn't open billing portal",
+        err instanceof ApiError ? err.message : "Couldn't cancel subscription",
       ),
   });
 }

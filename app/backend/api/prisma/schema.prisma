@@ -75,7 +75,7 @@ model Organization {
   name            String
   slug            String   @unique
   plan            Plan     @default(FREE)
-  polarCustomerId String?  @unique
+  bachsCustomerId String?  @unique
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -220,8 +220,8 @@ model EventQuota {
 model Subscription {
   id                  String   @id @default(cuid())
   orgId               String   @unique
-  polarSubscriptionId String   @unique
-  polarProductId      String
+  bachsSubscriptionId String   @unique
+  bachsProductId      String
   plan                Plan
   status              String
   currentPeriodStart  DateTime
