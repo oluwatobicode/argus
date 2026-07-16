@@ -143,6 +143,9 @@ export const handleWebhook = async (
       data: BachsSubscription;
     };
 
+    console.log("[webhook] event.type:", event.type);
+    console.log("[webhook] event.data:", JSON.stringify(event.data, null, 2));
+
     switch (event.type) {
       case "customer.subscription.created":
         await activateSubscription(event.data);
