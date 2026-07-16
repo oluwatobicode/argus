@@ -25,7 +25,7 @@ export function useCheckout() {
 /* cancel subscription (at period end or immediately) */
 export function useCancelSubscription() {
   return useMutation({
-    mutationFn: async (cancelAtPeriodEnd = true) => {
+    mutationFn: async (cancelAtPeriodEnd: boolean = true) => {
       const res = await axiosInstance.post<Envelope<null>>("/billing/cancel", {
         cancel_at_period_end: cancelAtPeriodEnd,
       });
