@@ -48,8 +48,8 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Login to GHCR
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            # Login to GHCR with PAT (read:packages)
+            echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u oluwatobicode --password-stdin
 
             cd ~/argus
             git pull origin main
