@@ -17,7 +17,14 @@ jobs:
           script: |
             cd ~/argus
             git pull origin main
-            docker compose -f infra/docker-compose.ec2.yml --env-file infra/.env up -d --build
-            docker compose -f infra/docker-compose.ec2.yml exec -T migrate pnpm exec prisma migrate deploy || true
+
+            # Build one at a time to avoid OOM on t3.micro (1GB RAM)
+            docker compose -f infra/docker-compose.ec2.yml --env-file infra/.env build migrate
+            docker compose -f infra/docker-compose.ec2.yml --env-file infra/.env build api
+            docker compose -f infra/docker-compose.ec2.yml --env-file infra/.env build worker
+
+            # Start all services (images already built)
+            docker compose -f infra/docker-compose.ec2.yml --env-file infra/.env up -d
+
             docker image prune -f
             echo "$(date): Deploy completed" >> ~/deploy.log
