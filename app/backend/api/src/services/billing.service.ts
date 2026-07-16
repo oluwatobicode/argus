@@ -32,10 +32,7 @@ export async function createProCheckout(
     method: "POST",
     body: JSON.stringify({
       product_cart: [{ product_id: BACHS_PRO_PRODUCT_ID, quantity: 1 }],
-      customer: {
-        email: email ?? undefined,
-        name: name ?? undefined,
-      },
+      ...(email ? { customer: { email, ...(name ? { name } : {}) } } : {}),
       success_url: BACHS_SUCCESS_URL,
       cancel_url: BACHS_CANCEL_URL,
       metadata: { orgId },
