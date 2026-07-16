@@ -10,6 +10,7 @@
 
 services:
   migrate:
+    image: ghcr.io/oluwatobicode/argus-migrate:latest
     build:
       context: ..
       dockerfile: app/backend/api/Dockerfile
@@ -20,6 +21,7 @@ services:
     restart: "no"
 
   api:
+    image: ghcr.io/oluwatobicode/argus-api:latest
     build:
       context: ..
       dockerfile: app/backend/api/Dockerfile
@@ -56,6 +58,7 @@ services:
       start_period: 20s
 
   worker:
+    image: ghcr.io/oluwatobicode/argus-worker:latest
     build:
       context: ..
       dockerfile: app/backend/worker/Dockerfile

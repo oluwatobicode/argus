@@ -4,8 +4,41 @@ on:
   push:
     branches: [main]
 
+env:
+  REGISTRY: ghcr.io
+  MIGRATE_IMAGE: ghcr.io/${{ github.repository_owner }}/argus-migrate
+  API_IMAGE: ghcr.io/${{ github.repository_owner }}/argus-api
+  WORKER_IMAGE: ghcr.io/${{ github.repository_owner }}/argus-worker
+
 jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+      - name: Build migrate image
+        run: docker build -t ${{ env.MIGRATE_IMAGE }}:latest -f app/backend/api/Dockerfile --target build .
+
+      - name: Build api image
+        run: docker build -t ${{ env.API_IMAGE }}:latest -f app/backend/api/Dockerfile .
+
+      - name: Build worker image
+        run: docker build -t ${{ env.WORKER_IMAGE }}:latest -f app/backend/worker/Dockerfile .
+
+      - name: Push all images
+        run: |
+          docker push ${{ env.MIGRATE_IMAGE }}:latest
+          docker push ${{ env.API_IMAGE }}:latest
+          docker push ${{ env.WORKER_IMAGE }}:latest
+
   deploy:
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSH
@@ -15,15 +48,16 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Login to GHCR
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
             cd ~/argus
             git pull origin main
 
-            # Build one at a time to avoid OOM on t3.micro (1GB RAM)
-            docker compose -f infra/docker-compose.ec2.yml --env-file infra/.env build migrate
-            docker compose -f infra/docker-compose.ec2.yml --env-file infra/.env build api
-            docker compose -f infra/docker-compose.ec2.yml --env-file infra/.env build worker
+            # Pull pre-built images (no build on EC2!)
+            docker compose -f infra/docker-compose.ec2.yml pull
 
-            # Start all services (images already built)
+            # Restart with new images
             docker compose -f infra/docker-compose.ec2.yml --env-file infra/.env up -d
 
             docker image prune -f
