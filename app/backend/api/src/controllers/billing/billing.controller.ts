@@ -8,6 +8,7 @@ import {
   SUCCESS_MESSAGES,
 } from "../../config/constants.config";
 import { BACHS_WEBHOOK_SECRET } from "../../config/bachs.config";
+import redis from "../../config/redis.config";
 import {
   createProCheckout,
   cancelSubscription,
@@ -43,11 +44,17 @@ export const createCheckoutSession = async (
       );
     }
 
-    const url = await createProCheckout(
-      org.id,
-      req.user!.email ?? null,
-      req.user!.name ?? null,
-    );
+    /* Bachs requires an email to create the org's customer */
+    const email = req.user!.email;
+    if (!email) {
+      return sendError(
+        res,
+        HTTP_STATUS.BAD_REQUEST,
+        "An email is required to upgrade",
+      );
+    }
+
+    const url = await createProCheckout(org.id, email, req.user!.name ?? null);
     return sendSuccess(res, HTTP_STATUS.OK, SUCCESS_MESSAGES.CHECKOUT_CREATED, {
       url,
     });
@@ -106,10 +113,7 @@ function verifyBachsSignature(
     .update(message, "utf8")
     .digest("hex");
 
-  return crypto.timingSafeEqual(
-    Buffer.from(expected),
-    Buffer.from(signature),
-  );
+  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
 }
 
 /* Bachs webhook — no session auth; verified by HMAC signature over the raw body */
@@ -130,11 +134,14 @@ export const handleWebhook = async (
       );
     }
 
-    const rawBody =
-      req.rawBody?.toString("utf8") ?? JSON.stringify(req.body);
+    const rawBody = req.rawBody?.toString("utf8") ?? JSON.stringify(req.body);
 
     if (!verifyBachsSignature(rawBody, timestamp, signature)) {
-      return sendError(res, HTTP_STATUS.BAD_REQUEST, "Invalid webhook signature");
+      return sendError(
+        res,
+        HTTP_STATUS.BAD_REQUEST,
+        "Invalid webhook signature",
+      );
     }
 
     const event = req.body as {
@@ -143,29 +150,23 @@ export const handleWebhook = async (
       data: BachsSubscription;
     };
 
-    console.log("[webhook] event.type:", event.type);
-    console.log("[webhook] event.data:", JSON.stringify(event.data, null, 2));
+    /* idempotency: Bachs guarantees at-least-once delivery, so the same event
+     * may arrive more than once. Claim the id atomically; if it's already been
+     * seen, ack without reprocessing. */
+    const dedupeKey = `bachs:webhook:${event.id}`;
+    const claimed = await redis.set(dedupeKey, "1", "EX", 60 * 60 * 24, "NX");
+    if (claimed !== "OK") {
+      return res
+        .status(HTTP_STATUS.OK)
+        .json({ received: true, duplicate: true });
+    }
 
-    switch (event.type) {
-      case "customer.subscription.created":
-        await activateSubscription(event.data);
-        break;
-      case "customer.subscription.updated": {
-        const status = event.data.status;
-        if (status === "active" || status === "trialing") {
-          await activateSubscription(event.data);
-        } else if (status === "canceled") {
-          await markSubscriptionCanceled(event.data);
-        } else if (status === "past_due" || status === "unpaid") {
-          await markSubscriptionCanceled(event.data);
-        }
-        break;
-      }
-      case "customer.subscription.deleted":
-        await revokeSubscription(event.data);
-        break;
-      default:
-        break; /* ignore other events (invoice.*, collection.*, etc.) */
+    try {
+      await processWebhookEvent(event);
+    } catch (err) {
+      /* release the claim so Bachs's retry can reprocess this event */
+      await redis.del(dedupeKey);
+      throw err;
     }
 
     return res.status(HTTP_STATUS.OK).json({ received: true });
@@ -173,3 +174,30 @@ export const handleWebhook = async (
     next(error);
   }
 };
+
+async function processWebhookEvent(event: {
+  type: string;
+  data: BachsSubscription;
+}) {
+  switch (event.type) {
+    case "customer.subscription.created":
+      await activateSubscription(event.data);
+      break;
+    case "customer.subscription.updated": {
+      const status = event.data.status;
+      if (status === "active" || status === "trialing") {
+        await activateSubscription(event.data);
+      } else if (status === "canceled") {
+        await markSubscriptionCanceled(event.data);
+      } else if (status === "past_due" || status === "unpaid") {
+        await markSubscriptionCanceled(event.data);
+      }
+      break;
+    }
+    case "customer.subscription.deleted":
+      await revokeSubscription(event.data);
+      break;
+    default:
+      break;
+  }
+}

@@ -1,11 +1,13 @@
 import "dotenv/config";
 
-const server = process.env.BACHS_SERVER === "production" ? "production" : "sandbox";
+const server =
+  process.env.BACHS_SERVER === "production" ? "production" : "sandbox";
 
 const BASE_URL =
-  server === "production" ? "https://api.bachs.io" : "https://sandbox-api.bachs.io";
+  server === "production"
+    ? "https://api.bachs.io"
+    : "https://sandbox-api.bachs.io";
 
-/* thin wrapper around fetch for Bachs REST API */
 export async function bachsFetch<T>(
   path: string,
   init: RequestInit = {},

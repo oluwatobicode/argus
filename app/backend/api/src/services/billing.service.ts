@@ -18,12 +18,59 @@ async function syncQuotaLimit(orgId: string, plan: "FREE" | "PRO") {
   });
 }
 
-/* create a Bachs checkout for the Pro plan, linked to our org via metadata */
+/* get the org's Bachs customer, creating one on first upgrade.
+ * a stable per-org customer lets us map every webhook (including the very first
+ * subscription.created) back to the org by customer_id — no reliance on whether
+ * Bachs echoes checkout metadata onto subscription events. */
+async function getOrCreateBachsCustomer(
+  orgId: string,
+  email: string,
+  name: string | null,
+): Promise<string> {
+  const org = await prisma.organization.findUnique({
+    where: { id: orgId },
+    select: { bachsCustomerId: true },
+  });
+  if (org?.bachsCustomerId) return org.bachsCustomerId;
+
+  const customer = await bachsFetch<{ customer_id: string }>("/v1/customers", {
+    method: "POST",
+    /* idempotency-key collapses double-clicks into a single customer */
+    headers: { "Idempotency-Key": `customer-${orgId}` },
+    body: JSON.stringify({
+      email,
+      ...(name ? { name } : {}),
+      metadata: { orgId },
+    }),
+  });
+
+  try {
+    await prisma.organization.update({
+      where: { id: orgId },
+      data: { bachsCustomerId: customer.customer_id },
+    });
+    return customer.customer_id;
+  } catch (err) {
+    /* concurrent request won the unique(bachsCustomerId) race — use theirs */
+    if ((err as { code?: string }).code === "P2002") {
+      const fresh = await prisma.organization.findUnique({
+        where: { id: orgId },
+        select: { bachsCustomerId: true },
+      });
+      if (fresh?.bachsCustomerId) return fresh.bachsCustomerId;
+    }
+    throw err;
+  }
+}
+
+/* create a Bachs checkout for the Pro plan, linked to our org via a stable customer */
 export async function createProCheckout(
   orgId: string,
-  email: string | null,
+  email: string,
   name: string | null,
 ) {
+  const customerId = await getOrCreateBachsCustomer(orgId, email, name);
+
   const body = await bachsFetch<{
     checkout_id: string;
     checkout_url: string;
@@ -32,7 +79,7 @@ export async function createProCheckout(
     method: "POST",
     body: JSON.stringify({
       product_cart: [{ product_id: BACHS_PRO_PRODUCT_ID, quantity: 1 }],
-      ...(email ? { customer: { email, ...(name ? { name } : {}) } } : {}),
+      customer: { customer_id: customerId },
       success_url: BACHS_SUCCESS_URL,
       cancel_url: BACHS_CANCEL_URL,
       metadata: { orgId },
@@ -68,9 +115,32 @@ export interface BachsSubscription {
   metadata?: Record<string, unknown>;
 }
 
-/* find the org this subscription belongs to (metadata.orgId set at checkout) */
-function orgIdFrom(sub: BachsSubscription): string | null {
-  return typeof sub.metadata?.orgId === "string" ? sub.metadata.orgId : null;
+/* find the org this subscription belongs to. resolution order is by reliability:
+ * the customer is created per-org before checkout, so customer_id is present and
+ * mappable from the very first event — unlike checkout metadata, whose
+ * propagation onto subscription events isn't guaranteed. */
+async function orgIdFrom(sub: BachsSubscription): Promise<string | null> {
+  /* primary: stable per-org customer, present on every event incl. the first */
+  const customerId = sub.customer?.customer_id;
+  if (customerId) {
+    const org = await prisma.organization.findUnique({
+      where: { bachsCustomerId: customerId },
+      select: { id: true },
+    });
+    if (org) return org.id;
+  }
+
+  /* fallback 1: we've persisted this subscription before */
+  const existing = await prisma.subscription.findUnique({
+    where: { bachsSubscriptionId: sub.subscription_id },
+    select: { orgId: true },
+  });
+  if (existing) return existing.orgId;
+
+  /* fallback 2: last-ditch, if checkout metadata happens to be echoed */
+  if (typeof sub.metadata?.orgId === "string") return sub.metadata.orgId;
+
+  return null;
 }
 
 async function upsertSubscription(
@@ -111,7 +181,7 @@ async function upsertSubscription(
 
 /* subscription became/stays active → org is PRO */
 export async function activateSubscription(sub: BachsSubscription) {
-  const orgId = orgIdFrom(sub);
+  const orgId = await orgIdFrom(sub);
   if (!orgId) return;
   await prisma.organization.update({
     where: { id: orgId },
@@ -123,7 +193,7 @@ export async function activateSubscription(sub: BachsSubscription) {
 
 /* deleted/canceled → access removed now → back to FREE */
 export async function revokeSubscription(sub: BachsSubscription) {
-  const orgId = orgIdFrom(sub);
+  const orgId = await orgIdFrom(sub);
   if (!orgId) return;
   await prisma.organization.update({
     where: { id: orgId },
@@ -135,7 +205,7 @@ export async function revokeSubscription(sub: BachsSubscription) {
 
 /* canceled but not yet expired → keeps PRO until currentPeriodEnd; just flag it */
 export async function markSubscriptionCanceled(sub: BachsSubscription) {
-  const orgId = orgIdFrom(sub);
+  const orgId = await orgIdFrom(sub);
   if (!orgId) return;
   await upsertSubscription(orgId, sub, "PRO");
 }
