@@ -15,7 +15,9 @@ import {
   activateSubscription,
   revokeSubscription,
   markSubscriptionCanceled,
+  activateProFromCollection,
   type BachsSubscription,
+  type BachsCollection,
 } from "../../services/billing.service";
 
 async function getUserOrg(userId: string) {
@@ -172,7 +174,7 @@ export const handleWebhook = async (
     const event = req.body as {
       id: string;
       type: string;
-      data: BachsSubscription;
+      data: unknown;
     };
 
     console.log(
@@ -210,31 +212,32 @@ export const handleWebhook = async (
   }
 };
 
-async function processWebhookEvent(event: {
-  type: string;
-  data: BachsSubscription;
-}) {
+async function processWebhookEvent(event: { type: string; data: unknown }) {
   switch (event.type) {
     case "customer.subscription.created":
-      await activateSubscription(event.data);
+      await activateSubscription(event.data as BachsSubscription);
       break;
     case "customer.subscription.updated": {
-      const status = event.data.status;
+      const sub = event.data as BachsSubscription;
+      const status = sub.status;
       if (status === "active" || status === "trialing") {
-        await activateSubscription(event.data);
+        await activateSubscription(sub);
       } else if (status === "canceled") {
-        await markSubscriptionCanceled(event.data);
+        await markSubscriptionCanceled(sub);
       } else if (status === "past_due" || status === "unpaid") {
-        await markSubscriptionCanceled(event.data);
+        await markSubscriptionCanceled(sub);
       } else {
         console.warn(
-          `[billing] customer.subscription.updated with unhandled status="${status}" for subscription ${event.data.subscription_id} — no action taken`,
+          `[billing] customer.subscription.updated with unhandled status="${status}" for subscription ${sub.subscription_id} — no action taken`,
         );
       }
       break;
     }
     case "customer.subscription.deleted":
-      await revokeSubscription(event.data);
+      await revokeSubscription(event.data as BachsSubscription);
+      break;
+    case "collection.succeeded":
+      await activateProFromCollection(event.data as BachsCollection);
       break;
     default:
       console.warn(

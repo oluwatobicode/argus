@@ -103,6 +103,60 @@ export async function cancelSubscription(
   });
 }
 
+/* Bachs "collection.succeeded" shape from webhook event.data — a one-time
+ * charge confirmation. No subscription_id/period fields; the customer is
+ * nested as { id }, not { customer_id } like BachsSubscription. */
+export interface BachsCollection {
+  charge_id: string;
+  checkout_id: string;
+  reference: string;
+  status: string;
+  customer: { id: string; email?: string; name?: string };
+  metadata?: Record<string, unknown>;
+}
+
+/* a successful charge is the only payment-confirmation signal Bachs sends for
+ * this product — no customer.subscription.created has been observed. Activate
+ * PRO directly off metadata.orgId (present on this event), falling back to
+ * the customer id the same way orgIdFrom does for subscription events. */
+export async function activateProFromCollection(collection: BachsCollection) {
+  if (collection.status !== "SUCCEEDED") {
+    console.warn(
+      `[billing] activateProFromCollection: charge ${collection.charge_id} has status="${collection.status}", not SUCCEEDED — skipping`,
+    );
+    return;
+  }
+
+  let orgId: string | null =
+    typeof collection.metadata?.orgId === "string"
+      ? collection.metadata.orgId
+      : null;
+
+  if (!orgId && collection.customer?.id) {
+    const org = await prisma.organization.findUnique({
+      where: { bachsCustomerId: collection.customer.id },
+      select: { id: true },
+    });
+    orgId = org?.id ?? null;
+  }
+
+  if (!orgId) {
+    console.error(
+      `[billing] activateProFromCollection: FAILED to resolve org for charge ${collection.charge_id} (customer.id=${collection.customer?.id ?? "none"}) — payment will not reflect for this org`,
+    );
+    return;
+  }
+
+  await prisma.organization.update({
+    where: { id: orgId },
+    data: { plan: "PRO", bachsCustomerId: collection.customer.id },
+  });
+  await syncQuotaLimit(orgId, "PRO");
+  console.log(
+    `[billing] activateProFromCollection: org ${orgId} is now PRO (charge ${collection.charge_id})`,
+  );
+}
+
 /* Bachs subscription shape from webhook event.data */
 export interface BachsSubscription {
   subscription_id: string;
