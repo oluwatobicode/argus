@@ -213,11 +213,12 @@ GOOGLE_CLIENT_ID=        # optional — OAuth
 GOOGLE_CLIENT_SECRET=
 GITHUB_CLIENT_ID=
 GITHUB_CLIENT_SECRET=
-POLAR_ACCESS_TOKEN=      # billing — Polar sandbox (deprecated, now Bachs)
-POLAR_PRO_PRODUCT_ID=
-POLAR_WEBHOOK_SECRET=
-POLAR_SERVER=sandbox     # production when live
-POLAR_SUCCESS_URL=http://localhost:5173/projects?upgraded=true
+BACHS_API_KEY=           # billing — Bachs sandbox
+BACHS_PRO_PRODUCT_ID=
+BACHS_WEBHOOK_SECRET=
+BACHS_SERVER=sandbox     # production when live
+BACHS_SUCCESS_URL=http://localhost:5173/projects?upgraded=true
+BACHS_CANCEL_URL=http://localhost:5173/projects
 ```
 
 ### `worker/.env`
@@ -237,7 +238,7 @@ FROM_EMAIL=Argus <onboarding@resend.dev>
 - **Error handling**: controllers `try/catch → next(error)`; `error.middleware.ts` (mounted last) maps ZodError→400 (with issues), Prisma P2002→409, P2025→404, malformed JSON→400, everything else→500 with server-side logging only.
 - **Prisma client import**: `from "../generated/prisma/client"`, not `@prisma/client`. Run `pnpm db:generate` first.
 - The worker keeps its **own copy** of the Prisma schema + generated client — keep both in sync (dedupe planned).
-- When billing lands: the Bachs webhook route must be registered **before** `express.json()` (raw body needed for signature verification). Not yet implemented — current `app.ts` would need reordering.
+- Billing: Bachs webhook signature verification uses `express.json({ verify })` to capture the raw body (see `app.ts`) rather than route reordering — no special route registration order needed.
 
 ---
 

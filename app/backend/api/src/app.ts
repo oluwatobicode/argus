@@ -45,7 +45,11 @@ app.use(
 );
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173" || "https://argus.pxxl.run",
+    origin:
+      process.env.FRONTEND_URL ||
+      (process.env.NODE_ENV === "production"
+        ? "https://arguserror.xyz"
+        : "http://localhost:5173"),
     credentials: true,
   }),
 );
@@ -62,7 +66,10 @@ app.get("/", (_req: Request, res: Response) => {
 app.use(`${API_PREFIX}/auth`, authRoutes);
 app.use(`${API_PREFIX}/projects`, projectsRoutes);
 app.use(`${API_PREFIX}/projects/:projectId/issues`, issuesRoutes);
-app.use(`${API_PREFIX}/projects/:projectId/issues/:issueId/events`, eventsRoutes);
+app.use(
+  `${API_PREFIX}/projects/:projectId/issues/:issueId/events`,
+  eventsRoutes,
+);
 app.use(`${API_PREFIX}/projects/:projectId/performance`, performanceRoutes);
 app.use(`${API_PREFIX}/projects/:projectId/alerts`, alertsRoutes);
 app.use(`${API_PREFIX}/billing`, billingRoutes);

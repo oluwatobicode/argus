@@ -25,7 +25,7 @@ import { buildOtpEmail, buildWelcomeEmail } from "../../templates/authemail";
  * sending domain.
  */
 function dispatchOtpEmail(email: string, otp: string) {
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.NODE_ENV === "production") {
     console.log(`[dev] OTP for ${email}: ${otp}`);
   }
   const { subject, html } = buildOtpEmail({ otp });

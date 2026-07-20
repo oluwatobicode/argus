@@ -1,7 +1,3 @@
-import { useEffect } from "react";
-import { useSearchParams } from "react-router";
-import { useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 import { Eyebrow } from "../../ui/Eyebrow";
 import { useMe } from "../../hooks/useAuth";
 import { useCheckout, useCancelSubscription } from "../../hooks/useBilling";
@@ -23,24 +19,12 @@ export function BillingPage() {
   const { canManageBilling } = usePermissions();
   const checkout = useCheckout();
   const cancelSub = useCancelSubscription();
-  const queryClient = useQueryClient();
-  const [params, setParams] = useSearchParams();
 
   const isPro = me?.organization?.plan === "PRO";
 
   const pct =
     usage && usage.limit > 0 ? Math.min(100, (usage.used / usage.limit) * 100) : 0;
   const meterColor = pct >= 100 ? "#F04438" : pct >= 80 ? "#F59E0B" : "#A3E635";
-
-  /* returning from Bachs checkout */
-  useEffect(() => {
-    if (params.get("upgraded") === "true") {
-      toast.success("Payment received — welcome to Pro 🎉");
-      queryClient.invalidateQueries({ queryKey: ["me"] });
-      params.delete("upgraded");
-      setParams(params, { replace: true });
-    }
-  }, [params, setParams, queryClient]);
 
   return (
     <div className="mx-auto max-w-[760px]">

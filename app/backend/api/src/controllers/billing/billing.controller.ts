@@ -101,11 +101,21 @@ function verifyBachsSignature(
   timestamp: string,
   signature: string,
 ): boolean {
-  if (!BACHS_WEBHOOK_SECRET) return false;
+  if (!BACHS_WEBHOOK_SECRET) {
+    console.error(
+      "[billing] webhook rejected: BACHS_WEBHOOK_SECRET is not set",
+    );
+    return false;
+  }
 
   /* reject stale deliveries (> 5 min old) */
   const ts = parseInt(timestamp, 10);
-  if (Number.isNaN(ts) || Math.abs(Date.now() / 1000 - ts) > 300) return false;
+  if (Number.isNaN(ts) || Math.abs(Date.now() / 1000 - ts) > 300) {
+    console.error(
+      `[billing] webhook rejected: stale/invalid timestamp (${timestamp})`,
+    );
+    return false;
+  }
 
   const message = `${timestamp}.${rawBody}`;
   const expected = crypto
@@ -113,7 +123,17 @@ function verifyBachsSignature(
     .update(message, "utf8")
     .digest("hex");
 
-  return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+  const expectedBuf = Buffer.from(expected);
+  const signatureBuf = Buffer.from(signature);
+  const valid =
+    expectedBuf.length === signatureBuf.length &&
+    crypto.timingSafeEqual(expectedBuf, signatureBuf);
+
+  if (!valid) {
+    console.error("[billing] webhook rejected: signature mismatch");
+  }
+
+  return valid;
 }
 
 /* Bachs webhook — no session auth; verified by HMAC signature over the raw body */
@@ -134,6 +154,11 @@ export const handleWebhook = async (
       );
     }
 
+    if (!req.rawBody) {
+      console.error(
+        "[billing] webhook: req.rawBody is missing — falling back to JSON.stringify(req.body), signature verification will likely fail",
+      );
+    }
     const rawBody = req.rawBody?.toString("utf8") ?? JSON.stringify(req.body);
 
     if (!verifyBachsSignature(rawBody, timestamp, signature)) {
@@ -150,12 +175,17 @@ export const handleWebhook = async (
       data: BachsSubscription;
     };
 
+    console.log(
+      `[billing] webhook received: id=${event.id} type=${event.type}`,
+    );
+
     /* idempotency: Bachs guarantees at-least-once delivery, so the same event
      * may arrive more than once. Claim the id atomically; if it's already been
      * seen, ack without reprocessing. */
     const dedupeKey = `bachs:webhook:${event.id}`;
     const claimed = await redis.set(dedupeKey, "1", "EX", 60 * 60 * 24, "NX");
     if (claimed !== "OK") {
+      console.log(`[billing] webhook duplicate, skipping: id=${event.id}`);
       return res
         .status(HTTP_STATUS.OK)
         .json({ received: true, duplicate: true });
@@ -163,8 +193,13 @@ export const handleWebhook = async (
 
     try {
       await processWebhookEvent(event);
+      console.log(`[billing] webhook processed: id=${event.id} type=${event.type}`);
     } catch (err) {
       /* release the claim so Bachs's retry can reprocess this event */
+      console.error(
+        `[billing] webhook processing failed: id=${event.id} type=${event.type}`,
+        err,
+      );
       await redis.del(dedupeKey);
       throw err;
     }
@@ -191,6 +226,10 @@ async function processWebhookEvent(event: {
         await markSubscriptionCanceled(event.data);
       } else if (status === "past_due" || status === "unpaid") {
         await markSubscriptionCanceled(event.data);
+      } else {
+        console.warn(
+          `[billing] customer.subscription.updated with unhandled status="${status}" for subscription ${event.data.subscription_id} — no action taken`,
+        );
       }
       break;
     }
@@ -198,6 +237,9 @@ async function processWebhookEvent(event: {
       await revokeSubscription(event.data);
       break;
     default:
+      console.warn(
+        `[billing] unhandled webhook event type="${event.type}" — no action taken. If this is a checkout/payment confirmation event, it needs a case here.`,
+      );
       break;
   }
 }

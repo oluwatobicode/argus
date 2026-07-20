@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -21,10 +22,28 @@ export function ProjectsConsolePage() {
   const logout = useLogout();
   const { canManageProjects } = usePermissions();
   const [modalOpen, setModalOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const [params, setParams] = useSearchParams();
 
   const org = me?.organization;
   const initials = (org?.name ?? "?").slice(0, 2).toUpperCase();
   const count = projects?.length ?? 0;
+
+  /* returning from Bachs checkout — this is where BACHS_SUCCESS_URL actually
+   * redirects to, not the billing page. The webhook that flips the org to PRO
+   * runs async and may lag this redirect, so retry the invalidate once. */
+  useEffect(() => {
+    if (params.get("upgraded") === "true") {
+      toast.success("Payment received — welcome to Pro 🎉");
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      const retry = setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["me"] });
+      }, 3000);
+      params.delete("upgraded");
+      setParams(params, { replace: true });
+      return () => clearTimeout(retry);
+    }
+  }, [params, setParams, queryClient]);
 
   return (
     <div className=" min-h-screen">

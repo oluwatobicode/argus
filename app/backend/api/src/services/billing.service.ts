@@ -127,7 +127,12 @@ async function orgIdFrom(sub: BachsSubscription): Promise<string | null> {
       where: { bachsCustomerId: customerId },
       select: { id: true },
     });
-    if (org) return org.id;
+    if (org) {
+      console.log(
+        `[billing] orgIdFrom: resolved org ${org.id} via customer_id ${customerId}`,
+      );
+      return org.id;
+    }
   }
 
   /* fallback 1: we've persisted this subscription before */
@@ -135,11 +140,24 @@ async function orgIdFrom(sub: BachsSubscription): Promise<string | null> {
     where: { bachsSubscriptionId: sub.subscription_id },
     select: { orgId: true },
   });
-  if (existing) return existing.orgId;
+  if (existing) {
+    console.log(
+      `[billing] orgIdFrom: resolved org ${existing.orgId} via existing subscription ${sub.subscription_id} (customer_id ${customerId} had no match)`,
+    );
+    return existing.orgId;
+  }
 
   /* fallback 2: last-ditch, if checkout metadata happens to be echoed */
-  if (typeof sub.metadata?.orgId === "string") return sub.metadata.orgId;
+  if (typeof sub.metadata?.orgId === "string") {
+    console.log(
+      `[billing] orgIdFrom: resolved org ${sub.metadata.orgId} via checkout metadata fallback for subscription ${sub.subscription_id}`,
+    );
+    return sub.metadata.orgId;
+  }
 
+  console.error(
+    `[billing] orgIdFrom: FAILED to resolve org for subscription ${sub.subscription_id} (customer_id=${customerId ?? "none"}) — payment will not reflect for this org`,
+  );
   return null;
 }
 
@@ -181,6 +199,9 @@ async function upsertSubscription(
 
 /* subscription became/stays active → org is PRO */
 export async function activateSubscription(sub: BachsSubscription) {
+  console.log(
+    `[billing] activateSubscription: subscription ${sub.subscription_id} status=${sub.status} customer=${sub.customer?.customer_id}`,
+  );
   const orgId = await orgIdFrom(sub);
   if (!orgId) return;
   await prisma.organization.update({
@@ -189,10 +210,14 @@ export async function activateSubscription(sub: BachsSubscription) {
   });
   await upsertSubscription(orgId, sub, "PRO");
   await syncQuotaLimit(orgId, "PRO");
+  console.log(`[billing] activateSubscription: org ${orgId} is now PRO`);
 }
 
 /* deleted/canceled → access removed now → back to FREE */
 export async function revokeSubscription(sub: BachsSubscription) {
+  console.log(
+    `[billing] revokeSubscription: subscription ${sub.subscription_id} status=${sub.status} customer=${sub.customer?.customer_id}`,
+  );
   const orgId = await orgIdFrom(sub);
   if (!orgId) return;
   await prisma.organization.update({
@@ -201,10 +226,14 @@ export async function revokeSubscription(sub: BachsSubscription) {
   });
   await upsertSubscription(orgId, sub, "FREE");
   await syncQuotaLimit(orgId, "FREE");
+  console.log(`[billing] revokeSubscription: org ${orgId} is now FREE`);
 }
 
 /* canceled but not yet expired → keeps PRO until currentPeriodEnd; just flag it */
 export async function markSubscriptionCanceled(sub: BachsSubscription) {
+  console.log(
+    `[billing] markSubscriptionCanceled: subscription ${sub.subscription_id} status=${sub.status} customer=${sub.customer?.customer_id}`,
+  );
   const orgId = await orgIdFrom(sub);
   if (!orgId) return;
   await upsertSubscription(orgId, sub, "PRO");
