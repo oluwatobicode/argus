@@ -238,7 +238,8 @@ async function processWebhookEvent(event: {
       break;
     default:
       console.warn(
-        `[billing] unhandled webhook event type="${event.type}" — no action taken. If this is a checkout/payment confirmation event, it needs a case here.`,
+        `[billing] unhandled webhook event type="${event.type}" — no action taken. If this is a checkout/payment confirmation event, it needs a case here. Full payload:`,
+        JSON.stringify(event.data, null, 2),
       );
       break;
   }
