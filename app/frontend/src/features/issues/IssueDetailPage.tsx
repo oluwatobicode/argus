@@ -94,7 +94,7 @@ export function IssueDetailPage() {
       </div>
 
       {/* stats strip */}
-      <div className="mt-6 flex overflow-hidden rounded-[18px] border border-border bg-surface">
+      <div className="mt-6 flex flex-wrap overflow-hidden rounded-[18px] border border-border bg-surface">
         <Stat label="EVENTS" value={`×${issue.eventCount}`} mono />
         <Stat
           label="FIRST SEEN"
@@ -110,7 +110,7 @@ export function IssueDetailPage() {
       </div>
 
       {/* two-column: stack trace + context */}
-      <div className="mt-4 grid grid-cols-[1fr_300px] items-start gap-4">
+      <div className="mt-4 grid grid-cols-1 items-start gap-4 lg:grid-cols-[1fr_300px]">
         <div className="overflow-hidden rounded-[18px] border border-border bg-surface">
           <div className="flex items-center justify-between border-b border-divider px-5 py-4">
             <div className="text-sm font-semibold">Stack trace</div>
@@ -182,7 +182,7 @@ function Stat({
 }) {
   return (
     <div
-      className={`flex-1 px-[22px] py-[18px] ${last ? "" : "border-r border-divider"}`}
+      className={`min-w-[45%] flex-1 px-3 py-3 sm:min-w-0 sm:px-[22px] sm:py-[18px] ${last ? "" : "border-r border-divider"}`}
     >
       <div className="font-mono text-[10px] tracking-[0.16em] text-text-4">
         {label}

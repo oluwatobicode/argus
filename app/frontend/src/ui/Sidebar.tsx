@@ -44,9 +44,11 @@ const ORG_NAV: NavItem[] = [
 interface Props {
   user: Me;
   projectId: string;
+  open: boolean;
+  onClose: () => void;
 }
 
-export function Sidebar({ user, projectId }: Props) {
+export function Sidebar({ user, projectId, open, onClose }: Props) {
   const logout = useLogout();
   const navigate = useNavigate();
 
@@ -55,6 +57,7 @@ export function Sidebar({ user, projectId }: Props) {
       <NavLink
         key={item.key}
         to={`/projects/${projectId}/${item.key}`}
+        onClick={onClose}
         className={({ isActive }) =>
           `flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm transition-colors ${
             isActive
@@ -80,7 +83,18 @@ export function Sidebar({ user, projectId }: Props) {
     );
 
   return (
-    <aside className="flex w-60 flex-col border-r border-border bg-bg-1 p-4">
+    <>
+      {open && (
+        <div
+          onClick={onClose}
+          className="fixed inset-0 z-30 bg-black/60 md:hidden"
+        />
+      )}
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 flex w-60 flex-col border-r border-border bg-bg-1 p-4 transition-transform duration-200 md:static md:translate-x-0 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
       <div className="mb-6 flex items-center gap-2 px-2">
         {/* PNG has heavy transparent padding — zoom-crop so the mark fills the box */}
         <div className="flex h-7 w-7 items-center justify-center overflow-hidden">
@@ -138,7 +152,8 @@ export function Sidebar({ user, projectId }: Props) {
           </button>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
 

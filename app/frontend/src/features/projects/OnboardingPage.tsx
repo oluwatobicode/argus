@@ -47,8 +47,8 @@ export function OnboardingPage() {
         {/* waiting / received */}
         <div className="mt-4">
           {received ? (
-            <div className="flex items-center justify-between gap-4 rounded-2xl border border-lime/35 bg-lime/8 px-5 py-4">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col items-start gap-3 rounded-2xl border border-lime/35 bg-lime/8 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+              <div className="flex min-w-0 items-center gap-3">
                 <span className="text-lg">🎉</span>
                 <div>
                   <div className="text-sm font-semibold text-lime">
@@ -67,7 +67,7 @@ export function OnboardingPage() {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-3 rounded-2xl border border-dashed border-border-2 px-5 py-4">
+            <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-dashed border-border-2 px-5 py-4">
               <span className="size-4 animate-spin rounded-full border-2 border-border-2 border-t-lime" />
               <span className="text-sm text-text-2">
                 Waiting for your first event…

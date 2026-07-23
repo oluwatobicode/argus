@@ -37,7 +37,7 @@ export function AlertsPage() {
 
   return (
     <div className="mx-auto max-w-[820px]">
-      <div className="flex items-end justify-between">
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <Eyebrow>project</Eyebrow>
           <h1 className="mt-1 text-[28px] font-bold tracking-tight">Alerts</h1>
@@ -74,7 +74,7 @@ export function AlertsPage() {
           {rules.map((rule) => (
             <div
               key={rule.id}
-              className="flex items-center gap-4 rounded-[18px] border border-border bg-surface p-5"
+              className="flex flex-wrap items-center gap-3 rounded-[18px] border border-border bg-surface p-4 sm:flex-nowrap sm:gap-4 sm:p-5"
               style={{ opacity: rule.enabled ? 1 : 0.55 }}
             >
               <div className="min-w-0 flex-1">

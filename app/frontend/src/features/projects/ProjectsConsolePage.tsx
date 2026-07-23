@@ -47,8 +47,8 @@ export function ProjectsConsolePage() {
 
   return (
     <div className=" min-h-screen">
-      <div className="mx-auto max-w-[1000px] px-6 py-10">
-        <div className="flex items-center justify-between gap-4">
+      <div className="mx-auto max-w-[1000px] px-4 py-6 sm:px-6 sm:py-10">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface px-4 py-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#182114] text-[#9fe871] font-mono text-xs font-bold">
               {initials}
@@ -88,10 +88,10 @@ export function ProjectsConsolePage() {
           </div>
         </div>
 
-        <div className="mt-12 flex items-end justify-between">
+        <div className="mt-8 flex flex-wrap items-end justify-between gap-4 sm:mt-12">
           <div>
             <Eyebrow>your projects</Eyebrow>
-            <h1 className="mt-1 text-[40px] font-sans font-bold tracking-tight">
+            <h1 className="mt-1 text-[28px] font-sans font-bold tracking-tight sm:text-[40px]">
               Projects
             </h1>
           </div>
@@ -100,9 +100,9 @@ export function ProjectsConsolePage() {
           </span>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-4">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
           {isLoading ? (
-            <div className="col-span-2">
+            <div className="col-span-1 sm:col-span-2">
               <PageLoader />
             </div>
           ) : (

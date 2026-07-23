@@ -53,7 +53,7 @@ export function IssuesPage() {
 
   return (
     <div className="mx-auto max-w-[1100px]">
-      <div className="mb-6 flex items-end justify-between gap-4">
+      <div className="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <Eyebrow>issues</Eyebrow>
           <h1 className="mt-1 text-[28px] font-bold tracking-tight">Issues</h1>
@@ -78,15 +78,15 @@ export function IssuesPage() {
         </select>
       </div>
 
-      <div className="mb-3.5 flex items-center">
+      <div className="mb-3.5 flex flex-wrap items-center gap-y-2">
         <StatusTabs active={status} counts={counts} onChange={changeStatus} />
-        <span className="ml-auto font-mono text-[11px] text-text-4">
+        <span className="ml-auto hidden font-mono text-[11px] text-text-4 sm:inline">
           sorted by last seen ↓
         </span>
       </div>
 
       <div className="overflow-hidden rounded-[20px] border border-border bg-surface">
-        <div className="flex items-center gap-4 border-b border-divider px-[22px] py-3.5">
+        <div className="flex items-center gap-4 border-b border-divider px-4 py-3.5 sm:px-[22px]">
           <span className="w-[9px] shrink-0" />
           <span className="flex-1 font-mono text-[10px] tracking-[0.18em] text-text-4">
             ISSUE

@@ -57,7 +57,7 @@ export function MembersPage() {
       {canManageMembers && (
         <form
           onSubmit={invite}
-          className="mt-6 flex items-center gap-3 rounded-[18px] border border-border bg-surface p-4"
+          className="mt-6 flex flex-col gap-3 rounded-[18px] border border-border bg-surface p-4 sm:flex-row sm:items-center"
         >
           <input
             type="email"
@@ -106,7 +106,7 @@ export function MembersPage() {
             return (
               <div
                 key={m.id}
-                className="flex items-center gap-3 rounded-[16px] border border-border bg-surface p-4"
+                className="flex flex-wrap items-center gap-3 rounded-[16px] border border-border bg-surface p-4"
               >
                 <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-2 font-mono text-sm text-text-2">
                   {(m.user.name ?? m.user.email ?? "?").slice(0, 1).toUpperCase()}

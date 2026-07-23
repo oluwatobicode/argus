@@ -12,7 +12,7 @@ const FOOTER_COLS = [
   {
     title: "Developers",
     links: [
-      { label: "Documentation", href: "https://argus-7960b943.mintlify.site/" },
+      { label: "Documentation", href: "https://docs.arguserror.xyz/" },
       { label: "SDKs on npm", href: "https://www.npmjs.com/org/argusdev" },
       { label: "Self-hosting", href: "#" },
       { label: "GitHub", href: "#" },

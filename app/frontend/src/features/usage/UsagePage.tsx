@@ -75,7 +75,7 @@ export function UsagePage() {
       </div>
 
       {/* breakdown */}
-      <div className="mt-4 grid grid-cols-3 gap-4">
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label="errors" value={usage.breakdown.errors} />
         <StatCard label="warnings" value={usage.breakdown.warnings} />
         <StatCard label="info / debug" value={usage.breakdown.info} />
