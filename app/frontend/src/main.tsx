@@ -9,7 +9,7 @@ import App from "./App.tsx";
 /* dogfood: the Argus dashboard monitors itself with the Argus SDK 🐕 */
 const argusDsn = import.meta.env.VITE_ARGUS_DSN as string | undefined;
 if (argusDsn) {
-  init({ dsn: argusDsn, environment: import.meta.env.MODE });
+  init({ dsn: argusDsn });
 }
 
 const queryClient = new QueryClient();
