@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -sI https://arguserror.xyz/assets/index-D3IBlQ7e.js)",
+      "Bash(curl -s https://arguserror.xyz/assets/index-D3IBlQ7e.js)"
+    ]
+  }
+}

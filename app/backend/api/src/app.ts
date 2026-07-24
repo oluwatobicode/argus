@@ -48,7 +48,7 @@ app.use(
     origin:
       process.env.FRONTEND_URL ||
       (process.env.NODE_ENV === "production"
-        ? "https://arguserror.xyz"
+        ? "https://www.arguserror.xyz"
         : "http://localhost:5173"),
     credentials: true,
   }),
