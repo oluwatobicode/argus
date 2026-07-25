@@ -10,5 +10,6 @@ router.use(ensureAuth, requireSuperAdmin);
 router.get("/users", adminController.listUsers);
 router.get("/organizations", adminController.listOrganizations);
 router.get("/stats", adminController.getStats);
+router.get("/signups", adminController.getSignupSeries);
 
 export default router;

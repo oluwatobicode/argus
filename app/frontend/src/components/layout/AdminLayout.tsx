@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Navigate, NavLink, Outlet, useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -12,7 +12,7 @@ import {
   Menu01Icon,
 } from "@hugeicons/core-free-icons";
 import { useMe, useLogout } from "../../hooks/useAuth";
-import { FullScreenLoader } from "../../ui/Loader";
+import { FullScreenLoader, PageLoader } from "../../ui/Loader";
 
 const NAV: { to: string; label: string; icon: IconSvgElement; end?: boolean }[] = [
   { to: "/admin", label: "Overview", icon: Analytics01Icon, end: true },
@@ -141,7 +141,10 @@ export function AdminLayout() {
           <span className="font-mono font-bold tracking-tight">argus admin</span>
         </header>
         <main className="flex-1 overflow-x-hidden p-4 md:p-8">
-          <Outlet />
+          {/* own boundary so switching pages doesn't blank the sidebar */}
+          <Suspense fallback={<PageLoader />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

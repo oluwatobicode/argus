@@ -1,11 +1,13 @@
 import { Eyebrow } from "../../ui/Eyebrow";
 import { PageLoader } from "../../ui/Loader";
-import { useAdminStats } from "../../hooks/useAdmin";
+import { useAdminSignups, useAdminStats } from "../../hooks/useAdmin";
+import { SignupsChart } from "./components/SignupsChart";
 
 const fmt = (n: number) => n.toLocaleString();
 
 export function OverviewPage() {
   const { data: stats, isLoading, isError } = useAdminStats();
+  const signups = useAdminSignups(30);
 
   if (isLoading) return <PageLoader />;
   if (isError || !stats)
@@ -29,22 +31,26 @@ export function OverviewPage() {
       </div>
 
       <div className="mt-4 rounded-[18px] border border-border bg-surface p-5">
-        <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-4">
-          last 30 days
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-4">
+            signups · last 30 days
+          </div>
+          <div className="font-mono text-[11px] text-text-3">
+            +{fmt(stats.last30Days.newUsers)} users · +
+            {fmt(stats.last30Days.newOrganizations)} orgs
+          </div>
         </div>
-        <div className="mt-3 flex flex-wrap gap-8">
-          <div>
-            <div className="font-mono text-[22px] font-semibold text-lime">
-              +{fmt(stats.last30Days.newUsers)}
-            </div>
-            <div className="mt-1 text-xs text-text-3">new users</div>
-          </div>
-          <div>
-            <div className="font-mono text-[22px] font-semibold text-lime">
-              +{fmt(stats.last30Days.newOrganizations)}
-            </div>
-            <div className="mt-1 text-xs text-text-3">new organizations</div>
-          </div>
+
+        <div className="mt-4">
+          {signups.isLoading ? (
+            <div className="h-[220px] animate-pulse rounded-xl bg-surface-2" />
+          ) : signups.isError || !signups.data ? (
+            <p className="py-16 text-center text-sm text-error">
+              Couldn't load signups.
+            </p>
+          ) : (
+            <SignupsChart series={signups.data.series} />
+          )}
         </div>
       </div>
     </div>

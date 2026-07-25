@@ -147,3 +147,62 @@ export const getStats = async (
     next(error);
   }
 };
+
+/* daily signup counts for the last N days — zero-filled so the chart has a
+ * point per day even on days nobody signed up */
+export const getSignupSeries = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const days = Math.min(90, Math.max(7, Number(req.query.days) || 30));
+
+    /* midnight UTC, (days - 1) back — the window includes today */
+    const start = new Date();
+    start.setUTCHours(0, 0, 0, 0);
+    start.setUTCDate(start.getUTCDate() - (days - 1));
+
+    const [users, orgs] = await Promise.all([
+      prisma.user.findMany({
+        where: { createdAt: { gte: start } },
+        select: { createdAt: true },
+      }),
+      prisma.organization.findMany({
+        where: { createdAt: { gte: start } },
+        select: { createdAt: true },
+      }),
+    ]);
+
+    const dayKey = (d: Date) => d.toISOString().slice(0, 10);
+    const tally = (rows: { createdAt: Date }[]) => {
+      const counts = new Map<string, number>();
+      for (const row of rows) {
+        const key = dayKey(row.createdAt);
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
+      return counts;
+    };
+
+    const userCounts = tally(users);
+    const orgCounts = tally(orgs);
+
+    const series = Array.from({ length: days }, (_, i) => {
+      const day = new Date(start);
+      day.setUTCDate(start.getUTCDate() + i);
+      const key = dayKey(day);
+      return {
+        date: key,
+        users: userCounts.get(key) ?? 0,
+        organizations: orgCounts.get(key) ?? 0,
+      };
+    });
+
+    return sendSuccess(res, HTTP_STATUS.OK, "Signup series fetched", {
+      days,
+      series,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -6,7 +6,21 @@
       "Bash(grep -n \"subscription\\\\b\" /Users/macbook/Documents/treasure/argus/app/backend/api/prisma/schema.prisma | head -5; echo \"---subscription model---\"; sed -n '/model Subscription/,/^}/p' /Users/macbook/Documents/treasure/argus/app/backend/api/prisma/schema.prisma)",
       "Bash(pnpm build *)",
       "Bash(pnpm db:generate)",
-      "Bash(echo \"tsc:$?\")"
+      "Bash(echo \"tsc:$?\")",
+      "Bash(node /private/tmp/claude-501/bundled-skills/2.1.220/12938789048dcc626c922a261229f901/dataviz/scripts/validate_palette.js \"#A3E635,#4C8DFF\" --mode dark --surface \"#111311\")",
+      "Bash(node scripts/validate_palette.js \"#84CC16,#4C8DFF\" --mode dark --surface \"#111311\")",
+      "Bash(node scripts/validate_palette.js \"#65A30D,#4C8DFF\" --mode dark --surface \"#111311\")",
+      "Bash(npx --yes playwright install chromium)",
+      "Bash(npx --yes playwright screenshot --viewport-size=1000,420 chart_preview.html chart.png)",
+      "Bash(cd /private/tmp/claude-501/-Users-macbook-Documents-treasure-argus/8eda391b-a439-407e-8f90-f3fa8205f4d5/scratchpad && ls ~/Library/Caches/ms-playwright 2>/dev/null | head -5; which chromium 2>/dev/null; ls \"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" 2>/dev/null && echo CHROME_OK)",
+      "Read(//Applications/Google Chrome.app/Contents/MacOS/**)",
+      "Bash(\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --headless --disable-gpu --screenshot=chart.png --window-size=1000,420 --virtual-time-budget=2000 chart_preview.html)",
+      "Bash(python3 -)",
+      "Bash(\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --headless --disable-gpu --screenshot=chart2.png --window-size=1000,420 --virtual-time-budget=2000 chart_preview.html)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('deps:'\\); [print\\(' ',k,v\\) for k,v in d['dependencies'].items\\(\\)]\")",
+      "Bash(pnpm --filter frontend add recharts)",
+      "Bash(\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --headless --disable-gpu --screenshot=recharts.png --window-size=1000,460 --virtual-time-budget=5000 http://localhost:5199/preview.html)",
+      "Bash(\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --headless --disable-gpu --screenshot=recharts2.png --window-size=1000,460 --virtual-time-budget=5000 http://localhost:5199/preview.html)"
     ],
     "additionalDirectories": [
       "/Users/macbook/Documents/treasure/argus/app/backend/api/prisma"

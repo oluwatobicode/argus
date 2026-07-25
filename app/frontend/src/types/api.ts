@@ -215,6 +215,17 @@ export interface AdminOrganizationsResponse {
   pagination: Pagination;
 }
 
+export interface SignupPoint {
+  date: string;
+  users: number;
+  organizations: number;
+}
+
+export interface AdminSignupSeries {
+  days: number;
+  series: SignupPoint[];
+}
+
 export interface AdminStats {
   totalUsers: number;
   totalOrganizations: number;

@@ -23,6 +23,7 @@
     "react-hook-form": "^7.80.0",
     "react-hot-toast": "^2.6.0",
     "react-router": "^8.1.0",
+    "recharts": "^3.10.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "../api/axiosInstance";
 import type {
   AdminOrganizationsResponse,
+  AdminSignupSeries,
   AdminStats,
   AdminUsersResponse,
   Envelope,
@@ -15,6 +16,19 @@ export function useAdminStats() {
         "/admin/stats",
       );
       return res.data.data as AdminStats;
+    },
+  });
+}
+
+export function useAdminSignups(days = 30) {
+  return useQuery({
+    queryKey: ["admin", "signups", days],
+    queryFn: async () => {
+      const res = await axiosInstance.get<Envelope<AdminSignupSeries>>(
+        "/admin/signups",
+        { params: { days } },
+      );
+      return res.data.data as AdminSignupSeries;
     },
   });
 }
