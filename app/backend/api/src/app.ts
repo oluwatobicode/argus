@@ -23,6 +23,7 @@ import {
   usageRoutes,
   ingestRoutes,
   organizationsRoutes,
+  adminRoutes,
 } from "./routes";
 
 const API_PREFIX = "/api/v1";
@@ -76,6 +77,7 @@ app.use(`${API_PREFIX}/billing`, billingRoutes);
 app.use(`${API_PREFIX}/usage`, usageRoutes);
 app.use(`${API_PREFIX}/organizations`, organizationsRoutes);
 app.use(`${API_PREFIX}/ingest`, ingestRoutes);
+app.use(`${API_PREFIX}/admin`, adminRoutes);
 
 app.use(errorHandler);
 

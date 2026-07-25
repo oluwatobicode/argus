@@ -16,6 +16,7 @@ import { BillingPage } from "./features/billing/BillingPage";
 import { MembersPage } from "./features/members/MembersPage";
 import { AlertsPage } from "./features/alerts/AlertsPage";
 import { PerformancePage } from "./features/performance/PerformancePage";
+import { AdminPage } from "./features/admin/AdminPage";
 import { LandingPage } from "./landing/LandingPage";
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
             path="/projects/:projectId/onboarding"
             element={<OnboardingPage />}
           />
+          <Route path="/admin" element={<AdminPage />} />
         </Route>
 
         {/* app — project-scoped, with sidebar (guards session itself) */}

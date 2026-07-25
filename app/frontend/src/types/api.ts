@@ -176,3 +176,49 @@ export interface Project {
   platform: string | null;
   keys: ProjectKey[];
 }
+
+export interface AdminUser {
+  id: string;
+  email: string | null;
+  name: string | null;
+  emailVerified: boolean;
+  createdAt: string;
+  memberships: {
+    role: MemberRole;
+    org: { id: string; name: string; slug: string; plan: Plan };
+  }[];
+}
+
+export interface AdminOrganization {
+  id: string;
+  name: string;
+  slug: string;
+  plan: Plan;
+  createdAt: string;
+  bachsCustomerId: string | null;
+  _count: { members: number; projects: number };
+  subscription: {
+    status: string;
+    currentPeriodEnd: string;
+    cancelAtPeriodEnd: boolean;
+  } | null;
+}
+
+export interface AdminUsersResponse {
+  users: AdminUser[];
+  pagination: Pagination;
+}
+
+export interface AdminOrganizationsResponse {
+  organizations: AdminOrganization[];
+  pagination: Pagination;
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  totalOrganizations: number;
+  plan: { free: number; pro: number };
+  totalProjects: number;
+  totalEventsIngested: number;
+  last30Days: { newUsers: number; newOrganizations: number };
+}

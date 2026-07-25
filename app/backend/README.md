@@ -219,6 +219,7 @@ BACHS_WEBHOOK_SECRET=
 BACHS_SERVER=sandbox     # production when live
 BACHS_SUCCESS_URL=http://localhost:5173/projects?upgraded=true
 BACHS_CANCEL_URL=http://localhost:5173/projects
+SUPER_ADMIN_EMAILS=       # comma-separated, gates /api/v1/admin/*
 ```
 
 ### `worker/.env`
