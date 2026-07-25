@@ -8,6 +8,7 @@ export interface User {
   name: string | null;
   avatarUrl: string | null;
   emailVerified: boolean;
+  isSuperAdmin: boolean;
 }
 
 /* /auth/me returns the user plus their org (for the console header) */

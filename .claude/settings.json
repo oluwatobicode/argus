@@ -4,7 +4,9 @@
       "Bash(curl -sI https://arguserror.xyz/assets/index-D3IBlQ7e.js)",
       "Bash(curl -s https://arguserror.xyz/assets/index-D3IBlQ7e.js)",
       "Bash(grep -n \"subscription\\\\b\" /Users/macbook/Documents/treasure/argus/app/backend/api/prisma/schema.prisma | head -5; echo \"---subscription model---\"; sed -n '/model Subscription/,/^}/p' /Users/macbook/Documents/treasure/argus/app/backend/api/prisma/schema.prisma)",
-      "Bash(pnpm build *)"
+      "Bash(pnpm build *)",
+      "Bash(pnpm db:generate)",
+      "Bash(echo \"tsc:$?\")"
     ],
     "additionalDirectories": [
       "/Users/macbook/Documents/treasure/argus/app/backend/api/prisma"

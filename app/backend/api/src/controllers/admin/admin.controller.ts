@@ -33,6 +33,7 @@ export const listUsers = async (
           email: true,
           name: true,
           emailVerified: true,
+          isSuperAdmin: true,
           createdAt: true,
           memberships: {
             select: {

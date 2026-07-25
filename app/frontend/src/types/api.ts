@@ -182,6 +182,7 @@ export interface AdminUser {
   email: string | null;
   name: string | null;
   emailVerified: boolean;
+  isSuperAdmin: boolean;
   createdAt: string;
   memberships: {
     role: MemberRole;

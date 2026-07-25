@@ -16,7 +16,12 @@ import { BillingPage } from "./features/billing/BillingPage";
 import { MembersPage } from "./features/members/MembersPage";
 import { AlertsPage } from "./features/alerts/AlertsPage";
 import { PerformancePage } from "./features/performance/PerformancePage";
-import { AdminPage } from "./features/admin/AdminPage";
+import { AdminLayout } from "./components/layout/AdminLayout";
+import { AdminLoginPage } from "./features/admin/AdminLoginPage";
+import { OverviewPage } from "./features/admin/OverviewPage";
+import { AdminUsersPage } from "./features/admin/AdminUsersPage";
+import { AdminOrganizationsPage } from "./features/admin/AdminOrganizationsPage";
+import { AdminBillingPage } from "./features/admin/AdminBillingPage";
 import { LandingPage } from "./landing/LandingPage";
 
 function App() {
@@ -40,7 +45,15 @@ function App() {
             path="/projects/:projectId/onboarding"
             element={<OnboardingPage />}
           />
-          <Route path="/admin" element={<AdminPage />} />
+        </Route>
+
+        {/* platform admin — own login, own sidebar (guards itself) */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<OverviewPage />} />
+          <Route path="users" element={<AdminUsersPage />} />
+          <Route path="organizations" element={<AdminOrganizationsPage />} />
+          <Route path="billing" element={<AdminBillingPage />} />
         </Route>
 
         {/* app — project-scoped, with sidebar (guards session itself) */}
