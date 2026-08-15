@@ -3,9 +3,12 @@ import { ERR_POOL, clock } from "./demoData";
 
 const SDKS = [
   { name: "React", sub: "@argusdev/sdk-react", logo: "/React-icon.svg", alt: "React logo" },
-  { name: "Next.js", sub: "React + Node ready", logo: "/next-js.svg", alt: "Next.js logo", markClassName: "rounded-full bg-[#e7e8ee] p-1" },
+  { name: "Next.js", sub: "@argusdev/sdk-nextjs", logo: "/next-js.svg", alt: "Next.js logo", markClassName: "rounded-full bg-[#e7e8ee] p-1" },
+  { name: "Vue", sub: "@argusdev/sdk-vue", logo: "/Vue.js_Logo_2.svg", alt: "Vue logo" },
+  { name: "Nuxt", sub: "SSR-safe sdk-vue", logo: "/nuxt_logo.svg", alt: "Nuxt logo" },
+  { name: "Angular", sub: "@argusdev/sdk-angular", logo: "/angular_logo.png", alt: "Angular logo" },
   { name: "Node.js", sub: "@argusdev/sdk-node", logo: "/Node.js.svg", alt: "Node.js logo" },
-  { name: "JavaScript", sub: "@argusdev/sdk-core", logo: "/js-logo.png", alt: "JavaScript logo" },
+  { name: "JavaScript", sub: "@argusdev/sdk-browser", logo: "/js-logo.png", alt: "JavaScript logo" },
   { name: "TypeScript", sub: "first-class types", logo: "/ts-logo.png", alt: "TypeScript logo" },
 ];
 
@@ -21,6 +24,36 @@ const FW: Record<
       [{ t: "tx", c: "" }],
       [{ t: "tx", c: "init({ dsn: " }, { t: "st", c: '"https://ed533eb8@…"' }, { t: "tx", c: " })" }],
       [{ t: "tx", c: "<ArgusErrorBoundary><App /></ArgusErrorBoundary>" }],
+    ],
+  },
+  nextjs: {
+    label: "Next.js",
+    file: "instrumentation.ts",
+    code: [
+      [{ t: "kw", c: "import" }, { t: "tx", c: " { init } from " }, { t: "st", c: '"@argusdev/sdk-nextjs/server"' }],
+      [{ t: "kw", c: "export" }, { t: "tx", c: " { onRequestError } from " }, { t: "st", c: '"@argusdev/sdk-nextjs/server"' }],
+      [{ t: "kw", c: "export" }, { t: "tx", c: " const register = () => init({ dsn: " }, { t: "st", c: '"https://ed533eb8@…"' }, { t: "tx", c: " })" }],
+      [{ t: "cm", c: "// server components, actions, middleware — covered" }],
+    ],
+  },
+  vue: {
+    label: "Vue",
+    file: "main.ts",
+    code: [
+      [{ t: "kw", c: "import" }, { t: "tx", c: " { argusVue } from " }, { t: "st", c: '"@argusdev/sdk-vue"' }],
+      [{ t: "tx", c: "" }],
+      [{ t: "tx", c: "createApp(App).use(argusVue, { dsn: " }, { t: "st", c: '"https://ed533eb8@…"' }, { t: "tx", c: " })" }],
+      [{ t: "cm", c: "// render, setup, watcher errors — captured" }],
+    ],
+  },
+  angular: {
+    label: "Angular",
+    file: "main.ts",
+    code: [
+      [{ t: "kw", c: "import" }, { t: "tx", c: " { init, ArgusErrorHandler } from " }, { t: "st", c: '"@argusdev/sdk-angular"' }],
+      [{ t: "tx", c: "init({ dsn: " }, { t: "st", c: '"https://ed533eb8@…"' }, { t: "tx", c: " })" }],
+      [{ t: "tx", c: "{ provide: ErrorHandler, useClass: ArgusErrorHandler }" }],
+      [{ t: "cm", c: "// HttpErrorResponse unwrapped automatically" }],
     ],
   },
   browser: {
@@ -84,7 +117,7 @@ export function Features() {
         <div className="mb-[30px] text-center font-code text-[11px] tracking-[0.2em] text-[#5a5f6d] uppercase">
           One SDK per platform · drop-in ready
         </div>
-        <div className="grid grid-cols-1 gap-3.5 min-[380px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-3.5 min-[380px]:grid-cols-2 sm:grid-cols-4 lg:grid-cols-4">
           {SDKS.map((s) => (
             <div
               key={s.name}
@@ -99,7 +132,7 @@ export function Features() {
                 />
               </div>
               <div className="text-[14.5px] font-bold text-[#e7e8ee]">{s.name}</div>
-              <div className="max-w-full break-all font-code text-[11px] text-[#5a5f6d]">
+              <div className="max-w-full wrap-break-word font-code text-[11px] text-[#5a5f6d]">
                 {s.sub}
               </div>
             </div>

@@ -157,7 +157,7 @@ export function Hero() {
             </div>
             {termStep >= 1 && (
               <div className="text-[#777b87]">
-                + @argusdev/sdk-browser@0.2.0 · added in 1.2s
+                + @argusdev/sdk-browser@0.3.0 · added in 1.2s
               </div>
             )}
             {termStep >= 2 && (

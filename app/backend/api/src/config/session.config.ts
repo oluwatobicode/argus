@@ -5,7 +5,6 @@ import session from "express-session";
 
 const client = createClient({ url: process.env.REDIS_URL! });
 
-/* awaited in startServer — no more "server up, sessions broken" boots */
 export async function connectSessionStore(): Promise<void> {
   await client.connect();
 }

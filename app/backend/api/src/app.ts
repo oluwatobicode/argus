@@ -29,14 +29,12 @@ import {
 const API_PREFIX = "/api/v1";
 const app: Application = express();
 
-/* secure cookies need this when running behind a reverse proxy in prod */
 if (process.env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
 }
 
 app.use(helmet());
-/* stash the raw body so the Bachs webhook can verify its signature
-   (needs the exact bytes, before JSON parsing) */
+
 app.use(
   express.json({
     verify: (req, _res, buf) => {

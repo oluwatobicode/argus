@@ -1,8 +1,3 @@
-/*
- * Single source of truth for role-based permissions.
- * Used by requirePermission middleware AND the /auth/me payload so they never drift.
- */
-
 export const PERMISSIONS = {
   PROJECT_MANAGE: "project:manage",
   ALERT_MANAGE: "alert:manage",
