@@ -1,6 +1,6 @@
 {
   "name": "@argusdev/sdk-react",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Argus SDK for React — ErrorBoundary component on top of @argusdev/sdk-browser.",
   "type": "module",
   "main": "./dist/index.js",
@@ -17,7 +17,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --test"
   },
   "dependencies": {
     "@argusdev/sdk-browser": "workspace:*",

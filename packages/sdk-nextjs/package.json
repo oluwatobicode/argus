@@ -1,0 +1,61 @@
+{
+  "name": "@argusdev/sdk-nextjs",
+  "version": "0.3.0",
+  "description": "Argus SDK for Next.js — client components plus server-side capture via instrumentation.ts onRequestError.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@argusdev/sdk-browser": "workspace:*",
+    "@argusdev/sdk-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "~6.0.3"
+  },
+  "license": "MIT",
+  "author": "Treasure Odetokun",
+  "homepage": "https://github.com/oluwatobicode/argus#readme",
+  "keywords": [
+    "argus",
+    "error-tracking",
+    "monitoring",
+    "sdk",
+    "nextjs",
+    "next"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oluwatobicode/argus.git",
+    "directory": "packages/sdk-nextjs"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

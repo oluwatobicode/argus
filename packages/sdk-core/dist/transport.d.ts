@@ -1,4 +1,4 @@
-import type { Envelope, TransactionEnvelope } from "./types";
+import type { Envelope, TransactionEnvelope } from "./types.js";
 export interface SendOptions {
     keepalive?: boolean;
 }

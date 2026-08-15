@@ -20,7 +20,19 @@
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('deps:'\\); [print\\(' ',k,v\\) for k,v in d['dependencies'].items\\(\\)]\")",
       "Bash(pnpm --filter frontend add recharts)",
       "Bash(\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --headless --disable-gpu --screenshot=recharts.png --window-size=1000,460 --virtual-time-budget=5000 http://localhost:5199/preview.html)",
-      "Bash(\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --headless --disable-gpu --screenshot=recharts2.png --window-size=1000,460 --virtual-time-budget=5000 http://localhost:5199/preview.html)"
+      "Bash(\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --headless --disable-gpu --screenshot=recharts2.png --window-size=1000,460 --virtual-time-budget=5000 http://localhost:5199/preview.html)",
+      "Bash(pnpm --version)",
+      "Bash(pnpm install *)",
+      "Bash(pnpm --filter @argusdev/sdk-vue build)",
+      "Bash(pnpm --filter @argusdev/sdk-angular build)",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(echo \"TSC_EXIT=$?\")",
+      "Bash(mkdir -p /private/tmp/claude-501/-Users-macbook-Documents-treasure-argus/68db98bb-82aa-449c-bf55-223ff241a830/scratchpad/verify/node_modules/@argusdev)",
+      "Bash(ln -sfn /Users/macbook/Documents/treasure/argus/packages/sdk-node /private/tmp/claude-501/-Users-macbook-Documents-treasure-argus/68db98bb-82aa-449c-bf55-223ff241a830/scratchpad/verify/node_modules/@argusdev/sdk-node)",
+      "Bash(node -e 'import\\(\"@argusdev/sdk-node\"\\).then\\(m=>console.log\\(\"OK\",Object.keys\\(m\\)\\)\\).catch\\(e=>console.log\\(\"BROKEN:\",e.code,\"\\\\n \",e.message.split\\(\"\\\\n\"\\)[0]\\)\\)')",
+      "Bash(perl -pi -e 's{from \"\\\\./\\([A-Za-z0-9_-]+\\)\"}{from \"./$1.js\"}g' sdk-core/src/*.ts sdk-node/src/*.ts sdk-browser/src/*.ts sdk-react/src/*.ts* sdk-vue/src/*.ts sdk-angular/src/*.ts)",
+      "Bash(pnpm --filter \"@argusdev/sdk-*\" build)",
+      "Bash(node -e 'import\\(\"@argusdev/sdk-react\"\\).catch\\(e=>console.log\\(e.message.split\\(\"\\\\n\"\\)[0]\\)\\)')"
     ],
     "additionalDirectories": [
       "/Users/macbook/Documents/treasure/argus/app/backend/api/prisma"

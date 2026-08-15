@@ -1,4 +1,4 @@
-import type { Envelope, StackFrame } from "./types";
+import type { Envelope, StackFrame } from "./types.js";
 export interface EnvelopeOptions {
     level?: Envelope["level"];
     environment?: string;

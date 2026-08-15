@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    /* DOM for the client entry; the server entry uses no Node-only API, so
+       @types/node is deliberately absent — the server code must also run on
+       the (V8, non-Node) edge runtime. */
+    "lib": ["ES2020", "DOM"],
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}

@@ -24,6 +24,27 @@ const FRAMEWORKS: Framework[] = [
       `import { init, ArgusErrorBoundary } from "@argusdev/sdk-react";\n\ninit({ dsn: "${dsn}" });\n\n// wrap your tree:\n// <ArgusErrorBoundary><App /></ArgusErrorBoundary>`,
   },
   {
+    key: "nextjs",
+    label: "Next.js",
+    pkg: "@argusdev/sdk-nextjs",
+    snippet: (dsn) =>
+      `// instrumentation.ts\nimport { init, onRequestError as argusOnRequestError } from "@argusdev/sdk-nextjs/server";\n\nexport function register() {\n  init({ dsn: "${dsn}" });\n}\n\nexport const onRequestError = argusOnRequestError;`,
+  },
+  {
+    key: "vue",
+    label: "Vue",
+    pkg: "@argusdev/sdk-vue",
+    snippet: (dsn) =>
+      `import { createApp } from "vue";\nimport { argusVue } from "@argusdev/sdk-vue";\n\ncreateApp(App)\n  .use(argusVue, { dsn: "${dsn}" })\n  .mount("#app");`,
+  },
+  {
+    key: "angular",
+    label: "Angular",
+    pkg: "@argusdev/sdk-angular",
+    snippet: (dsn) =>
+      `import { ErrorHandler } from "@angular/core";\nimport { init, ArgusErrorHandler } from "@argusdev/sdk-angular";\n\ninit({ dsn: "${dsn}" });\n\n// add to your providers:\n// { provide: ErrorHandler, useClass: ArgusErrorHandler }`,
+  },
+  {
     key: "node",
     label: "Node",
     pkg: "@argusdev/sdk-node",
@@ -41,7 +62,7 @@ export function InstallTabs({ dsn }: { dsn: string }) {
   return (
     <div>
       <div className="flex items-center justify-between gap-3">
-        <div className="flex gap-1.5">
+        <div className="flex flex-wrap gap-1.5">
           {FRAMEWORKS.map((fw) => {
             const isActive = fw.key === active.key;
             return (

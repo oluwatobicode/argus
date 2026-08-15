@@ -1,4 +1,4 @@
-import { captureException } from "./init";
+import { captureException } from "./init.js";
 
 /* structural types — just the fields we read, so express isn't a dependency */
 interface RequestLike {

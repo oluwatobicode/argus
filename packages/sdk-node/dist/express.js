@@ -1,4 +1,4 @@
-import { captureException } from "./init";
+import { captureException } from "./init.js";
 /*
  * Usage (LAST middleware, after routes):
  *   app.use(argusErrorHandler());

@@ -1,0 +1,22 @@
+{
+  "name": "@argusdev/sdk-tests",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Cross-SDK integration tests — every SDK's output validated against the API's real ingest schema and the worker's real fingerprint. Never published.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@argusdev/sdk-angular": "workspace:*",
+    "@argusdev/sdk-browser": "workspace:*",
+    "@argusdev/sdk-core": "workspace:*",
+    "@argusdev/sdk-nextjs": "workspace:*",
+    "@argusdev/sdk-node": "workspace:*",
+    "@argusdev/sdk-react": "workspace:*",
+    "@argusdev/sdk-vue": "workspace:*"
+  },
+  "devDependencies": {
+    "react": "^19.0.0"
+  }
+}

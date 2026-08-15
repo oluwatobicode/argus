@@ -1,6 +1,6 @@
 /* Public surface of @argusdev/sdk-node */
 
-export { init, captureException } from "./init";
-export type { InitOptions } from "./init";
-export { argusErrorHandler } from "./express";
-export { parseStack } from "./stacktrace";
+export { init, captureException } from "./init.js";
+export type { InitOptions } from "./init.js";
+export { argusErrorHandler } from "./express.js";
+export { parseStack } from "./stacktrace.js";

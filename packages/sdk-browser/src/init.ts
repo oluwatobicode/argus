@@ -6,8 +6,8 @@ import {
   type EnvelopeOptions,
   type StackFrame,
 } from "@argusdev/sdk-core";
-import { parseStack } from "./stacktrace";
-import { startVitals } from "./vitals";
+import { parseStack } from "./stacktrace.js";
+import { startVitals } from "./vitals.js";
 
 export interface InitOptions {
   dsn: string;
@@ -33,6 +33,17 @@ export function init(options: InitOptions): void {
     environment: options.environment,
     release: options.release,
   };
+
+  /*
+   * SSR — Next.js, Nuxt, Angular Universal, Remix. There is no DOM to hook
+   * here, and the same module graph runs on both sides, so init() WILL be
+   * called on the server. Bail before touching window rather than taking down
+   * someone's server render: the golden rule matters most when we're inside
+   * their request path. `client` stays set on purpose, so a manual
+   * captureException() still reports from the server — Node's stack format is
+   * V8, which parseStack already handles.
+   */
+  if (typeof window === "undefined") return;
 
   /* web vitals + page.load transaction (opt out with vitals: false) */
   if (options.vitals !== false) {
@@ -91,7 +102,11 @@ async function send(
   const envelope = buildEnvelope(type, value, frames, {
     environment: client.environment,
     release: client.release,
-    request: { url: window.location.href },
+    /* page URL only exists client-side; on the server the caller supplies
+       request context through `extra` (see @argusdev/sdk-nextjs/server) */
+    ...(typeof window !== "undefined"
+      ? { request: { url: window.location.href } }
+      : {}),
     ...extra,
   });
 

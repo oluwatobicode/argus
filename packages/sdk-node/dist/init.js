@@ -1,5 +1,5 @@
 import { parseDsn, getIngestUrl, buildEnvelope, sendEnvelope, } from "@argusdev/sdk-core";
-import { parseStack } from "./stacktrace";
+import { parseStack } from "./stacktrace.js";
 /* set once by init(); null means "not initialized — do nothing, never crash" */
 let client = null;
 export function init(options) {

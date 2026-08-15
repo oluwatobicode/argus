@@ -1,4 +1,4 @@
-import type { Envelope, StackFrame } from "./types";
+import type { Envelope, StackFrame } from "./types.js";
 
 /* everything optional a captured error can carry along */
 export interface EnvelopeOptions {

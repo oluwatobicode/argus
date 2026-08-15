@@ -1,11 +1,11 @@
 /* Public surface of @argusdev/sdk-core */
 
-export { parseDsn, getIngestUrl } from "./dsn";
-export type { ParsedDsn } from "./dsn";
-export { buildEnvelope } from "./envelope";
-export type { EnvelopeOptions } from "./envelope";
-export { sendEnvelope } from "./transport";
-export type { SendOptions } from "./transport";
+export { parseDsn, getIngestUrl } from "./dsn.js";
+export type { ParsedDsn } from "./dsn.js";
+export { buildEnvelope } from "./envelope.js";
+export type { EnvelopeOptions } from "./envelope.js";
+export { sendEnvelope } from "./transport.js";
+export type { SendOptions } from "./transport.js";
 export type {
   Envelope,
   TransactionEnvelope,
@@ -13,4 +13,4 @@ export type {
   StackFrame,
   ExceptionPayload,
   Breadcrumb,
-} from "./types";
+} from "./types.js";

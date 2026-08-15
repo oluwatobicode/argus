@@ -1,4 +1,4 @@
-import type { Envelope, TransactionEnvelope } from "./types";
+import type { Envelope, TransactionEnvelope } from "./types.js";
 
 const MAX_RETRIES = 2;
 const BACKOFF_MS = 1_000;
