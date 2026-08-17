@@ -48,6 +48,9 @@ const PACKAGES = [
   "sdk-vue",
   "sdk-angular",
   "sdk-nextjs",
+  "sdk-svelte",
+  "sdk-nestjs",
+  "sdk-astro",
 ];
 
 function assertValidEvent(envelope) {
@@ -58,9 +61,15 @@ function assertValidEvent(envelope) {
 describe("published artifacts", () => {
   test("every package (and both sdk-nextjs entries) loads in plain Node ESM", async () => {
     const entries = [
-      ...PACKAGES.filter((p) => p !== "sdk-nextjs").map((p) => `@argusdev/${p}`),
+      ...PACKAGES.filter((p) => !["sdk-nextjs", "sdk-svelte"].includes(p)).map(
+        (p) => `@argusdev/${p}`,
+      ),
       "@argusdev/sdk-nextjs/server",
       "@argusdev/sdk-nextjs/client",
+      "@argusdev/sdk-svelte/server",
+      "@argusdev/sdk-svelte/client",
+      "@argusdev/sdk-astro/client",
+      "@argusdev/sdk-astro/middleware",
     ];
     for (const entry of entries) {
       await assert.doesNotReject(import(entry), `${entry} failed to import`);
@@ -147,6 +156,50 @@ describe("every SDK's output passes the API's real ingest schema", () => {
       { path: "/blog/x", method: "GET", headers: { "user-agent": "UA" } },
       { routerKind: "App Router", routePath: "/blog/[slug]", routeType: "render" },
     );
+    assertValidEvent(sent.at(-1).body);
+  });
+
+  test("sdk-svelte — server handleError", async () => {
+    const sdk = await import("@argusdev/sdk-svelte/server");
+    sdk.init({ dsn: DSN, environment: "production" });
+    await sdk.handleErrorWithArgus()({
+      error: new Error("kit load boom"),
+      status: 500,
+      message: "Internal Error",
+      event: {
+        route: { id: "/blog/[slug]" },
+        url: { pathname: "/blog/x" },
+        request: { method: "GET", headers: { get: () => null } },
+      },
+    });
+    await flush();
+    assertValidEvent(sent.at(-1).body);
+  });
+
+  test("sdk-nestjs — exception filter", async (t) => {
+    t.mock.method(console, "error", () => {});
+    const { init, ArgusExceptionFilter } = await import("@argusdev/sdk-nestjs");
+    init({ dsn: DSN });
+    const response = { status: () => response, json: () => {} };
+    new ArgusExceptionFilter().catch(new Error("nest boom"), {
+      switchToHttp: () => ({
+        getRequest: () => ({ method: "GET", url: "/api/x", headers: {} }),
+        getResponse: () => response,
+      }),
+    });
+    await flush();
+    assertValidEvent(sent.at(-1).body);
+  });
+
+  test("sdk-astro — middleware capture", async () => {
+    const { init } = await import("../../sdk-astro/dist/server-capture.js");
+    const { onRequest } = await import("@argusdev/sdk-astro/middleware");
+    init({ dsn: DSN });
+    await onRequest(
+      { routePattern: "/x", url: { pathname: "/x" }, request: { method: "GET", headers: { get: () => null } } },
+      () => Promise.reject(new Error("astro ssr boom")),
+    ).catch(() => {});
+    await flush();
     assertValidEvent(sent.at(-1).body);
   });
 

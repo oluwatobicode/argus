@@ -42,15 +42,29 @@ app.use(
     },
   }),
 );
-app.use(
-  cors({
-    origin:
-      process.env.FRONTEND_URL ||
-      (process.env.NODE_ENV === "production"
-        ? "https://www.arguserror.xyz"
-        : "http://localhost:5173"),
-    credentials: true,
-  }),
+/*
+ * Two CORS policies, split by route:
+ *  - /api/v1/ingest — open to EVERY origin. SDK events arrive from arbitrary
+ *    customer sites; auth is the DSN public key, not cookies, so `*` is safe
+ *    (and `*` is incompatible with credentials by spec anyway).
+ *  - everything else — the dashboard only, with session-cookie credentials.
+ * The dashboard policy must SKIP ingest: cors() with a string origin always
+ * stamps that origin, so running both would overwrite the `*` on the POST.
+ */
+app.use("/api/v1/ingest", cors());
+
+const dashboardCors = cors({
+  origin:
+    process.env.FRONTEND_URL ||
+    (process.env.NODE_ENV === "production"
+      ? "https://www.arguserror.xyz"
+      : "http://localhost:5173"),
+  credentials: true,
+});
+app.use((req, res, next) =>
+  req.path.startsWith("/api/v1/ingest")
+    ? next()
+    : dashboardCors(req, res, next),
 );
 app.use(morgan("dev"));
 app.use(cookieParser());

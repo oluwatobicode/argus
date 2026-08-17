@@ -1,0 +1,57 @@
+{
+  "name": "@argusdev/sdk-astro",
+  "version": "0.3.0",
+  "description": "Argus SDK for Astro — one integration wires browser capture on every page and SSR error capture in middleware.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js"
+    },
+    "./middleware": {
+      "types": "./dist/middleware.d.ts",
+      "import": "./dist/middleware.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@argusdev/sdk-browser": "workspace:*",
+    "@argusdev/sdk-core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3"
+  },
+  "license": "MIT",
+  "author": "Treasure Odetokun",
+  "homepage": "https://github.com/oluwatobicode/argus#readme",
+  "keywords": [
+    "argus",
+    "error-tracking",
+    "monitoring",
+    "sdk",
+    "astro",
+    "astro-integration"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oluwatobicode/argus.git",
+    "directory": "packages/sdk-astro"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "@argusdev/sdk-nestjs",
+  "version": "0.3.0",
+  "description": "Argus SDK for NestJS — global exception filter on top of @argusdev/sdk-node. Works with Express and Fastify adapters.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@argusdev/sdk-core": "workspace:*",
+    "@argusdev/sdk-node": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "typescript": "~6.0.3"
+  },
+  "license": "MIT",
+  "author": "Treasure Odetokun",
+  "homepage": "https://github.com/oluwatobicode/argus#readme",
+  "keywords": [
+    "argus",
+    "error-tracking",
+    "monitoring",
+    "sdk",
+    "nestjs",
+    "nest"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oluwatobicode/argus.git",
+    "directory": "packages/sdk-nestjs"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

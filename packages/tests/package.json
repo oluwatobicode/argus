@@ -9,11 +9,14 @@
   },
   "dependencies": {
     "@argusdev/sdk-angular": "workspace:*",
+    "@argusdev/sdk-astro": "workspace:*",
     "@argusdev/sdk-browser": "workspace:*",
     "@argusdev/sdk-core": "workspace:*",
+    "@argusdev/sdk-nestjs": "workspace:*",
     "@argusdev/sdk-nextjs": "workspace:*",
     "@argusdev/sdk-node": "workspace:*",
     "@argusdev/sdk-react": "workspace:*",
+    "@argusdev/sdk-svelte": "workspace:*",
     "@argusdev/sdk-vue": "workspace:*"
   },
   "devDependencies": {

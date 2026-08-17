@@ -45,11 +45,32 @@ const FRAMEWORKS: Framework[] = [
       `import { ErrorHandler } from "@angular/core";\nimport { init, ArgusErrorHandler } from "@argusdev/sdk-angular";\n\ninit({ dsn: "${dsn}" });\n\n// add to your providers:\n// { provide: ErrorHandler, useClass: ArgusErrorHandler }`,
   },
   {
+    key: "svelte",
+    label: "Svelte",
+    pkg: "@argusdev/sdk-svelte",
+    snippet: (dsn) =>
+      `// hooks.server.ts (same for hooks.client.ts via /client)\nimport { init, handleErrorWithArgus } from "@argusdev/sdk-svelte/server";\n\ninit({ dsn: "${dsn}" });\n\nexport const handleError = handleErrorWithArgus();`,
+  },
+  {
+    key: "astro",
+    label: "Astro",
+    pkg: "@argusdev/sdk-astro",
+    snippet: (dsn) =>
+      `// astro.config.mjs\nimport argus from "@argusdev/sdk-astro";\n\nexport default defineConfig({\n  integrations: [argus({ dsn: "${dsn}" })],\n});`,
+  },
+  {
     key: "node",
     label: "Node",
     pkg: "@argusdev/sdk-node",
     snippet: (dsn) =>
       `import { init } from "@argusdev/sdk-node";\n\ninit({ dsn: "${dsn}" });`,
+  },
+  {
+    key: "nestjs",
+    label: "NestJS",
+    pkg: "@argusdev/sdk-nestjs",
+    snippet: (dsn) =>
+      `import { init, ArgusExceptionFilter } from "@argusdev/sdk-nestjs";\n\ninit({ dsn: "${dsn}" });\n\n// after NestFactory.create(AppModule):\n// app.useGlobalFilters(new ArgusExceptionFilter());`,
   },
 ];
 

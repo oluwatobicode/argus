@@ -1,6 +1,6 @@
 # Argus — Packages (SDKs)
 
-Seven TypeScript packages, zero runtime dependencies outside the scope itself. **Published to npm under the `@argusdev/*` scope** (public; **v0.3.0** — SSR safety, the Node-ESM fix, and the vue/angular/nextjs debuts). Linked inside the monorepo via `workspace:*` — publish with `pnpm publish`, never `npm publish` (only pnpm rewrites the workspace protocol).
+Ten TypeScript packages, zero runtime dependencies outside the scope itself. **Published to npm under the `@argusdev/*` scope** (public; **v0.3.0** — SSR safety, the Node-ESM fix, and the vue/angular/nextjs debuts). Linked inside the monorepo via `workspace:*` — publish with `pnpm publish`, never `npm publish` (only pnpm rewrites the workspace protocol).
 
 Every SDK follows the same 3-part pattern: **hook** (how this runtime announces crashes) → **normalize** (that runtime's error format → a real `Error` + `StackFrame[]`) → **delegate** (sdk-core builds + sends the envelope).
 
@@ -17,10 +17,13 @@ Every SDK follows the same 3-part pattern: **hook** (how this runtime announces 
 | `sdk-vue`     | Vue 3 apps       | ✅     | `argusVue` plugin → `app.config.errorHandler`               |
 | `sdk-angular` | Angular apps     | ✅     | `ArgusErrorHandler` provider + Angular wrapper unwrapping   |
 | `sdk-nextjs`  | Next.js apps     | ✅     | `/client` + `/server` (`onRequestError`) — both runtimes    |
+| `sdk-svelte`  | SvelteKit apps   | ✅     | `handleError` wrappers for both hooks files                 |
+| `sdk-nestjs`  | NestJS backends  | ✅     | global exception filter (Express + Fastify adapters)        |
+| `sdk-astro`   | Astro sites      | ✅     | one integration: page script + SSR middleware               |
 
-`sdk-core` is never installed directly by developers — it's an internal dependency of the other six.
+`sdk-core` is never installed directly by developers — it's an internal dependency of the other nine.
 
-**Framework deps:** `sdk-react` peer-depends on `react >=18`, `sdk-vue` on `vue >=3`, `sdk-nextjs` on `react >=18` (types only). Neither `sdk-angular` nor `sdk-nextjs` imports its framework at all — both hook in structurally. See their READMEs.
+**Framework deps:** `sdk-react` peer-depends on `react >=18`, `sdk-vue` on `vue >=3`, `sdk-nextjs` on `react >=18` (types only). `sdk-angular`, `sdk-nextjs`, `sdk-svelte`, `sdk-nestjs`, and `sdk-astro` import **nothing** from their frameworks — all hook in structurally, verified against the real framework types. See their READMEs.
 
 **SSR:** `sdk-browser`'s `init()` and `captureException()` no-op instead of throwing when there is no `window`, so react/vue/angular/nextjs are all safe to import into a server render. Manual `captureException()` still reports from the server — Node's stack format is V8, which `parseStack` already handles.
 
@@ -223,7 +226,8 @@ Edge-safe: the server entry uses no Node built-ins and never imports `sdk-browse
 ## How They Connect
 
 ```
-sdk-node / sdk-browser / sdk-react / sdk-vue / sdk-angular / sdk-nextjs
+sdk-node / sdk-browser / sdk-react / sdk-vue / sdk-angular
+sdk-nextjs / sdk-svelte / sdk-nestjs / sdk-astro
         │  imports
         ▼
     sdk-core
@@ -245,7 +249,7 @@ sdk-node / sdk-browser / sdk-react / sdk-vue / sdk-angular / sdk-nextjs
 ```bash
 pnpm --filter @argusdev/sdk-core build      # required once before typechecking dependents
 pnpm --filter "@argusdev/sdk-*" exec tsc --noEmit
-pnpm --filter "@argusdev/sdk-*" build       # build all seven (topological order)
+pnpm --filter "@argusdev/sdk-*" build       # build all ten (topological order)
 pnpm test:sdk                               # from repo root: build + run every SDK test suite
 pnpm --filter @argusdev/sdk-core test       # one package's tests
 ```
@@ -278,7 +282,10 @@ To test the full pipeline, create a project in the dashboard, install an SDK
 - [x] SSR safety in `sdk-browser` (no more `window is not defined` on server renders)
 - [x] `node:test` suites across all seven + `tests/` integration package (real validator + real fingerprint)
 - [x] **v0.3.0 published** (2026-08-15) — all seven live; install verified from the registry end-to-end
+- [x] `@argusdev/sdk-svelte` — handleError wrappers (client + server)
+- [x] `@argusdev/sdk-nestjs` — global exception filter, runtime-verified in a real Nest 11 app
+- [x] `@argusdev/sdk-astro` — integration (page script + SSR middleware + vite define)
 - [ ] Deprecate `@argusdev/sdk-node@<=0.2.1` on npm (broken ESM — unloadable in Node)
 - [ ] Browser SDK breadcrumbs
-- [ ] `@argusdev/sdk-react-native`, Svelte, Go
+- [ ] `@argusdev/sdk-react-native`, Go (needs Go toolchain — git-tag release, not npm), dedicated Nuxt module
 - [ ] `@argusdev/sdk-java` (dir exists, empty — separate Maven toolchain, no code sharing with sdk-core)

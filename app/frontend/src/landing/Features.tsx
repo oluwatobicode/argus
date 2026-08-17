@@ -6,7 +6,10 @@ const SDKS = [
   { name: "Next.js", sub: "@argusdev/sdk-nextjs", logo: "/next-js.svg", alt: "Next.js logo", markClassName: "rounded-full bg-[#e7e8ee] p-1" },
   { name: "Vue", sub: "@argusdev/sdk-vue", logo: "/Vue.js_Logo_2.svg", alt: "Vue logo" },
   { name: "Nuxt", sub: "SSR-safe sdk-vue", logo: "/nuxt_logo.svg", alt: "Nuxt logo" },
+  { name: "Svelte", sub: "@argusdev/sdk-svelte", logo: "/Svelte_Logo.svg", alt: "Svelte logo" },
   { name: "Angular", sub: "@argusdev/sdk-angular", logo: "/angular_logo.png", alt: "Angular logo" },
+  { name: "Astro", sub: "@argusdev/sdk-astro", logo: "/astro_logo.svg", alt: "Astro logo" },
+  { name: "NestJS", sub: "@argusdev/sdk-nestjs", logo: "/NestJS_logo.svg", alt: "NestJS logo" },
   { name: "Node.js", sub: "@argusdev/sdk-node", logo: "/Node.js.svg", alt: "Node.js logo" },
   { name: "JavaScript", sub: "@argusdev/sdk-browser", logo: "/js-logo.png", alt: "JavaScript logo" },
   { name: "TypeScript", sub: "first-class types", logo: "/ts-logo.png", alt: "TypeScript logo" },
@@ -54,6 +57,36 @@ const FW: Record<
       [{ t: "tx", c: "init({ dsn: " }, { t: "st", c: '"https://ed533eb8@…"' }, { t: "tx", c: " })" }],
       [{ t: "tx", c: "{ provide: ErrorHandler, useClass: ArgusErrorHandler }" }],
       [{ t: "cm", c: "// HttpErrorResponse unwrapped automatically" }],
+    ],
+  },
+  svelte: {
+    label: "Svelte",
+    file: "hooks.server.ts",
+    code: [
+      [{ t: "kw", c: "import" }, { t: "tx", c: " { init, handleErrorWithArgus } from " }, { t: "st", c: '"@argusdev/sdk-svelte/server"' }],
+      [{ t: "tx", c: "" }],
+      [{ t: "tx", c: "init({ dsn: " }, { t: "st", c: '"https://ed533eb8@…"' }, { t: "tx", c: " })" }],
+      [{ t: "kw", c: "export" }, { t: "tx", c: " const handleError = handleErrorWithArgus()" }],
+    ],
+  },
+  astro: {
+    label: "Astro",
+    file: "astro.config.mjs",
+    code: [
+      [{ t: "kw", c: "import" }, { t: "tx", c: " argus from " }, { t: "st", c: '"@argusdev/sdk-astro"' }],
+      [{ t: "tx", c: "" }],
+      [{ t: "tx", c: "integrations: [argus({ dsn: " }, { t: "st", c: '"https://ed533eb8@…"' }, { t: "tx", c: " })]" }],
+      [{ t: "cm", c: "// browser + SSR capture, one integration" }],
+    ],
+  },
+  nestjs: {
+    label: "NestJS",
+    file: "main.ts",
+    code: [
+      [{ t: "kw", c: "import" }, { t: "tx", c: " { init, ArgusExceptionFilter } from " }, { t: "st", c: '"@argusdev/sdk-nestjs"' }],
+      [{ t: "tx", c: "init({ dsn: " }, { t: "st", c: '"https://ed533eb8@…"' }, { t: "tx", c: " })" }],
+      [{ t: "tx", c: "app.useGlobalFilters(new ArgusExceptionFilter())" }],
+      [{ t: "cm", c: "// every request error — Express or Fastify" }],
     ],
   },
   browser: {
