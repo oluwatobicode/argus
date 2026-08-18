@@ -21,7 +21,9 @@ interface IssuesQuery {
   page?: number;
 }
 
-/* paginated issue list for one status/level/page */
+/* paginated issue list for one status/level/page — polls so new errors land
+   on screen without a refresh (no push channel yet; v5 keeps polling while
+   the window is visible, and pauses only for hidden tabs) */
 export function useIssues({
   projectId,
   status,
@@ -31,6 +33,7 @@ export function useIssues({
   return useQuery({
     queryKey: ["issues", projectId, status, level, page],
     enabled: Boolean(projectId),
+    refetchInterval: 3000,
     queryFn: async () => {
       const res = await axiosInstance.get<Envelope<IssuesResponse>>(
         `/projects/${projectId}/issues`,
@@ -49,6 +52,7 @@ export function useIssueCounts(projectId: string) {
     queries: STATUSES.map((status) => ({
       queryKey: ["issueCount", projectId, status],
       enabled: Boolean(projectId),
+      refetchInterval: 5000 /* keep the tab counts in step with the list */,
       queryFn: async () => {
         const res = await axiosInstance.get<Envelope<IssuesResponse>>(
           `/projects/${projectId}/issues`,
@@ -87,6 +91,7 @@ export function useIssue(projectId: string, issueId: string) {
   return useQuery({
     queryKey: ["issue", projectId, issueId],
     enabled: Boolean(projectId && issueId),
+    refetchInterval: 5000 /* eventCount / lastSeen tick while you watch */,
     queryFn: async () => {
       const res = await axiosInstance.get<Envelope<IssueDetail>>(
         `/projects/${projectId}/issues/${issueId}`,

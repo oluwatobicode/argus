@@ -17,6 +17,20 @@ export function init(options) {
         release: options.release,
     };
 }
+async function maybeAttachSourceContext(frames) {
+    try {
+        const isNode = process.env.NEXT_RUNTIME === "nodejs" ||
+            (process.env.NEXT_RUNTIME === undefined &&
+                typeof process.versions?.node === "string");
+        if (isNode) {
+            const { attachSourceContext } = await import("@argusdev/sdk-node");
+            attachSourceContext(frames);
+        }
+    }
+    catch {
+        /* no context is fine — never let it break error reporting */
+    }
+}
 export async function captureException(err, extra = {}) {
     if (!client)
         return; /* init() not called — silently no-op */
@@ -26,6 +40,8 @@ export async function captureException(err, extra = {}) {
         /* validator requires >= 1 frame — synthesize one rather than drop the event */
         frames = [{ filename: "<unknown>", lineno: 1 }];
     }
+    /* ±5 source lines per in-app frame — Node runtime only, see above */
+    await maybeAttachSourceContext(frames);
     const envelope = buildEnvelope(error.name, error.message, frames, {
         environment: client.environment,
         release: client.release,

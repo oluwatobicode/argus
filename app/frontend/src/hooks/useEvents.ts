@@ -13,6 +13,7 @@ export function useEvents(
     queryKey: ["events", projectId, issueId, page, limit],
     enabled: Boolean(projectId && issueId),
     placeholderData: keepPreviousData /* no flicker while stepping */,
+    refetchInterval: 5000 /* new events appear without a refresh */,
     queryFn: async () => {
       const res = await axiosInstance.get<Envelope<EventsResponse>>(
         `/projects/${projectId}/issues/${issueId}/events`,

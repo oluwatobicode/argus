@@ -309,6 +309,9 @@ importers:
       '@argusdev/sdk-core':
         specifier: workspace:*
         version: link:../sdk-core
+      '@argusdev/sdk-node':
+        specifier: workspace:*
+        version: link:../sdk-node
       react:
         specifier: '>=18'
         version: 19.2.7

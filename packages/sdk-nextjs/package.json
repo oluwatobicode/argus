@@ -1,7 +1,7 @@
 {
   "name": "@argusdev/sdk-nextjs",
-  "version": "0.3.0",
-  "description": "Argus SDK for Next.js — client components plus server-side capture via instrumentation.ts onRequestError.",
+  "version": "0.4.0",
+  "description": "Argus SDK for Next.js — client components plus server-side capture via instrumentation.ts onRequestError, with source context (the crashing code lines) on the Node runtime.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -30,7 +30,8 @@
   },
   "dependencies": {
     "@argusdev/sdk-browser": "workspace:*",
-    "@argusdev/sdk-core": "workspace:*"
+    "@argusdev/sdk-core": "workspace:*",
+    "@argusdev/sdk-node": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18"

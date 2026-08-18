@@ -1,11 +1,6 @@
 import type { IssueEvent, Level, StackFrame } from "../../../types/api";
 import { LEVEL_META } from "../../../utils/levels";
 
-/* stack trace viewer: top frame tinted in level color, vendor frames dimmed
-   (design.md §4). Function color: top = pink, app = lime, vendor = muted. */
-
-/* the ±5 source lines a server SDK read off disk — crash line tinted in the
-   level color, line numbers derived from the frame's lineno */
 function CodeContext({ frame, level }: { frame: StackFrame; level: Level }) {
   if (frame.contextLine == null) return null;
 
@@ -15,7 +10,11 @@ function CodeContext({ frame, level }: { frame: StackFrame; level: Level }) {
   const rows = [
     ...pre.map((code, i) => ({ no: startLine + i, code, crash: false })),
     { no: frame.lineno, code: frame.contextLine, crash: true },
-    ...post.map((code, i) => ({ no: frame.lineno + 1 + i, code, crash: false })),
+    ...post.map((code, i) => ({
+      no: frame.lineno + 1 + i,
+      code,
+      crash: false,
+    })),
   ];
 
   return (
@@ -48,7 +47,13 @@ function CodeContext({ frame, level }: { frame: StackFrame; level: Level }) {
   );
 }
 
-export function StackTrace({ event, level }: { event: IssueEvent; level: Level }) {
+export function StackTrace({
+  event,
+  level,
+}: {
+  event: IssueEvent;
+  level: Level;
+}) {
   const frames = event.stacktrace?.frames ?? [];
   const levelColor = LEVEL_META[level].color;
 
@@ -66,7 +71,9 @@ export function StackTrace({ event, level }: { event: IssueEvent; level: Level }
 
           const header = (
             <>
-              <span style={{ color: fnColor }}>{frame.function ?? "<anonymous>"}</span>{" "}
+              <span style={{ color: fnColor }}>
+                {frame.function ?? "<anonymous>"}
+              </span>{" "}
               <span className="text-text-4">in</span>{" "}
               <span className="text-text-2">{frame.filename}</span>
               <span className="text-text-4">
@@ -91,7 +98,9 @@ export function StackTrace({ event, level }: { event: IssueEvent; level: Level }
                 <details>
                   <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                     {header}{" "}
-                    <span className="text-[11px] text-lime/70">{"{ code }"}</span>
+                    <span className="text-[11px] text-lime/70">
+                      {"{ code }"}
+                    </span>
                   </summary>
                   <CodeContext frame={frame} level={level} />
                 </details>

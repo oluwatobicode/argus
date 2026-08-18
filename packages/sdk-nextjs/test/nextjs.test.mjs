@@ -91,6 +91,47 @@ describe("client entry", () => {
     assert.equal(firstLine, '"use client";');
   });
 
+  test("source context: attached on the Node runtime (NEXT_RUNTIME=nodejs)", async () => {
+    process.env.NEXT_RUNTIME = "nodejs";
+    try {
+      await server.captureException(new Error("node runtime crash"));
+      await flush();
+      const top = sent.at(-1).body.exception.stacktrace.frames[0];
+      assert.ok(top.contextLine.includes("node runtime crash"));
+      assert.ok(top.preContext.length > 0 && top.postContext.length > 0);
+    } finally {
+      delete process.env.NEXT_RUNTIME;
+    }
+  });
+
+  test("source context: SKIPPED on the edge runtime (NEXT_RUNTIME=edge)", async () => {
+    process.env.NEXT_RUNTIME = "edge";
+    try {
+      await server.captureException(new Error("edge runtime crash"));
+      await flush();
+      const top = sent.at(-1).body.exception.stacktrace.frames[0];
+      assert.equal(top.contextLine, undefined);
+      assert.equal(top.preContext, undefined);
+    } finally {
+      delete process.env.NEXT_RUNTIME;
+    }
+  });
+
+  test("source context: plain-Node fallback when NEXT_RUNTIME is unset", async () => {
+    await server.captureException(new Error("plain node crash"));
+    await flush();
+    assert.ok(sent.at(-1).body.exception.stacktrace.frames[0].contextLine.includes("plain node crash"));
+  });
+
+  test("edge safety: no STATIC import of sdk-node or node:fs in the server entry", () => {
+    /* the sdk-node import must stay dynamic inside the NEXT_RUNTIME branch —
+       a static one would drag node:fs into every edge bundle */
+    const code = readFileSync(new URL("../dist/server.js", import.meta.url), "utf8");
+    const staticImports = code.match(/^\s*(?:import|export)[^;]*from\s+"[^"]+"/gm) ?? [];
+    assert.ok(staticImports.every((l) => !l.includes("sdk-node") && !l.includes("node:")));
+    assert.ok(code.includes('import("@argusdev/sdk-node")'), "dynamic import missing");
+  });
+
   test("server entry graph never imports sdk-browser (server/edge bundle purity)", () => {
     for (const file of ["../dist/server.js", "../dist/stacktrace.js"]) {
       const code = readFileSync(new URL(file, import.meta.url), "utf8");

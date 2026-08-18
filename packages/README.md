@@ -221,7 +221,7 @@ Auto-tags `routePath` (the dynamic **pattern**, `/blog/[slug]` — stable across
 
 **Client** re-exports the browser `init` plus `useArgusError(error)` for `error.tsx` / `global-error.tsx`. Both halves tag the `digest`, which is the same value on server and client, so one failure is searchable across both envelopes.
 
-Edge-safe: the server entry uses no Node built-ins and never imports `sdk-browser`.
+Edge-safe: the server entry uses no Node built-ins and never imports `sdk-browser`. **Source context (v0.4+):** on the Node runtime the server entry dynamically imports sdk-node's `attachSourceContext` behind a `process.env.NEXT_RUNTIME === "nodejs"` gate — Next inlines that env per build, so edge bundles tree-shake the whole branch (verified against real emitted bundles: node chunks carry `readFileSync`, edge chunks carry nothing). Note: prod Next frames point at compiled `.next/server` output, so snippets are compiled code until source-map symbolication lands; `next dev` frames read cleanly.
 
 ---
 

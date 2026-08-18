@@ -86,9 +86,13 @@ export async function POST(req: Request) {
 
 Only `user-agent` is sent. Cookies and `authorization` live in the same object and are never copied into an envelope. A repeated header arrives from Next as an array (`NodeJS.Dict<string | string[]>`) and is narrowed to its first value.
 
+### Source context (v0.4+)
+
+On the **Node runtime**, captured server errors ship with the ±5 source lines around each in-app stack frame, read off disk at capture — the Argus dashboard renders the snippet with the crashing line highlighted. The wiring is gated on `process.env.NEXT_RUNTIME === "nodejs"`, which Next inlines per build, so **edge bundles contain none of it** (no `node:fs`, verified at the emitted-bundle level). Expect the best snippets in `next dev`; production builds show Next's compiled server output until source-map support lands.
+
 ### Edge runtime
 
-Works as-is. The server entry uses no Node built-ins — no `process`, no `node:*` — and `sdk-core`'s transport is `fetch` + `setTimeout`. It also never imports `sdk-browser`, so no browser code lands in a server or edge bundle.
+Works as-is. The server entry imports no Node built-ins (the only `process` usage is `process.env`/`process.versions`, both available on the edge runtime) and `sdk-core`'s transport is `fetch` + `setTimeout`. It also never imports `sdk-browser`, so no browser code lands in a server or edge bundle.
 
 ## Client
 

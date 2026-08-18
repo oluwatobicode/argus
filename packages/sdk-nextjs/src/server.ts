@@ -38,6 +38,38 @@ export function init(options: ServerInitOptions): void {
   };
 }
 
+/*
+ * Source context (Node runtime only). Next inlines process.env.NEXT_RUNTIME as
+ * a literal per build, so on the edge build both comparisons below are
+ * statically false and the bundler eliminates the branch — the node:fs-using
+ * import never reaches an edge bundle. This is Next's own documented pattern
+ * for runtime-splitting instrumentation.
+ *
+ * Outside Next (plain Node — tests, custom servers) NEXT_RUNTIME is unset, so
+ * fall back to detecting Node itself.
+ */
+/* this package deliberately has no @types/node (edge safety by construction);
+   declare the two fields we read — both exist on Node AND the edge runtime */
+declare const process: {
+  env: { NEXT_RUNTIME?: string };
+  versions?: { node?: string };
+};
+
+async function maybeAttachSourceContext(frames: StackFrame[]): Promise<void> {
+  try {
+    const isNode =
+      process.env.NEXT_RUNTIME === "nodejs" ||
+      (process.env.NEXT_RUNTIME === undefined &&
+        typeof process.versions?.node === "string");
+    if (isNode) {
+      const { attachSourceContext } = await import("@argusdev/sdk-node");
+      attachSourceContext(frames);
+    }
+  } catch {
+    /* no context is fine — never let it break error reporting */
+  }
+}
+
 export async function captureException(
   err: unknown,
   extra: EnvelopeOptions = {},
@@ -51,6 +83,9 @@ export async function captureException(
     /* validator requires >= 1 frame — synthesize one rather than drop the event */
     frames = [{ filename: "<unknown>", lineno: 1 }];
   }
+
+  /* ±5 source lines per in-app frame — Node runtime only, see above */
+  await maybeAttachSourceContext(frames);
 
   const envelope = buildEnvelope(error.name, error.message, frames, {
     environment: client.environment,

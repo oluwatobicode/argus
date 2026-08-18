@@ -56,4 +56,8 @@ import { captureException } from "@argusdev/sdk-nestjs";
 await captureException(err, { tags: { job: "invoice-sync" } });
 ```
 
+## Source context (v0.4+)
+
+Every captured event ships with the ±5 source lines around each in-app stack frame, read off disk at capture time — the Argus dashboard shows the actual broken code with the crashing line highlighted. No source maps, no configuration; `node_modules` frames are skipped and any read failure silently degrades to "no snippet". (Inherited from `@argusdev/sdk-node`, which this SDK builds on.)
+
 MIT © Treasure Odetokun
