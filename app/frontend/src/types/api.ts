@@ -115,6 +115,10 @@ export interface StackFrame {
   function?: string;
   lineno: number;
   colno?: number;
+  /** ±5 source lines around the frame — present when a server SDK read them */
+  preContext?: string[];
+  contextLine?: string;
+  postContext?: string[];
 }
 
 export interface Issue {

@@ -75,6 +75,8 @@ app.use(argusErrorHandler());
 
 Behavior: on `uncaughtException` the event is sent, then the process exits `1` (crash behavior preserved). `unhandledRejection` is captured without exiting. Non-Error rejections are normalized.
 
+**Source context (v0.4+):** at capture time the SDK reads ±5 lines around each in-app frame off disk (`preContext`/`contextLine`/`postContext` on the frame) — the dashboard shows the actual broken code, no source maps needed on a server. In-app frames only (node_modules and `node:` internals skipped), lines clipped to 200 chars, max 10 frames per event, cached reads, and any read failure silently degrades to "no snippet". `sdk-nestjs` inherits this via sdk-node's capture. Fingerprinting is unaffected (frames hash on filename:function:lineno only).
+
 ---
 
 ## `sdk-browser/`
@@ -286,6 +288,7 @@ To test the full pipeline, create a project in the dashboard, install an SDK
 - [x] `@argusdev/sdk-nestjs` — global exception filter, runtime-verified in a real Nest 11 app
 - [x] `@argusdev/sdk-astro` — integration (page script + SSR middleware + vite define)
 - [ ] Deprecate `@argusdev/sdk-node@<=0.2.1` on npm (broken ESM — unloadable in Node)
+- [x] Server source context — ±5 code lines per in-app frame (sdk-node + sdk-nestjs), rendered in the dashboard
 - [ ] Browser SDK breadcrumbs
 - [ ] `@argusdev/sdk-react-native`, Go (needs Go toolchain — git-tag release, not npm), dedicated Nuxt module
 - [ ] `@argusdev/sdk-java` (dir exists, empty — separate Maven toolchain, no code sharing with sdk-core)

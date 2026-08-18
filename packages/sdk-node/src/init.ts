@@ -6,6 +6,7 @@ import {
   type EnvelopeOptions,
 } from "@argusdev/sdk-core";
 import { parseStack } from "./stacktrace.js";
+import { attachSourceContext } from "./sourcecontext.js";
 
 export interface InitOptions {
   dsn: string;
@@ -55,6 +56,9 @@ export async function captureException(
     /* validator requires >= 1 frame — synthesize one rather than drop the event */
     frames = [{ filename: "<unknown>", lineno: 1 }];
   }
+
+  /* ±5 source lines around each in-app frame — the dashboard shows the code */
+  attachSourceContext(frames);
 
   const envelope = buildEnvelope(error.name, error.message, frames, {
     environment: client.environment,

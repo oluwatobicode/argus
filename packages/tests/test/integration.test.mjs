@@ -101,8 +101,15 @@ describe("every SDK's output passes the API's real ingest schema", () => {
       () => {},
     );
     await flush();
-    assertValidEvent(sent.at(-1).body);
+    const env = sent.at(-1).body;
+    assertValidEvent(env);
     assert.equal(sent.at(-1).url, "https://argus.test/api/v1/ingest/proj1/envelope");
+
+    /* this test file is real source on disk → the top frame must carry its
+       own code, and the fattened envelope must still pass the real schema */
+    const top = env.exception.stacktrace.frames[0];
+    assert.ok(top.contextLine.includes("route died"));
+    assert.ok(top.preContext.length > 0 && top.postContext.length > 0);
   });
 
   test("sdk-browser — window.onerror", async () => {

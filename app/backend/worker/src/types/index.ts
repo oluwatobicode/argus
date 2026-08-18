@@ -3,6 +3,10 @@ export interface StackFrame {
   function?: string;
   lineno: number;
   colno?: number;
+  /** ±5 source lines around the frame — attached by server SDKs, stored as-is */
+  preContext?: string[];
+  contextLine?: string;
+  postContext?: string[];
 }
 
 export interface Breadcrumb {

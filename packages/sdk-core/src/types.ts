@@ -3,6 +3,12 @@ export interface StackFrame {
   function?: string;
   lineno: number;
   colno?: number;
+  /* source context around the crash — attached by SDKs that can read the
+     source at capture time (sdk-node reads it off disk). All optional; the
+     dashboard renders the snippet when present. */
+  preContext?: string[];
+  contextLine?: string;
+  postContext?: string[];
 }
 
 export interface Breadcrumb {

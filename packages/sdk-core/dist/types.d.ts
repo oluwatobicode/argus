@@ -3,6 +3,9 @@ export interface StackFrame {
     function?: string;
     lineno: number;
     colno?: number;
+    preContext?: string[];
+    contextLine?: string;
+    postContext?: string[];
 }
 export interface Breadcrumb {
     type: string;

@@ -12,11 +12,18 @@ const TimestampMs = z
   .int()
   .min(MS_EPOCH_2020, "timestamp must be milliseconds since epoch (Date.now())");
 
+/* source context lines are display-only — cap them hard so a hostile or buggy
+   SDK can't fatten events (SDKs clip to 200 chars; 300 leaves headroom) */
+const ContextLine = z.string().max(300);
+
 const StackFrameSchema = z.object({
   filename: z.string(),
   function: z.string().optional(),
   lineno: z.number().int().positive(),
   colno: z.number().int().positive().optional(),
+  preContext: z.array(ContextLine).max(8).optional(),
+  contextLine: ContextLine.optional(),
+  postContext: z.array(ContextLine).max(8).optional(),
 });
 
 const ExceptionSchema = z.object({

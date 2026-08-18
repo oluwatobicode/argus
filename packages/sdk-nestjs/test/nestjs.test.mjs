@@ -57,7 +57,10 @@ describe("ArgusExceptionFilter", () => {
       url: "/api/orders",
       headers: { "user-agent": "filter-UA" } /* array narrowed, cookie dropped */,
     });
-    assert.ok(!JSON.stringify(env).includes("nest-secret"));
+    /* scoped to request — the envelope's stack frames now carry THIS file's
+       source as context lines, which legitimately contain the literal above */
+    assert.ok(!JSON.stringify(env.request).includes("nest-secret"));
+    assert.equal(env.request.headers.cookie, undefined);
   });
 
   test("fastify adapter: send() used when json() is absent", async (t) => {

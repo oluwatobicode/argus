@@ -1,5 +1,6 @@
 import { parseDsn, getIngestUrl, buildEnvelope, sendEnvelope, } from "@argusdev/sdk-core";
 import { parseStack } from "./stacktrace.js";
+import { attachSourceContext } from "./sourcecontext.js";
 /* set once by init(); null means "not initialized — do nothing, never crash" */
 let client = null;
 export function init(options) {
@@ -29,6 +30,8 @@ export async function captureException(err, extra = {}) {
         /* validator requires >= 1 frame — synthesize one rather than drop the event */
         frames = [{ filename: "<unknown>", lineno: 1 }];
     }
+    /* ±5 source lines around each in-app frame — the dashboard shows the code */
+    attachSourceContext(frames);
     const envelope = buildEnvelope(error.name, error.message, frames, {
         environment: client.environment,
         release: client.release,
