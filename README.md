@@ -2,16 +2,18 @@
 
 > Self-hostable error tracking and performance monitoring. Open core.
 
-Argus watches your applications across browser, Node.js, and React — capturing errors, grouping them into issues, tracking performance, and alerting you before your users do.
+Argus watches your applications across **ten SDKs** — browser, Node, React, Next.js, Vue, Angular, Svelte, Astro, and NestJS — capturing errors, grouping them into issues, showing the broken code, tracking performance, and alerting you before your users do.
 
 ---
 
 ## What It Does
 
-- **Error Tracking** — catches uncaught exceptions and unhandled promise rejections, groups duplicates into issues (SHA-256 stack fingerprinting), shows full stack trace
+- **Error Tracking** — catches what each runtime actually swallows (error boundaries, `app.config.errorHandler`, zone.js, `onRequestError`, `handleError`, exception filters — not just `window.onerror`), groups duplicates into issues (SHA-256 stack fingerprinting), shows the full stack trace
+- **Source Context** — server SDKs ship the ±5 lines of code around each in-app frame at capture time; the issue page renders the crashing line highlighted. No source maps, no build step
+- **Live Issue Feed** — new errors land on the dashboard within ~3s of happening, no refresh
 - **Performance Monitoring** — web vitals (LCP, CLS, FCP, TTFB) + page-load transactions with p50/p75/p95 latency (browser; Node timing planned)
 - **Alerting** — email (Resend) or webhook on a new issue or an error-rate spike (windowed threshold + cooldown)
-- **Free + Pro tiers** — free tier for small projects, Pro for higher volume with Bachs billing
+- **Teams & Billing** — organizations with member roles, per-plan quotas (atomic check-and-consume), Free + Pro tiers via Bachs billing
 
 -------
 ## Pricing
@@ -28,10 +30,10 @@ Events over the limit are rejected with `429` at the ingest layer (atomic check-
 ## Architecture
 
 ```
-[sdk-browser]  [sdk-node]  [sdk-react]
-       │             │           │
-       └─────────────┴───────────┘
-                     │
+[browser] [react] [vue] [angular] [nextjs] [svelte] [astro]   [node] [nestjs]
+     │        │      │       │        │        │       │         │      │
+     └────────┴──────┴───────┴────────┴────────┴───────┴─────────┴──────┘
+                     │            (all delegate to sdk-core)
      POST /api/v1/ingest/:projectId/envelope
                      │
                      ▼
@@ -49,8 +51,8 @@ Events over the limit are rejected with `429` at the ingest layer (atomic check-
          PostgreSQL     Redis
                     │
            ┌─────────────────┐
-           │    dashboard    │  ← React app (in progress), reads REST API
-           └─────────────────┘
+           │    dashboard    │  ← React 19 app — live issue feed, source context,
+           └─────────────────┘    performance, alerts, team, billing
 ```
 
 **Envelope contract:** all timestamps are **milliseconds** since epoch (`Date.now()`), enforced at ingest. DSN format: `http(s)://<publicKey>@<host>/<projectId>`. See [AGENTS.md](./AGENTS.md).
@@ -65,12 +67,19 @@ argus/
 │   ├── backend/
 │   │   ├── api/            # Express 5 — ingest + REST API (session auth via Passport)
 │   │   └── worker/         # BullMQ processor — fingerprinting, grouping
-│   └── frontend/           # React 19 dashboard (not built yet — see docs/DESIGN_BRIEF.md)
+│   └── frontend/           # React 19 dashboard (dogfoods @argusdev/sdk-react)
 ├── packages/
 │   ├── sdk-core/           # DSN parsing, envelope builder, transport (shared internals)
-│   ├── sdk-node/           # Node SDK — uncaughtException hooks + Express middleware
-│   ├── sdk-browser/        # Browser SDK — window.onerror, Chrome+Firefox stack parsing
-│   └── sdk-react/          # React SDK — <ArgusErrorBoundary>, re-exports sdk-browser
+│   ├── sdk-node/           # Node — process hooks, Express middleware, source context
+│   ├── sdk-browser/        # Browser — window.onerror, stack parsing, web vitals, SSR-safe
+│   ├── sdk-react/          # <ArgusErrorBoundary> on top of sdk-browser
+│   ├── sdk-vue/            # argusVue plugin → app.config.errorHandler
+│   ├── sdk-angular/        # ErrorHandler provider + Angular wrapper unwrapping
+│   ├── sdk-nextjs/         # /client + /server (onRequestError), edge-safe
+│   ├── sdk-svelte/         # SvelteKit handleError wrappers (client + server)
+│   ├── sdk-nestjs/         # global exception filter (Express + Fastify adapters)
+│   ├── sdk-astro/          # one integration: page script + SSR middleware
+│   └── tests/              # integration suite — envelopes vs the REAL ingest validator
 ├── docs/                   # DESIGN_BRIEF.md — dashboard design spec
 └── infra/                  # docker-compose (dev deps + full stack), Dockerfiles
 ```
@@ -86,7 +95,7 @@ argus/
 | Queue     | BullMQ + Redis                                          |
 | Worker    | BullMQ processors, TypeScript                           |
 | Database  | PostgreSQL (TimescaleDB planned for perf data)          |
-| Email     | Resend (planned — OTP currently logs to console)        |
+| Email     | Resend (alert emails verified live)                     |
 | Payments  | Bachs                                                   |
 | Dashboard | React 19, Vite, Tailwind v4, TanStack Query v5, Axios, react-hook-form + Zod |
 | SDKs      | TypeScript, zero runtime dependencies                   |
@@ -121,7 +130,7 @@ pnpm dev
 Then create a project in the dashboard, install an SDK, and errors start flowing:
 
 ```bash
-npm install @argusdev/sdk-browser   # or @argusdev/sdk-node, @argusdev/sdk-react
+npm install @argusdev/sdk-nextjs    # or sdk-{react,vue,angular,svelte,astro,nestjs,node,browser}
 ```
 
 ---

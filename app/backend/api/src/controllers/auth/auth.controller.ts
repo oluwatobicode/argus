@@ -345,7 +345,7 @@ export const googleCallback = (
   })(req, res, next);
 };
 
-//  GitHub OAuth
+//  GitHub OAuth -> for github authentication
 
 export const githubAuth = (req: Request, res: Response, next: NextFunction) => {
   if (req.isAuthenticated()) {
