@@ -15,7 +15,8 @@ Argus watches your applications across **ten SDKs** — browser, Node, React, Ne
 - **Alerting** — email (Resend) or webhook on a new issue or an error-rate spike (windowed threshold + cooldown)
 - **Teams & Billing** — organizations with member roles, per-plan quotas (atomic check-and-consume), Free + Pro tiers via Bachs billing
 
--------
+---
+
 ## Pricing
 
 | Tier | Events / month | Projects  | Price  |
@@ -29,7 +30,7 @@ Events over the limit are rejected with `429` at the ingest layer (atomic check-
 
 ## Architecture
 
-```
+```text
 [browser] [react] [vue] [angular] [nextjs] [svelte] [astro]   [node] [nestjs]
      │        │      │       │        │        │       │         │      │
      └────────┴──────┴───────┴────────┴────────┴───────┴─────────┴──────┘
@@ -61,7 +62,7 @@ Events over the limit are rejected with `429` at the ingest layer (atomic check-
 
 ## Folder Structure
 
-```
+```text
 argus/
 ├── app/
 │   ├── backend/
@@ -151,20 +152,26 @@ npm install @argusdev/sdk-nextjs    # or sdk-{react,vue,angular,svelte,astro,nes
 - [x] API routes: issues list/detail/status, events list (paginated + filtered)
 - [x] Dashboard: Issues list page + Issue detail page
 
-### Phase 2 — SDKs ✅ (published to npm under `@argusdev/*`)
+### Phase 2 — SDKs ✅ (ten packages, published to npm under `@argusdev/*`)
 
 - [x] `@argusdev/sdk-core` — DSN parser, envelope builder, transport (never throws, drops on 429)
-- [x] `@argusdev/sdk-node` — uncaughtException/unhandledRejection, V8 stack parser, Express middleware
-- [x] `@argusdev/sdk-browser` — window.onerror, unhandledrejection, Chrome+Firefox stack parsing
+- [x] `@argusdev/sdk-node` — process hooks, V8 stack parser, Express middleware, **source context**
+- [x] `@argusdev/sdk-browser` — window.onerror, unhandledrejection, web vitals, SSR-safe
 - [x] `@argusdev/sdk-react` — `<ArgusErrorBoundary>` on top of sdk-browser
-- [x] Published to npm (`@argusdev` scope, v0.1.0, public)
-- [ ] `@argusdev/sdk-react-native`
+- [x] `@argusdev/sdk-vue` — `argusVue` plugin → `app.config.errorHandler` (works in Nuxt)
+- [x] `@argusdev/sdk-angular` — `ErrorHandler` provider, unwraps zone.js/`HttpErrorResponse` wrappers
+- [x] `@argusdev/sdk-nextjs` — `/client` + `/server` (`onRequestError`), edge-safe, digest join
+- [x] `@argusdev/sdk-svelte` — SvelteKit `handleError` wrappers for both hooks files
+- [x] `@argusdev/sdk-nestjs` — global exception filter (Express + Fastify), source context
+- [x] `@argusdev/sdk-astro` — one integration: page script + SSR middleware
+- [x] `node:test` suites (111 tests) — envelopes validated against the **real** ingest schema and worker fingerprint; framework hooks typechecked against the **real** framework types
+- [x] Releases: v0.2 web vitals · v0.3 SSR safety + Node-ESM fix + vue/angular/nextjs/svelte/nestjs/astro · v0.4 source context
 
 ### Phase 3 — Team & Projects
 
 - [x] Organization auto-creation on signup
 - [x] Project CRUD + project limit (1 for FREE)
-- [ ] Organization member management (invite, roles)
+- [x] Organization member management (invite, roles / RBAC)
 - [x] Dashboard: project settings page
 
 ### Phase 4 — Dashboard ✅ (React 19, session auth)
@@ -195,15 +202,29 @@ npm install @argusdev/sdk-nextjs    # or sdk-{react,vue,angular,svelte,astro,nes
 - [x] Web vitals capture in sdk-browser (LCP, CLS, FCP, TTFB — one report per page view)
 - [x] Aggregation API: p50/p75/p95 per transaction name + p75 vitals with ratings
 - [x] Dashboard: Performance page (vitals cards + transactions table, 24h/7d/30d)
-- [ ] Node/Express timing middleware + spans
-- [ ] TimescaleDB when volume demands it
+- [ ] TimescaleDB when volume demands it (spans + Node timing → Phase 9)
 
-### Phase 8 — Polish
+### Phase 8 — Deep Debugging (current)
 
-- [ ] Source map resolution for stack traces
-- [ ] Fingerprint normalization (minified linenos fragment issues across releases)
-- [ ] Advanced filtering + search across issues
-- [ ] More SDKs: Vue, React Native, Go
+*From "we capture errors from everywhere" to "we help you fix them".*
+
+- [x] **Source context** (v0.4, 2026-08-18) — server SDKs read the ±5 code lines around each in-app frame at capture; the issue page renders the crashing line highlighted. sdk-node + sdk-nestjs, and sdk-nextjs on the Node runtime (edge bundles verified clean)
+- [x] **Live issue feed** — dashboard polls (3s list / 5s detail & counts) so crashes land on screen without a refresh
+- [x] Open CORS on ingest — browser SDKs can post from any origin (auth = DSN key, not cookies)
+- [ ] **Browser breadcrumbs** — console/click/fetch/navigation trail before the crash, ring buffer of 100 (schema already accepts them); one sdk-browser implementation upgrades react/vue/angular/nextjs/svelte/astro at once — *next up*
+- [ ] **Regression detection** — a RESOLVED issue that reoccurs (especially on a newer `release`) auto-reopens with a "regression" alert
+- [ ] **"N users affected"** per issue — distinct `userContext` count; events are stored, just needs the aggregate + UI
+- [ ] **Filtering + search** — by tag (`routePath`, `httpStatus`, `component`…), environment, release; the tags already flow, the dashboard can't filter by them yet
+- [ ] **Source maps / symbolication** — upload maps per release, symbolicate in the worker; unlocks readable browser stacks + code context for frontend and production Next.js. Includes fingerprint normalization (minified linenos fragment issues across releases)
+- [ ] **Live push (SSE)** — replace polling; events land the moment the worker writes them
+- [ ] **Retention/TTL cleanup** — nightly worker job deletes events past a plan-based age (unbounded growth today)
+- [ ] **GitHub stack-trace linking** — `release` + per-project repo config → open any frame at the exact line on GitHub
+
+### Phase 9 — More Platforms (later)
+
+- [ ] Node/Express timing middleware + spans (schema is ready: `Transaction → Span`)
+- [ ] `@argusdev/sdk-go` (git-tag release, not npm), `sdk-java` (dir exists — separate Maven toolchain), React Native, dedicated Nuxt module
+- [ ] Uptime / cron monitoring — a second product surface, only once error tracking is deep
 
 ---
 
