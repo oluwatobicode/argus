@@ -67,10 +67,7 @@ export function normalizeAngularError(input: unknown): NormalizedAngularError {
         ? current.ngOriginalError
         : current.rejection !== undefined
           ? current.rejection
-          : /* HttpErrorResponse.error carries an Error for network-level
-               failures; for HTTP-level ones it's the response body, which is
-               not the bug — leave that one wrapped */
-            current.error instanceof Error
+          : current.error instanceof Error
             ? current.error
             : undefined;
 
@@ -85,9 +82,6 @@ function toError(value: unknown, http: HttpMeta): Error {
   /* a real Error already carries a real stack — hands off */
   if (value instanceof Error) return value;
 
-  /* Error-shaped but not an Error — HttpErrorResponse, ErrorEvent, plenty of
-     third-party rejections. Its name + message are already good ("Http failure
-     response for /api/users: 500 Internal Server Error"), so keep them. */
   const shaped =
     isRecord(value) && typeof value.message === "string" && value.message
       ? value

@@ -211,14 +211,42 @@ npm install @argusdev/sdk-nextjs    # or sdk-{react,vue,angular,svelte,astro,nes
 - [x] **Source context** (v0.4, 2026-08-18) — server SDKs read the ±5 code lines around each in-app frame at capture; the issue page renders the crashing line highlighted. sdk-node + sdk-nestjs, and sdk-nextjs on the Node runtime (edge bundles verified clean)
 - [x] **Live issue feed** — dashboard polls (3s list / 5s detail & counts) so crashes land on screen without a refresh
 - [x] Open CORS on ingest — browser SDKs can post from any origin (auth = DSN key, not cookies)
-- [ ] **Browser breadcrumbs** — console/click/fetch/navigation trail before the crash, ring buffer of 100 (schema already accepts them); one sdk-browser implementation upgrades react/vue/angular/nextjs/svelte/astro at once — *next up*
-- [ ] **Regression detection** — a RESOLVED issue that reoccurs (especially on a newer `release`) auto-reopens with a "regression" alert
-- [ ] **"N users affected"** per issue — distinct `userContext` count; events are stored, just needs the aggregate + UI
-- [ ] **Filtering + search** — by tag (`routePath`, `httpStatus`, `component`…), environment, release; the tags already flow, the dashboard can't filter by them yet
-- [ ] **Source maps / symbolication** — upload maps per release, symbolicate in the worker; unlocks readable browser stacks + code context for frontend and production Next.js. Includes fingerprint normalization (minified linenos fragment issues across releases)
-- [ ] **Live push (SSE)** — replace polling; events land the moment the worker writes them
+What's next ships as five named sprints — each ends with something a user feels and a camera can film:
+
+#### Sprint 1 — The Trail *(up next)*
+
+- [ ] **Browser breadcrumbs** — console/click/fetch/navigation trail before the crash, ring buffer of 100 (the schema already accepts them); one `sdk-browser` implementation upgrades react/vue/angular/nextjs/svelte/astro at once
+- [ ] **Breadcrumb timeline** on the issue page — typed entries, relative times, the crash as the final entry
+- [ ] **Release migration rider** — `release` + `environment` columns on Event + two lines in the worker; the SDKs already send both, the pipeline currently drops them, and this data can't be back-filled later
+
+#### Sprint 2 — Find Anything
+
+- [ ] **Filter bar** on the issues feed — by tag (`routePath`, `httpStatus`, `component`…), environment, release, level; combinable and URL-addressable
+- [ ] **Text search** over issue title + culprit (Postgres, no new infra)
+- [ ] **"N users affected"** per issue — distinct `userContext` count; the number that actually drives triage
+
+#### Sprint 3 — It Came Back
+
+- [ ] **Regression detection** — an event lands on a RESOLVED issue → auto-reopen, mark `REGRESSION`, fire a new alert type
+- [ ] **Regression history** on the issue page — resolved in `1.4.1`, back in `1.4.3`
+- [ ] **Releases surface** — first/last seen per release; groundwork for a releases page
+
+#### Sprint 4 — Actually Live
+
+- [ ] **SSE push** — worker → Redis pub/sub → API stream; the dashboard drops to polling only as a fallback. Makes the landing page's "streaming live" claim literal
+
+#### Sprint 5 — The Big Rock: Source Maps
+
+- [ ] **Map upload endpoint** per release + storage, auth'd by DSN key
+- [ ] **Symbolication in the worker** — minified frames → original file/line, code context from `sourcesContent`, fingerprint on original frames (fixes issues fragmenting across builds)
+- [ ] **Upload tooling** — a tiny CLI + Vite/Next plugin
+
+#### Ongoing drip — between sprints, never a dead sprint
+
+- [ ] Deprecate `@argusdev/sdk-node@<=0.2.1` on npm (broken ESM — unloadable in Node)
 - [ ] **Retention/TTL cleanup** — nightly worker job deletes events past a plan-based age (unbounded growth today)
 - [ ] **GitHub stack-trace linking** — `release` + per-project repo config → open any frame at the exact line on GitHub
+- [ ] One backend test file whenever a sprint touches backend code (the app has none today)
 
 ### Phase 9 — More Platforms (later)
 
